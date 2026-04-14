@@ -13,42 +13,33 @@ const LANGUAGES = [
 ];
 
 const SPECIALTIES = [
+  { label: 'General',    code: 'general',    prompt: '' },
   {
-    label: 'General',
-    code: 'general',
-    prompt: '',
-  },
-  {
-    label: 'Emergency',
-    code: 'emergency',
+    label: 'Emergency',  code: 'emergency',
     prompt: `This is an emergency department encounter. Prioritize clarity and urgency in all translations. 
 Use triage vocabulary, vital signs terminology, and trauma language where appropriate. 
 Translate time-sensitive instructions with directness and precision.`,
   },
   {
-    label: 'Maternity',
-    code: 'maternity',
+    label: 'Maternity',  code: 'maternity',
     prompt: `This is a maternity or obstetrics encounter. Use terminology appropriate for labor, delivery, 
 prenatal care, postpartum recovery, and infant care. Be precise with contraction timing, 
 dilation measurements, and fetal monitoring terms.`,
   },
   {
-    label: 'Pediatrics',
-    code: 'pediatrics',
+    label: 'Pediatrics', code: 'pediatrics',
     prompt: `This is a pediatric encounter. When speaking to the patient use age-appropriate language. 
 When speaking to the parent or caregiver use clear, non-alarming clinical language. 
 Use developmental and growth terminology where appropriate.`,
   },
   {
-    label: 'Cardiology',
-    code: 'cardiology',
+    label: 'Cardiology', code: 'cardiology',
     prompt: `This is a cardiology encounter. Use precise cardiac terminology including symptoms, 
 diagnostic procedures, medications, and monitoring terms. Be exact with measurements 
 such as blood pressure readings, heart rate, and ejection fraction values.`,
   },
   {
-    label: 'Surgery',
-    code: 'surgery',
+    label: 'Surgery',    code: 'surgery',
     prompt: `This is a surgical encounter. Use terminology appropriate for pre-operative consent, 
 post-operative instructions, wound care, pain management, and anesthesia. 
 Be precise with procedure names and recovery expectations.`,
@@ -71,6 +62,51 @@ const PATIENT_BUTTONS = {
   pt:  { idle: 'Segure para falar',     listening: 'Ouvindo...' },
   fr:  { idle: 'Maintenir pour parler', listening: 'Écoute...' },
   ar:  { idle: 'اضغط للتحدث',           listening: 'جارٍ الاستماع...' },
+};
+
+const PATIENT_ONBOARDING = {
+  es: {
+    title: 'Bienvenido a Verba',
+    body: 'Esta aplicación traduce lo que usted y su médico dicen en tiempo real.',
+    instruction: 'Mantenga presionado el botón verde para hablar. Hable con naturalidad.',
+    privacy: 'Su conversación es privada y no se almacena.',
+    dismiss: 'Entendido',
+  },
+  zh: {
+    title: '欢迎使用 Verba',
+    body: '此应用程序可实时翻译您和医生之间的对话。',
+    instruction: '按住绿色按钮说话。请自然地说话。',
+    privacy: '您的对话是私密的，不会被存储。',
+    dismiss: '我明白了',
+  },
+  yue: {
+    title: '歡迎使用 Verba',
+    body: '此應用程式可即時翻譯您和醫生之間的對話。',
+    instruction: '按住綠色按鈕說話。請自然地說話。',
+    privacy: '您的對話是私密的，不會被儲存。',
+    dismiss: '我明白了',
+  },
+  pt: {
+    title: 'Bem-vindo ao Verba',
+    body: 'Este aplicativo traduz em tempo real o que você e seu médico dizem.',
+    instruction: 'Mantenha o botão verde pressionado para falar. Fale naturalmente.',
+    privacy: 'Sua conversa é privada e não é armazenada.',
+    dismiss: 'Entendi',
+  },
+  fr: {
+    title: 'Bienvenue sur Verba',
+    body: 'Cette application traduit en temps réel ce que vous et votre médecin dites.',
+    instruction: 'Maintenez le bouton vert appuyé pour parler. Parlez naturellement.',
+    privacy: 'Votre conversation est privée et n\'est pas enregistrée.',
+    dismiss: 'J\'ai compris',
+  },
+  ar: {
+    title: 'مرحباً بك في Verba',
+    body: 'يترجم هذا التطبيق ما تقوله أنت وطبيبك في الوقت الفعلي.',
+    instruction: 'اضغط باستمرار على الزر الأخضر للتحدث. تحدث بشكل طبيعي.',
+    privacy: 'محادثتك خاصة ولا يتم تخزينها.',
+    dismiss: 'فهمت',
+  },
 };
 
 const PHRASE_CATEGORIES = [
@@ -125,6 +161,7 @@ export default function App() {
   const [showExport, setShowExport] = useState(false);
   const [copyConfirmed, setCopyConfirmed] = useState(false);
   const [expandedMessages, setExpandedMessages] = useState({});
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const providerRef = useRef(null);
   const patientRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -198,7 +235,6 @@ Your rules:
     if (selectedSpecialty.prompt) {
       return `${base}\n\nSpecialty context:\n${selectedSpecialty.prompt}`;
     }
-
     return base;
   };
 
@@ -211,22 +247,18 @@ Your rules:
       return;
     }
 
-    // The text shown in this bubble
     const shownText = viewSide === 'provider'
       ? (message.side === 'provider' ? message.original : message.translated)
       : (message.side === 'patient' ? message.original : message.translated);
 
     if (!shownText || shownText === '...') return;
 
-    // The language of the shown text
     const shownLang = viewSide === 'provider'
       ? (message.side === 'provider' ? 'English' : selectedLang.label)
       : (message.side === 'patient' ? selectedLang.label : 'English');
 
-    // Back-translate to the other language
     const backLang = shownLang === 'English' ? selectedLang.label : 'English';
 
-    // If already cached use it
     if (message.backTranslations?.[key]) {
       setExpandedMessages((prev) => ({
         ...prev,
@@ -235,7 +267,6 @@ Your rules:
       return;
     }
 
-    // Show loading state
     setExpandedMessages((prev) => ({ ...prev, [key]: 'loading' }));
 
     try {
@@ -261,17 +292,10 @@ Your rules:
       const backText = data.choices?.[0]?.message?.content?.trim();
 
       if (backText) {
-        // Cache on message object
         setMessages((prev) =>
           prev.map((m) =>
             m.id === message.id
-              ? {
-                  ...m,
-                  backTranslations: {
-                    ...m.backTranslations,
-                    [key]: backText,
-                  },
-                }
+              ? { ...m, backTranslations: { ...m.backTranslations, [key]: backText } }
               : m
           )
         );
@@ -590,15 +614,14 @@ Your rules:
 
   const patientLabel = PATIENT_LABELS[selectedLang.code];
   const patientBtn = PATIENT_BUTTONS[selectedLang.code];
+  const onboarding = PATIENT_ONBOARDING[selectedLang.code];
 
   const renderMessages = (viewSide, ref) => (
     <div className="messages" ref={ref}>
       {messages.map((m) => {
         const key = `${m.id}-${viewSide}`;
         const isSent = m.side === viewSide;
-        const shownText = isSent
-          ? m.original
-          : (m.translated ?? '...');
+        const shownText = isSent ? m.original : (m.translated ?? '...');
         const backText = expandedMessages[key];
         const isExpanded = !!backText;
 
@@ -686,6 +709,12 @@ Your rules:
         >
           Phrases
         </button>
+        <button
+          className="intro-btn"
+          onClick={() => setShowOnboarding(true)}
+        >
+          Intro
+        </button>
         {status ? <span className="status">{status}</span> : null}
         {messages.length > 0 && (
           <>
@@ -709,6 +738,25 @@ Your rules:
         {renderMessages('patient', patientRef)}
         <div className="side-label">{patientLabel}</div>
       </div>
+
+      {/* Patient onboarding overlay */}
+      {showOnboarding && (
+        <div className="onboarding-overlay">
+          <div className="onboarding-box">
+            <div className="onboarding-icon">🌐</div>
+            <p className="onboarding-title">{onboarding.title}</p>
+            <p className="onboarding-body">{onboarding.body}</p>
+            <p className="onboarding-instruction">{onboarding.instruction}</p>
+            <p className="onboarding-privacy">{onboarding.privacy}</p>
+            <button
+              className="onboarding-dismiss"
+              onClick={() => setShowOnboarding(false)}
+            >
+              {onboarding.dismiss}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Phrases panel */}
       {showPhrases && (
