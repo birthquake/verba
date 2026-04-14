@@ -416,3 +416,18 @@
 .export-action-btn.share:active {
   background: #ede8e0;
 }
+
+.specialty-badge {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #e87840;
+  background: #e8784015;
+  border: 1px solid #e8784030;
+  border-radius: 6px;
+  padding: 2px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
