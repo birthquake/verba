@@ -224,9 +224,19 @@ export default function App() {
           model: 'gpt-4o',
           messages: [
             {
-              role: 'system',
-              content: `You are a medical interpreter. Translate the following from ${sourceLang} to ${targetLang}. Preserve medical terminology accurately. Return only the translation, nothing else.`,
-            },
+  role: 'system',
+  content: `You are a certified medical interpreter specializing in clinical communication. 
+
+Your rules:
+- Translate from ${sourceLang} to ${targetLang}
+- Use formal clinical register appropriate for a hospital or clinic setting
+- Preserve all medical terminology, anatomical terms, medication names, and dosages exactly
+- Preserve numbers, measurements, and units exactly (e.g. "10mg", "120/80", "37.5°C")
+- Do not add explanations, clarifications, or commentary
+- Do not soften or rephrase symptoms — translate them as stated
+- If a term has no direct equivalent, use the closest clinical term in the target language
+- Return only the translated text, nothing else`,
+},
             { role: 'user', content: originalText },
           ],
         }),
