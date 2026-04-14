@@ -8,16 +8,25 @@ export default function App() {
   const [isListening, setIsListening] = useState(false);
   const [activeSide, setActiveSide] = useState(null);
   const [status, setStatus] = useState('');
-  const transcriptRef = useRef(null);
+  const providerRef = useRef(null);
+  const patientRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const streamRef = useRef(null);
 
   useEffect(() => {
-    if (transcriptRef.current) {
-      transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
+    if (providerRef.current) {
+      providerRef.current.scrollTop = providerRef.current.scrollHeight;
+    }
+    if (patientRef.current) {
+      patientRef.current.scrollTop = patientRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const unlockAudio = () => {
+    const utterance = new SpeechSynthesisUtterance('');
+    window.speechSynthesis.speak(utterance);
+  };
 
   const getSupportedMimeType = () => {
     const types = [
@@ -35,6 +44,7 @@ export default function App() {
 
   const startListening = async (side) => {
     if (isListening) return;
+    unlockAudio();
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -53,7 +63,6 @@ export default function App() {
 
       const mimeType = getSupportedMimeType();
       const options = mimeType ? { mimeType } : {};
-
       const mediaRecorder = new MediaRecorder(stream, options);
       mediaRecorderRef.current = mediaRecorder;
 
@@ -137,6 +146,20 @@ export default function App() {
         return;
       }
 
+      // Show original text immediately
+      const messageId = Date.now();
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: messageId,
+          side,
+          original: originalText,
+          translated: null,
+        },
+      ]);
+      setStatus('');
+
+      // Translate in background
       const sourceLang = side === 'provider' ? 'English' : 'Spanish';
       const targetLang = side === 'provider' ? 'Spanish' : 'English';
 
@@ -173,22 +196,18 @@ export default function App() {
         return;
       }
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          side,
-          original: originalText,
-          translated: translatedText,
-        },
-      ]);
+      // Update message with translation
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId ? { ...m, translated: translatedText } : m
+        )
+      );
 
+      // Speak translation
       const utterance = new SpeechSynthesisUtterance(translatedText);
       utterance.lang = side === 'provider' ? 'es-ES' : 'en-US';
       utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
-
-      setStatus('');
 
     } catch (err) {
       console.error('Process error:', err);
@@ -207,11 +226,11 @@ export default function App() {
       {/* Provider side (top) */}
       <div className={`side provider ${activeSide === 'provider' && isListening ? 'active' : ''}`}>
         <div className="side-label">Healthcare Provider — English</div>
-        <div className="messages" ref={transcriptRef}>
+        <div className="messages" ref={providerRef}>
           {messages.map((m) => (
             <div key={m.id} className={`message ${m.side === 'provider' ? 'sent' : 'received'}`}>
               <span className="original">
-                {m.side === 'provider' ? m.original : m.translated}
+                {m.side === 'provider' ? m.original : (m.translated ?? '...')}
               </span>
             </div>
           ))}
@@ -247,11 +266,11 @@ export default function App() {
         >
           {activeSide === 'patient' && isListening ? 'Escuchando...' : 'Mantén para hablar'}
         </button>
-        <div className="messages patient-messages">
+        <div className="messages" ref={patientRef}>
           {messages.map((m) => (
             <div key={m.id} className={`message ${m.side === 'patient' ? 'sent' : 'received'}`}>
               <span className="original">
-                {m.side === 'patient' ? m.original : m.translated}
+                {m.side === 'patient' ? m.original : (m.translated ?? '...')}
               </span>
             </div>
           ))}
