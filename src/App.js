@@ -74,7 +74,6 @@ export default function App() {
         await processAudio(audioBlob, side, mimeUsed);
       };
 
-      // Request data every 250ms for iOS compatibility
       mediaRecorder.start(250);
 
     } catch (err) {
@@ -131,9 +130,8 @@ export default function App() {
       }
 
       const whisperData = await whisperRes.json();
-      console.log('Whisper response:', whisperData);
-
       const originalText = whisperData.text?.trim();
+
       if (!originalText) {
         setStatus('No speech detected. Hold longer and speak clearly.');
         return;
@@ -210,14 +208,13 @@ export default function App() {
       <div className={`side provider ${activeSide === 'provider' && isListening ? 'active' : ''}`}>
         <div className="side-label">Healthcare Provider — English</div>
         <div className="messages" ref={transcriptRef}>
-          {messages
-            .filter((m) => m.side === 'provider')
-            .map((m) => (
-              <div key={m.id} className="message">
-                <span className="original">{m.original}</span>
-                <span className="translated">→ {m.translated}</span>
-              </div>
-            ))}
+          {messages.map((m) => (
+            <div key={m.id} className={`message ${m.side === 'provider' ? 'sent' : 'received'}`}>
+              <span className="original">
+                {m.side === 'provider' ? m.original : m.translated}
+              </span>
+            </div>
+          ))}
         </div>
         <button
           className={`speak-btn ${activeSide === 'provider' && isListening ? 'listening' : ''}`}
@@ -251,14 +248,13 @@ export default function App() {
           {activeSide === 'patient' && isListening ? 'Escuchando...' : 'Mantén para hablar'}
         </button>
         <div className="messages patient-messages">
-          {messages
-            .filter((m) => m.side === 'patient')
-            .map((m) => (
-              <div key={m.id} className="message">
-                <span className="original">{m.original}</span>
-                <span className="translated">→ {m.translated}</span>
-              </div>
-            ))}
+          {messages.map((m) => (
+            <div key={m.id} className={`message ${m.side === 'patient' ? 'sent' : 'received'}`}>
+              <span className="original">
+                {m.side === 'patient' ? m.original : m.translated}
+              </span>
+            </div>
+          ))}
         </div>
         <div className="side-label">Paciente — Español</div>
       </div>
