@@ -6,11 +6,12 @@ const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
 export default function App() {
   const [messages, setMessages] = useState([]);
   const [isListening, setIsListening] = useState(false);
-  const [activeSide, setActiveSide] = useState(null); // 'provider' or 'patient'
+  const [activeSide, setActiveSide] = useState(null);
   const [status, setStatus] = useState('');
   const transcriptRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const streamRef = useRef(null);
 
   useEffect(() => {
     if (transcriptRef.current) {
@@ -18,51 +19,103 @@ export default function App() {
     }
   }, [messages]);
 
+  const getSupportedMimeType = () => {
+    const types = [
+      'audio/mp4',
+      'audio/aac',
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/ogg;codecs=opus',
+    ];
+    for (const type of types) {
+      if (MediaRecorder.isTypeSupported(type)) return type;
+    }
+    return '';
+  };
+
   const startListening = async (side) => {
     if (isListening) return;
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100,
+        }
+      });
+
+      streamRef.current = stream;
       setIsListening(true);
       setActiveSide(side);
       setStatus('Listening...');
       audioChunksRef.current = [];
 
-      const mediaRecorder = new MediaRecorder(stream);
+      const mimeType = getSupportedMimeType();
+      const options = mimeType ? { mimeType } : {};
+
+      const mediaRecorder = new MediaRecorder(stream, options);
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+        if (e.data && e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
       };
 
       mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach(t => t.stop());
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(t => t.stop());
+          streamRef.current = null;
+        }
         setStatus('Translating...');
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        await processAudio(audioBlob, side);
+        const mimeUsed = mediaRecorder.mimeType || mimeType || 'audio/mp4';
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeUsed });
+        await processAudio(audioBlob, side, mimeUsed);
       };
 
-      mediaRecorder.start();
-    } catch (err) {
-      setStatus('Microphone access denied.');
-      setIsListening(false);
-    }
-  };
+      // Request data every 250ms for iOS compatibility
+      mediaRecorder.start(250);
 
-  const stopListening = () => {
-    if (mediaRecorderRef.current && isListening) {
-      mediaRecorderRef.current.stop();
+    } catch (err) {
+      console.error('Mic error:', err);
+      setStatus('Microphone access denied. Please allow microphone in Safari settings.');
       setIsListening(false);
       setActiveSide(null);
     }
   };
 
-  const processAudio = async (audioBlob, side) => {
+  const stopListening = () => {
+    if (mediaRecorderRef.current && isListening) {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch (e) {
+        console.error('Stop error:', e);
+      }
+      setIsListening(false);
+      setActiveSide(null);
+    }
+  };
+
+  const getFileExtension = (mimeType) => {
+    if (mimeType.includes('mp4') || mimeType.includes('aac')) return 'mp4';
+    if (mimeType.includes('webm')) return 'webm';
+    if (mimeType.includes('ogg')) return 'ogg';
+    return 'mp4';
+  };
+
+  const processAudio = async (audioBlob, side, mimeType) => {
     try {
-      // Step 1: Transcribe with Whisper
+      if (audioBlob.size < 500) {
+        setStatus('Recording too short. Hold longer and speak clearly.');
+        return;
+      }
+
+      const extension = getFileExtension(mimeType);
       const formData = new FormData();
-      formData.append('file', audioBlob, 'audio.webm');
+      formData.append('file', audioBlob, `audio.${extension}`);
       formData.append('model', 'whisper-1');
+      formData.append('language', side === 'provider' ? 'en' : 'es');
 
       const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
         method: 'POST',
@@ -70,14 +123,22 @@ export default function App() {
         body: formData,
       });
 
-      const whisperData = await whisperRes.json();
-      const originalText = whisperData.text?.trim();
-      if (!originalText) {
-        setStatus('No speech detected. Try again.');
+      if (!whisperRes.ok) {
+        const errData = await whisperRes.json();
+        console.error('Whisper error:', errData);
+        setStatus('Transcription failed. Please try again.');
         return;
       }
 
-      // Step 2: Translate with Claude via OpenAI-compatible prompt
+      const whisperData = await whisperRes.json();
+      console.log('Whisper response:', whisperData);
+
+      const originalText = whisperData.text?.trim();
+      if (!originalText) {
+        setStatus('No speech detected. Hold longer and speak clearly.');
+        return;
+      }
+
       const sourceLang = side === 'provider' ? 'English' : 'Spanish';
       const targetLang = side === 'provider' ? 'Spanish' : 'English';
 
@@ -92,13 +153,19 @@ export default function App() {
           messages: [
             {
               role: 'system',
-              content: `You are a medical interpreter. Translate the following from ${sourceLang} to ${targetLang}. 
-              Preserve medical terminology accurately. Return only the translation, nothing else.`,
+              content: `You are a medical interpreter. Translate the following from ${sourceLang} to ${targetLang}. Preserve medical terminology accurately. Return only the translation, nothing else.`,
             },
             { role: 'user', content: originalText },
           ],
         }),
       });
+
+      if (!translateRes.ok) {
+        const errData = await translateRes.json();
+        console.error('Translation error:', errData);
+        setStatus('Translation failed. Please try again.');
+        return;
+      }
 
       const translateData = await translateRes.json();
       const translatedText = translateData.choices?.[0]?.message?.content?.trim();
@@ -108,7 +175,6 @@ export default function App() {
         return;
       }
 
-      // Step 3: Add to transcript
       setMessages((prev) => [
         ...prev,
         {
@@ -119,15 +185,15 @@ export default function App() {
         },
       ]);
 
-      // Step 4: Speak the translation aloud
       const utterance = new SpeechSynthesisUtterance(translatedText);
       utterance.lang = side === 'provider' ? 'es-ES' : 'en-US';
       utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
 
       setStatus('');
+
     } catch (err) {
-      console.error(err);
+      console.error('Process error:', err);
       setStatus('Something went wrong. Please try again.');
     }
   };
@@ -143,7 +209,7 @@ export default function App() {
       {/* Provider side (top) */}
       <div className={`side provider ${activeSide === 'provider' && isListening ? 'active' : ''}`}>
         <div className="side-label">Healthcare Provider — English</div>
-        <div className="messages" ref={null}>
+        <div className="messages" ref={transcriptRef}>
           {messages
             .filter((m) => m.side === 'provider')
             .map((m) => (
