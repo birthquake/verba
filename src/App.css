@@ -544,3 +544,26 @@
 .onboarding-dismiss:active {
   background: #2a58c8;
 }
+
+/* ── Onboarding repeat button ── */
+.onboarding-repeat {
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  border: 2px solid #4a78e8;
+  background: #ffffff;
+  color: #4a78e8;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.onboarding-repeat:active {
+  background: #e8f0fe;
+}
+
+.onboarding-repeat:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
