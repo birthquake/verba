@@ -3,12 +3,40 @@ import './App.css';
 
 const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
 
+const LANGUAGES = [
+  { label: 'Spanish',    code: 'es', voice: 'es-ES', whisper: 'es' },
+  { label: 'Mandarin',   code: 'zh', voice: 'zh-CN', whisper: 'zh' },
+  { label: 'Cantonese',  code: 'yue', voice: 'zh-HK', whisper: 'yue' },
+  { label: 'Portuguese', code: 'pt', voice: 'pt-BR', whisper: 'pt' },
+  { label: 'French',     code: 'fr', voice: 'fr-FR', whisper: 'fr' },
+  { label: 'Arabic',     code: 'ar', voice: 'ar-SA', whisper: 'ar' },
+];
+
+const PATIENT_LABELS = {
+  es:  'Paciente — Español',
+  zh:  '患者 — 普通话',
+  yue: '病人 — 廣東話',
+  pt:  'Paciente — Português',
+  fr:  'Patient — Français',
+  ar:  'مريض — العربية',
+};
+
+const PATIENT_BUTTONS = {
+  es:  { idle: 'Mantén para hablar', listening: 'Escuchando...' },
+  zh:  { idle: '按住说话',            listening: '聆听中...' },
+  yue: { idle: '按住講嘢',            listening: '聆聽中...' },
+  pt:  { idle: 'Segure para falar',  listening: 'Ouvindo...' },
+  fr:  { idle: 'Maintenir pour parler', listening: 'Écoute...' },
+  ar:  { idle: 'اضغط للتحدث',        listening: 'جارٍ الاستماع...' },
+};
+
 export default function App() {
   const [messages, setMessages] = useState([]);
   const [isListening, setIsListening] = useState(false);
   const [activeSide, setActiveSide] = useState(null);
   const [status, setStatus] = useState('');
   const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
   const providerRef = useRef(null);
   const patientRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -118,7 +146,7 @@ export default function App() {
       const formData = new FormData();
       formData.append('file', audioBlob, `audio.${extension}`);
       formData.append('model', 'whisper-1');
-      formData.append('language', side === 'provider' ? 'en' : 'es');
+      formData.append('language', side === 'provider' ? 'en' : selectedLang.whisper);
 
       const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
         method: 'POST',
@@ -141,7 +169,6 @@ export default function App() {
         return;
       }
 
-      // Show original text immediately
       const messageId = Date.now();
       setMessages((prev) => [
         ...prev,
@@ -154,9 +181,8 @@ export default function App() {
       ]);
       setStatus('');
 
-      // Translate in background
-      const sourceLang = side === 'provider' ? 'English' : 'Spanish';
-      const targetLang = side === 'provider' ? 'Spanish' : 'English';
+      const sourceLang = side === 'provider' ? 'English' : selectedLang.label;
+      const targetLang = side === 'provider' ? selectedLang.label : 'English';
 
       const translateRes = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -191,16 +217,14 @@ export default function App() {
         return;
       }
 
-      // Update message with translation
       setMessages((prev) =>
         prev.map((m) =>
           m.id === messageId ? { ...m, translated: translatedText } : m
         )
       );
 
-      // Speak translation
       const utterance = new SpeechSynthesisUtterance(translatedText);
-      utterance.lang = side === 'provider' ? 'es-ES' : 'en-US';
+      utterance.lang = side === 'provider' ? selectedLang.voice : 'en-US';
       utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
 
@@ -214,6 +238,17 @@ export default function App() {
     setMessages([]);
     setStatus('');
   };
+
+  const handleLangChange = (e) => {
+    const lang = LANGUAGES.find(l => l.code === e.target.value);
+    if (lang) {
+      setSelectedLang(lang);
+      clearSession();
+    }
+  };
+
+  const patientLabel = PATIENT_LABELS[selectedLang.code];
+  const patientBtn = PATIENT_BUTTONS[selectedLang.code];
 
   return (
     <div className="app">
@@ -260,9 +295,18 @@ export default function App() {
       {/* Center divider */}
       <div className="divider">
         <span className="app-name">Verba</span>
+        <select
+          className="lang-select"
+          value={selectedLang.code}
+          onChange={handleLangChange}
+        >
+          {LANGUAGES.map((l) => (
+            <option key={l.code} value={l.code}>{l.label}</option>
+          ))}
+        </select>
         {status ? <span className="status">{status}</span> : null}
         {messages.length > 0 && (
-          <button className="clear-btn" onClick={clearSession}>Clear session</button>
+          <button className="clear-btn" onClick={clearSession}>Clear</button>
         )}
       </div>
 
@@ -275,7 +319,7 @@ export default function App() {
           onTouchStart={(e) => { e.preventDefault(); startListening('patient'); }}
           onTouchEnd={(e) => { e.preventDefault(); stopListening(); }}
         >
-          {activeSide === 'patient' && isListening ? 'Escuchando...' : 'Mantén para hablar'}
+          {activeSide === 'patient' && isListening ? patientBtn.listening : patientBtn.idle}
         </button>
         <div className="messages" ref={patientRef}>
           {messages.map((m) => (
@@ -286,7 +330,7 @@ export default function App() {
             </div>
           ))}
         </div>
-        <div className="side-label">Paciente — Español</div>
+        <div className="side-label">{patientLabel}</div>
       </div>
 
     </div>
