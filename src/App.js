@@ -22,12 +22,12 @@ const PATIENT_LABELS = {
 };
 
 const PATIENT_BUTTONS = {
-  es:  { idle: 'Mantén para hablar', listening: 'Escuchando...' },
-  zh:  { idle: '按住说话',            listening: '聆听中...' },
-  yue: { idle: '按住講嘢',            listening: '聆聽中...' },
-  pt:  { idle: 'Segure para falar',  listening: 'Ouvindo...' },
+  es:  { idle: 'Mantén para hablar',    listening: 'Escuchando...' },
+  zh:  { idle: '按住说话',               listening: '聆听中...' },
+  yue: { idle: '按住講嘢',               listening: '聆聽中...' },
+  pt:  { idle: 'Segure para falar',     listening: 'Ouvindo...' },
   fr:  { idle: 'Maintenir pour parler', listening: 'Écoute...' },
-  ar:  { idle: 'اضغط للتحدث',        listening: 'جارٍ الاستماع...' },
+  ar:  { idle: 'اضغط للتحدث',           listening: 'جارٍ الاستماع...' },
 };
 
 export default function App() {
@@ -43,6 +43,7 @@ export default function App() {
   const audioChunksRef = useRef([]);
   const streamRef = useRef(null);
 
+  // Scroll to bottom when messages update
   useEffect(() => {
     if (providerRef.current) {
       providerRef.current.scrollTop = providerRef.current.scrollHeight;
@@ -51,6 +52,35 @@ export default function App() {
       patientRef.current.scrollTop = patientRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Prevent screen lock
+  useEffect(() => {
+    let wakeLock = null;
+
+    const requestWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {
+        console.log('Wake lock not available:', err);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        requestWakeLock();
+      }
+    };
+
+    requestWakeLock();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (wakeLock) wakeLock.release();
+    };
+  }, []);
 
   const getSupportedMimeType = () => {
     const types = [
