@@ -71,6 +71,7 @@ const PATIENT_ONBOARDING = {
     instruction: 'Mantenga presionado el botón verde para hablar. Hable con naturalidad.',
     privacy: 'Su conversación es privada y no se almacena.',
     dismiss: 'Entendido',
+    repeat: 'Repetir',
   },
   zh: {
     title: '欢迎使用 Verba',
@@ -78,6 +79,7 @@ const PATIENT_ONBOARDING = {
     instruction: '按住绿色按钮说话。请自然地说话。',
     privacy: '您的对话是私密的，不会被存储。',
     dismiss: '我明白了',
+    repeat: '重复',
   },
   yue: {
     title: '歡迎使用 Verba',
@@ -85,6 +87,7 @@ const PATIENT_ONBOARDING = {
     instruction: '按住綠色按鈕說話。請自然地說話。',
     privacy: '您的對話是私密的，不會被儲存。',
     dismiss: '我明白了',
+    repeat: '重複',
   },
   pt: {
     title: 'Bem-vindo ao Verba',
@@ -92,6 +95,7 @@ const PATIENT_ONBOARDING = {
     instruction: 'Mantenha o botão verde pressionado para falar. Fale naturalmente.',
     privacy: 'Sua conversa é privada e não é armazenada.',
     dismiss: 'Entendi',
+    repeat: 'Repetir',
   },
   fr: {
     title: 'Bienvenue sur Verba',
@@ -99,6 +103,7 @@ const PATIENT_ONBOARDING = {
     instruction: 'Maintenez le bouton vert appuyé pour parler. Parlez naturellement.',
     privacy: 'Votre conversation est privée et n\'est pas enregistrée.',
     dismiss: 'J\'ai compris',
+    repeat: 'Répéter',
   },
   ar: {
     title: 'مرحباً بك في Verba',
@@ -106,6 +111,7 @@ const PATIENT_ONBOARDING = {
     instruction: 'اضغط باستمرار على الزر الأخضر للتحدث. تحدث بشكل طبيعي.',
     privacy: 'محادثتك خاصة ولا يتم تخزينها.',
     dismiss: 'فهمت',
+    repeat: 'كرر',
   },
 };
 
@@ -162,6 +168,7 @@ export default function App() {
   const [copyConfirmed, setCopyConfirmed] = useState(false);
   const [expandedMessages, setExpandedMessages] = useState({});
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isSpeakingOnboarding, setIsSpeakingOnboarding] = useState(false);
   const providerRef = useRef(null);
   const patientRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -204,6 +211,29 @@ export default function App() {
       if (wakeLock) wakeLock.release();
     };
   }, []);
+
+  // Speak onboarding automatically when it opens
+  useEffect(() => {
+    if (showOnboarding) {
+      setTimeout(() => speakOnboarding(), 400);
+    } else {
+      window.speechSynthesis.cancel();
+      setIsSpeakingOnboarding(false);
+    }
+  }, [showOnboarding]);
+
+  const speakOnboarding = () => {
+    window.speechSynthesis.cancel();
+    const onboarding = PATIENT_ONBOARDING[selectedLang.code];
+    const fullText = `${onboarding.body} ${onboarding.instruction} ${onboarding.privacy}`;
+    const utterance = new SpeechSynthesisUtterance(fullText);
+    utterance.lang = selectedLang.voice;
+    utterance.rate = 0.85;
+    utterance.onstart = () => setIsSpeakingOnboarding(true);
+    utterance.onend = () => setIsSpeakingOnboarding(false);
+    utterance.onerror = () => setIsSpeakingOnboarding(false);
+    window.speechSynthesis.speak(utterance);
+  };
 
   const getSupportedMimeType = () => {
     const types = [
@@ -748,6 +778,13 @@ Your rules:
             <p className="onboarding-body">{onboarding.body}</p>
             <p className="onboarding-instruction">{onboarding.instruction}</p>
             <p className="onboarding-privacy">{onboarding.privacy}</p>
+            <button
+              className="onboarding-repeat"
+              onClick={speakOnboarding}
+              disabled={isSpeakingOnboarding}
+            >
+              {isSpeakingOnboarding ? '🔊 ...' : `🔊 ${onboarding.repeat}`}
+            </button>
             <button
               className="onboarding-dismiss"
               onClick={() => setShowOnboarding(false)}
