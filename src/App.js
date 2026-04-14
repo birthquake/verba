@@ -12,6 +12,49 @@ const LANGUAGES = [
   { label: 'Arabic',     code: 'ar', voice: 'ar-SA', whisper: 'ar' },
 ];
 
+const SPECIALTIES = [
+  {
+    label: 'General',
+    code: 'general',
+    prompt: '',
+  },
+  {
+    label: 'Emergency',
+    code: 'emergency',
+    prompt: `This is an emergency department encounter. Prioritize clarity and urgency in all translations. 
+Use triage vocabulary, vital signs terminology, and trauma language where appropriate. 
+Translate time-sensitive instructions with directness and precision.`,
+  },
+  {
+    label: 'Maternity',
+    code: 'maternity',
+    prompt: `This is a maternity or obstetrics encounter. Use terminology appropriate for labor, delivery, 
+prenatal care, postpartum recovery, and infant care. Be precise with contraction timing, 
+dilation measurements, and fetal monitoring terms.`,
+  },
+  {
+    label: 'Pediatrics',
+    code: 'pediatrics',
+    prompt: `This is a pediatric encounter. When speaking to the patient use age-appropriate language. 
+When speaking to the parent or caregiver use clear, non-alarming clinical language. 
+Use developmental and growth terminology where appropriate.`,
+  },
+  {
+    label: 'Cardiology',
+    code: 'cardiology',
+    prompt: `This is a cardiology encounter. Use precise cardiac terminology including symptoms, 
+diagnostic procedures, medications, and monitoring terms. Be exact with measurements 
+such as blood pressure readings, heart rate, and ejection fraction values.`,
+  },
+  {
+    label: 'Surgery',
+    code: 'surgery',
+    prompt: `This is a surgical encounter. Use terminology appropriate for pre-operative consent, 
+post-operative instructions, wound care, pain management, and anesthesia. 
+Be precise with procedure names and recovery expectations.`,
+  },
+];
+
 const PATIENT_LABELS = {
   es:  'Paciente — Español',
   zh:  '患者 — 普通话',
@@ -75,6 +118,7 @@ export default function App() {
   const [status, setStatus] = useState('');
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
+  const [selectedSpecialty, setSelectedSpecialty] = useState(SPECIALTIES[0]);
   const [showPhrases, setShowPhrases] = useState(false);
   const [activeCategory, setActiveCategory] = useState(0);
   const [translatingPhrase, setTranslatingPhrase] = useState(null);
@@ -135,6 +179,26 @@ export default function App() {
       if (MediaRecorder.isTypeSupported(type)) return type;
     }
     return '';
+  };
+
+  const buildSystemPrompt = (sourceLang, targetLang) => {
+    const base = `You are a certified medical interpreter specializing in clinical communication.
+
+Your rules:
+- Translate from ${sourceLang} to ${targetLang}
+- Use formal clinical register appropriate for a hospital or clinic setting
+- Preserve all medical terminology, anatomical terms, medication names, and dosages exactly
+- Preserve numbers, measurements, and units exactly (e.g. "10mg", "120/80", "37.5°C")
+- Do not add explanations, clarifications, or commentary
+- Do not soften or rephrase symptoms — translate them as stated
+- If a term has no direct equivalent, use the closest clinical term in the target language
+- Return only the translated text, nothing else`;
+
+    if (selectedSpecialty.prompt) {
+      return `${base}\n\nSpecialty context:\n${selectedSpecialty.prompt}`;
+    }
+
+    return base;
   };
 
   const startListening = async (side) => {
@@ -266,17 +330,7 @@ export default function App() {
           messages: [
             {
               role: 'system',
-              content: `You are a certified medical interpreter specializing in clinical communication.
-
-Your rules:
-- Translate from ${sourceLang} to ${targetLang}
-- Use formal clinical register appropriate for a hospital or clinic setting
-- Preserve all medical terminology, anatomical terms, medication names, and dosages exactly
-- Preserve numbers, measurements, and units exactly (e.g. "10mg", "120/80", "37.5°C")
-- Do not add explanations, clarifications, or commentary
-- Do not soften or rephrase symptoms — translate them as stated
-- If a term has no direct equivalent, use the closest clinical term in the target language
-- Return only the translated text, nothing else`,
+              content: buildSystemPrompt(sourceLang, targetLang),
             },
             { role: 'user', content: originalText },
           ],
@@ -330,15 +384,7 @@ Your rules:
           messages: [
             {
               role: 'system',
-              content: `You are a certified medical interpreter specializing in clinical communication.
-
-Your rules:
-- Translate from English to ${selectedLang.label}
-- Use formal clinical register appropriate for a hospital or clinic setting
-- Preserve all medical terminology, anatomical terms, medication names, and dosages exactly
-- Preserve numbers, measurements, and units exactly
-- Do not add explanations, clarifications, or commentary
-- Return only the translated text, nothing else`,
+              content: buildSystemPrompt('English', selectedLang.label),
             },
             { role: 'user', content: phrase },
           ],
@@ -386,6 +432,7 @@ Your rules:
       'Verba Session Transcript',
       `Date: ${date} at ${time}`,
       `Languages: English — ${selectedLang.label}`,
+      `Specialty: ${selectedSpecialty.label}`,
       '',
       '---',
       '',
@@ -446,6 +493,14 @@ Your rules:
     }
   };
 
+  const handleSpecialtyChange = (e) => {
+    const specialty = SPECIALTIES.find(s => s.code === e.target.value);
+    if (specialty) {
+      setSelectedSpecialty(specialty);
+      clearSession();
+    }
+  };
+
   const patientLabel = PATIENT_LABELS[selectedLang.code];
   const patientBtn = PATIENT_BUTTONS[selectedLang.code];
 
@@ -470,7 +525,12 @@ Your rules:
 
       {/* Provider side (top) */}
       <div className={`side provider ${activeSide === 'provider' && isListening ? 'active' : ''}`}>
-        <div className="side-label">Healthcare Provider — English</div>
+        <div className="side-label">
+          Healthcare Provider — English
+          {selectedSpecialty.code !== 'general' && (
+            <span className="specialty-badge">{selectedSpecialty.label}</span>
+          )}
+        </div>
         <div className="messages" ref={providerRef}>
           {messages.map((m) => (
             <div key={m.id} className={`message ${m.side === 'provider' ? 'sent' : 'received'}`}>
@@ -501,6 +561,15 @@ Your rules:
         >
           {LANGUAGES.map((l) => (
             <option key={l.code} value={l.code}>{l.label}</option>
+          ))}
+        </select>
+        <select
+          className="lang-select"
+          value={selectedSpecialty.code}
+          onChange={handleSpecialtyChange}
+        >
+          {SPECIALTIES.map((s) => (
+            <option key={s.code} value={s.code}>{s.label}</option>
           ))}
         </select>
         <button
