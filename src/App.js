@@ -8,6 +8,7 @@ export default function App() {
   const [isListening, setIsListening] = useState(false);
   const [activeSide, setActiveSide] = useState(null);
   const [status, setStatus] = useState('');
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
   const providerRef = useRef(null);
   const patientRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -22,11 +23,6 @@ export default function App() {
       patientRef.current.scrollTop = patientRef.current.scrollHeight;
     }
   }, [messages]);
-
-  const unlockAudio = () => {
-    const utterance = new SpeechSynthesisUtterance('');
-    window.speechSynthesis.speak(utterance);
-  };
 
   const getSupportedMimeType = () => {
     const types = [
@@ -44,7 +40,6 @@ export default function App() {
 
   const startListening = async (side) => {
     if (isListening) return;
-    unlockAudio();
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -222,6 +217,22 @@ export default function App() {
 
   return (
     <div className="app">
+
+      {/* Audio unlock overlay */}
+      {!audioUnlocked && (
+        <div className="unlock-overlay" onClick={() => {
+          const utterance = new SpeechSynthesisUtterance(' ');
+          utterance.volume = 0;
+          window.speechSynthesis.speak(utterance);
+          setAudioUnlocked(true);
+        }}>
+          <div className="unlock-box">
+            <span className="unlock-icon">🔊</span>
+            <p className="unlock-title">Tap to enable audio</p>
+            <p className="unlock-sub">Required for voice translation</p>
+          </div>
+        </div>
+      )}
 
       {/* Provider side (top) */}
       <div className={`side provider ${activeSide === 'provider' && isListening ? 'active' : ''}`}>
