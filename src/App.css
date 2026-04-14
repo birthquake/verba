@@ -363,3 +363,56 @@
   color: #b0a898;
   background: #f5f2ee;
 }
+
+/* ── Export ── */
+.export-btn {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6a8a5a;
+  background: #6a8a5a15;
+  border: 1px solid #6a8a5a30;
+  border-radius: 8px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.export-btn:active {
+  background: #6a8a5a25;
+}
+
+.export-panel {
+  max-height: 40vh;
+}
+
+.export-desc {
+  font-size: 14px;
+  color: #a09080;
+  line-height: 1.5;
+}
+
+.export-action-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: #e87840;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.export-action-btn:active {
+  background: #c45e28;
+}
+
+.export-action-btn.share {
+  background: #f5f2ee;
+  color: #2a2018;
+  border: 1px solid #ede8e0;
+}
+
+.export-action-btn.share:active {
+  background: #ede8e0;
+}
