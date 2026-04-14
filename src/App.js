@@ -78,6 +78,8 @@ export default function App() {
   const [showPhrases, setShowPhrases] = useState(false);
   const [activeCategory, setActiveCategory] = useState(0);
   const [translatingPhrase, setTranslatingPhrase] = useState(null);
+  const [showExport, setShowExport] = useState(false);
+  const [copyConfirmed, setCopyConfirmed] = useState(false);
   const providerRef = useRef(null);
   const patientRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -373,9 +375,67 @@ Your rules:
     }
   };
 
+  const buildTranscript = () => {
+    const date = new Date().toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric',
+    });
+    const time = new Date().toLocaleTimeString('en-US', {
+      hour: '2-digit', minute: '2-digit',
+    });
+    const header = [
+      'Verba Session Transcript',
+      `Date: ${date} at ${time}`,
+      `Languages: English — ${selectedLang.label}`,
+      '',
+      '---',
+      '',
+    ].join('\n');
+
+    const body = messages
+      .filter((m) => m.translated)
+      .map((m) => {
+        const providerLabel = 'Provider';
+        const patientLabel = selectedLang.label;
+        if (m.side === 'provider') {
+          return `[${providerLabel}] ${m.original}\n[${patientLabel}] ${m.translated}`;
+        } else {
+          return `[${patientLabel}] ${m.original}\n[${providerLabel}] ${m.translated}`;
+        }
+      })
+      .join('\n\n');
+
+    return header + body;
+  };
+
+  const handleCopy = async () => {
+    const transcript = buildTranscript();
+    try {
+      await navigator.clipboard.writeText(transcript);
+      setCopyConfirmed(true);
+      setTimeout(() => setCopyConfirmed(false), 2000);
+    } catch (err) {
+      console.error('Copy failed:', err);
+    }
+  };
+
+  const handleShare = async () => {
+    const transcript = buildTranscript();
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Verba Session Transcript',
+          text: transcript,
+        });
+      }
+    } catch (err) {
+      console.error('Share failed:', err);
+    }
+  };
+
   const clearSession = () => {
     setMessages([]);
     setStatus('');
+    setShowExport(false);
   };
 
   const handleLangChange = (e) => {
@@ -451,7 +511,10 @@ Your rules:
         </button>
         {status ? <span className="status">{status}</span> : null}
         {messages.length > 0 && (
-          <button className="clear-btn" onClick={clearSession}>Clear</button>
+          <>
+            <button className="export-btn" onClick={() => setShowExport(true)}>Export</button>
+            <button className="clear-btn" onClick={clearSession}>Clear</button>
+          </>
         )}
       </div>
 
@@ -509,6 +572,27 @@ Your rules:
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Export panel */}
+      {showExport && (
+        <div className="phrases-overlay" onClick={() => setShowExport(false)}>
+          <div className="phrases-panel export-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="phrases-header">
+              <span className="phrases-title">Export Transcript</span>
+              <button className="phrases-close" onClick={() => setShowExport(false)}>✕</button>
+            </div>
+            <p className="export-desc">
+              Export the full bilingual transcript from this session.
+            </p>
+            <button className="export-action-btn" onClick={handleCopy}>
+              {copyConfirmed ? '✓ Copied to clipboard' : 'Copy to clipboard'}
+            </button>
+            <button className="export-action-btn share" onClick={handleShare}>
+              Share via...
+            </button>
           </div>
         </div>
       )}
