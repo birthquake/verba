@@ -198,3 +198,19 @@
   font-size: 14px;
   color: #888;
 }
+
+.lang-select {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+.lang-select:focus {
+  border-color: #1a73e8;
+}
