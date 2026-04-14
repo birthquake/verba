@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import './App.css';
 
 const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
@@ -101,8 +101,8 @@ const PATIENT_ONBOARDING = {
     title: 'Bienvenue sur Verba',
     body: 'Cette application traduit en temps réel ce que vous et votre médecin dites.',
     instruction: 'Maintenez le bouton vert appuyé pour parler. Parlez naturellement.',
-    privacy: 'Votre conversation est privée et n\'est pas enregistrée.',
-    dismiss: 'J\'ai compris',
+    privacy: "Votre conversation est privée et n'est pas enregistrée.",
+    dismiss: "J'ai compris",
     repeat: 'Répéter',
   },
   ar: {
@@ -212,17 +212,7 @@ export default function App() {
     };
   }, []);
 
-  // Speak onboarding automatically when it opens
-  useEffect(() => {
-    if (showOnboarding) {
-      setTimeout(() => speakOnboarding(), 400);
-    } else {
-      window.speechSynthesis.cancel();
-      setIsSpeakingOnboarding(false);
-    }
-  }, [showOnboarding]);
-
-  const speakOnboarding = () => {
+  const speakOnboarding = useCallback(() => {
     window.speechSynthesis.cancel();
     const onboarding = PATIENT_ONBOARDING[selectedLang.code];
     const fullText = `${onboarding.body} ${onboarding.instruction} ${onboarding.privacy}`;
@@ -233,7 +223,16 @@ export default function App() {
     utterance.onend = () => setIsSpeakingOnboarding(false);
     utterance.onerror = () => setIsSpeakingOnboarding(false);
     window.speechSynthesis.speak(utterance);
-  };
+  }, [selectedLang]);
+
+  useEffect(() => {
+    if (showOnboarding) {
+      setTimeout(() => speakOnboarding(), 400);
+    } else {
+      window.speechSynthesis.cancel();
+      setIsSpeakingOnboarding(false);
+    }
+  }, [showOnboarding, speakOnboarding]);
 
   const getSupportedMimeType = () => {
     const types = [
