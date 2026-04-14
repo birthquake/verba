@@ -124,6 +124,7 @@ export default function App() {
   const [translatingPhrase, setTranslatingPhrase] = useState(null);
   const [showExport, setShowExport] = useState(false);
   const [copyConfirmed, setCopyConfirmed] = useState(false);
+  const [expandedMessages, setExpandedMessages] = useState({});
   const providerRef = useRef(null);
   const patientRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -199,6 +200,89 @@ Your rules:
     }
 
     return base;
+  };
+
+  const handleBubbleTap = async (message, viewSide) => {
+    const key = `${message.id}-${viewSide}`;
+    const isExpanded = expandedMessages[key];
+
+    if (isExpanded) {
+      setExpandedMessages((prev) => ({ ...prev, [key]: null }));
+      return;
+    }
+
+    // The text shown in this bubble
+    const shownText = viewSide === 'provider'
+      ? (message.side === 'provider' ? message.original : message.translated)
+      : (message.side === 'patient' ? message.original : message.translated);
+
+    if (!shownText || shownText === '...') return;
+
+    // The language of the shown text
+    const shownLang = viewSide === 'provider'
+      ? (message.side === 'provider' ? 'English' : selectedLang.label)
+      : (message.side === 'patient' ? selectedLang.label : 'English');
+
+    // Back-translate to the other language
+    const backLang = shownLang === 'English' ? selectedLang.label : 'English';
+
+    // If already cached use it
+    if (message.backTranslations?.[key]) {
+      setExpandedMessages((prev) => ({
+        ...prev,
+        [key]: message.backTranslations[key],
+      }));
+      return;
+    }
+
+    // Show loading state
+    setExpandedMessages((prev) => ({ ...prev, [key]: 'loading' }));
+
+    try {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'system',
+              content: `You are a certified medical interpreter. Translate from ${shownLang} to ${backLang}. Return only the translated text, nothing else.`,
+            },
+            { role: 'user', content: shownText },
+          ],
+        }),
+      });
+
+      const data = await res.json();
+      const backText = data.choices?.[0]?.message?.content?.trim();
+
+      if (backText) {
+        // Cache on message object
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === message.id
+              ? {
+                  ...m,
+                  backTranslations: {
+                    ...m.backTranslations,
+                    [key]: backText,
+                  },
+                }
+              : m
+          )
+        );
+        setExpandedMessages((prev) => ({ ...prev, [key]: backText }));
+      } else {
+        setExpandedMessages((prev) => ({ ...prev, [key]: null }));
+      }
+    } catch (err) {
+      console.error('Back-translation error:', err);
+      setExpandedMessages((prev) => ({ ...prev, [key]: null }));
+    }
   };
 
   const startListening = async (side) => {
@@ -312,6 +396,7 @@ Your rules:
           side,
           original: originalText,
           translated: null,
+          backTranslations: {},
         },
       ]);
       setStatus('');
@@ -404,6 +489,7 @@ Your rules:
           side: 'provider',
           original: phrase,
           translated: translatedText,
+          backTranslations: {},
         },
       ]);
 
@@ -483,6 +569,7 @@ Your rules:
     setMessages([]);
     setStatus('');
     setShowExport(false);
+    setExpandedMessages({});
   };
 
   const handleLangChange = (e) => {
@@ -503,6 +590,35 @@ Your rules:
 
   const patientLabel = PATIENT_LABELS[selectedLang.code];
   const patientBtn = PATIENT_BUTTONS[selectedLang.code];
+
+  const renderMessages = (viewSide, ref) => (
+    <div className="messages" ref={ref}>
+      {messages.map((m) => {
+        const key = `${m.id}-${viewSide}`;
+        const isSent = m.side === viewSide;
+        const shownText = isSent
+          ? m.original
+          : (m.translated ?? '...');
+        const backText = expandedMessages[key];
+        const isExpanded = !!backText;
+
+        return (
+          <div
+            key={m.id}
+            className={`message ${isSent ? 'sent' : 'received'} ${isExpanded ? 'expanded' : ''}`}
+            onClick={() => m.translated && handleBubbleTap(m, viewSide)}
+          >
+            <span className="original">{shownText}</span>
+            {isExpanded && (
+              <span className="back-translation">
+                {backText === 'loading' ? 'Verifying...' : `↩ ${backText}`}
+              </span>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 
   return (
     <div className="app">
@@ -531,15 +647,7 @@ Your rules:
             <span className="specialty-badge">{selectedSpecialty.label}</span>
           )}
         </div>
-        <div className="messages" ref={providerRef}>
-          {messages.map((m) => (
-            <div key={m.id} className={`message ${m.side === 'provider' ? 'sent' : 'received'}`}>
-              <span className="original">
-                {m.side === 'provider' ? m.original : (m.translated ?? '...')}
-              </span>
-            </div>
-          ))}
-        </div>
+        {renderMessages('provider', providerRef)}
         <button
           className={`speak-btn ${activeSide === 'provider' && isListening ? 'listening' : ''}`}
           onMouseDown={() => startListening('provider')}
@@ -598,15 +706,7 @@ Your rules:
         >
           {activeSide === 'patient' && isListening ? patientBtn.listening : patientBtn.idle}
         </button>
-        <div className="messages" ref={patientRef}>
-          {messages.map((m) => (
-            <div key={m.id} className={`message ${m.side === 'patient' ? 'sent' : 'received'}`}>
-              <span className="original">
-                {m.side === 'patient' ? m.original : (m.translated ?? '...')}
-              </span>
-            </div>
-          ))}
-        </div>
+        {renderMessages('patient', patientRef)}
         <div className="side-label">{patientLabel}</div>
       </div>
 
