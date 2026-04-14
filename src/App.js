@@ -30,6 +30,44 @@ const PATIENT_BUTTONS = {
   ar:  { idle: 'اضغط للتحدث',           listening: 'جارٍ الاستماع...' },
 };
 
+const PHRASE_CATEGORIES = [
+  {
+    category: 'Pain',
+    phrases: [
+      'Where is your pain?',
+      'Rate your pain 1 to 10.',
+      'Is the pain constant or does it come and go?',
+      'Does the pain radiate anywhere?',
+    ],
+  },
+  {
+    category: 'Assessment',
+    phrases: [
+      'Are you having trouble breathing?',
+      'Do you feel dizzy or nauseous?',
+      'Do you have a fever?',
+      'How long have you had this symptom?',
+    ],
+  },
+  {
+    category: 'History',
+    phrases: [
+      'Do you have any allergies?',
+      'What medications are you currently taking?',
+      'Do you have any chronic conditions?',
+    ],
+  },
+  {
+    category: 'Consent',
+    phrases: [
+      'I need to examine you.',
+      'I am going to give you medication.',
+      'Do you understand?',
+      'Please sign here.',
+    ],
+  },
+];
+
 export default function App() {
   const [messages, setMessages] = useState([]);
   const [isListening, setIsListening] = useState(false);
@@ -37,13 +75,15 @@ export default function App() {
   const [status, setStatus] = useState('');
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
+  const [showPhrases, setShowPhrases] = useState(false);
+  const [activeCategory, setActiveCategory] = useState(0);
+  const [translatingPhrase, setTranslatingPhrase] = useState(null);
   const providerRef = useRef(null);
   const patientRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const streamRef = useRef(null);
 
-  // Scroll to bottom when messages update
   useEffect(() => {
     if (providerRef.current) {
       providerRef.current.scrollTop = providerRef.current.scrollHeight;
@@ -53,7 +93,6 @@ export default function App() {
     }
   }, [messages]);
 
-  // Prevent screen lock
   useEffect(() => {
     let wakeLock = null;
 
@@ -224,8 +263,8 @@ export default function App() {
           model: 'gpt-4o',
           messages: [
             {
-  role: 'system',
-  content: `You are a certified medical interpreter specializing in clinical communication. 
+              role: 'system',
+              content: `You are a certified medical interpreter specializing in clinical communication.
 
 Your rules:
 - Translate from ${sourceLang} to ${targetLang}
@@ -236,7 +275,7 @@ Your rules:
 - Do not soften or rephrase symptoms — translate them as stated
 - If a term has no direct equivalent, use the closest clinical term in the target language
 - Return only the translated text, nothing else`,
-},
+            },
             { role: 'user', content: originalText },
           ],
         }),
@@ -271,6 +310,66 @@ Your rules:
     } catch (err) {
       console.error('Process error:', err);
       setStatus('Something went wrong. Please try again.');
+    }
+  };
+
+  const handlePhraseTap = async (phrase) => {
+    setTranslatingPhrase(phrase);
+
+    try {
+      const translateRes = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'system',
+              content: `You are a certified medical interpreter specializing in clinical communication.
+
+Your rules:
+- Translate from English to ${selectedLang.label}
+- Use formal clinical register appropriate for a hospital or clinic setting
+- Preserve all medical terminology, anatomical terms, medication names, and dosages exactly
+- Preserve numbers, measurements, and units exactly
+- Do not add explanations, clarifications, or commentary
+- Return only the translated text, nothing else`,
+            },
+            { role: 'user', content: phrase },
+          ],
+        }),
+      });
+
+      const translateData = await translateRes.json();
+      const translatedText = translateData.choices?.[0]?.message?.content?.trim();
+
+      if (!translatedText) return;
+
+      const messageId = Date.now();
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: messageId,
+          side: 'provider',
+          original: phrase,
+          translated: translatedText,
+        },
+      ]);
+
+      const utterance = new SpeechSynthesisUtterance(translatedText);
+      utterance.lang = selectedLang.voice;
+      utterance.rate = 0.9;
+      window.speechSynthesis.speak(utterance);
+
+      setShowPhrases(false);
+
+    } catch (err) {
+      console.error('Phrase translation error:', err);
+    } finally {
+      setTranslatingPhrase(null);
     }
   };
 
@@ -344,6 +443,12 @@ Your rules:
             <option key={l.code} value={l.code}>{l.label}</option>
           ))}
         </select>
+        <button
+          className="phrases-btn"
+          onClick={() => setShowPhrases(true)}
+        >
+          Phrases
+        </button>
         {status ? <span className="status">{status}</span> : null}
         {messages.length > 0 && (
           <button className="clear-btn" onClick={clearSession}>Clear</button>
@@ -372,6 +477,41 @@ Your rules:
         </div>
         <div className="side-label">{patientLabel}</div>
       </div>
+
+      {/* Phrases panel */}
+      {showPhrases && (
+        <div className="phrases-overlay" onClick={() => setShowPhrases(false)}>
+          <div className="phrases-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="phrases-header">
+              <span className="phrases-title">Quick Phrases</span>
+              <button className="phrases-close" onClick={() => setShowPhrases(false)}>✕</button>
+            </div>
+            <div className="phrases-tabs">
+              {PHRASE_CATEGORIES.map((cat, i) => (
+                <button
+                  key={cat.category}
+                  className={`phrases-tab ${activeCategory === i ? 'active' : ''}`}
+                  onClick={() => setActiveCategory(i)}
+                >
+                  {cat.category}
+                </button>
+              ))}
+            </div>
+            <div className="phrases-list">
+              {PHRASE_CATEGORIES[activeCategory].phrases.map((phrase) => (
+                <button
+                  key={phrase}
+                  className={`phrase-item ${translatingPhrase === phrase ? 'loading' : ''}`}
+                  onClick={() => handlePhraseTap(phrase)}
+                  disabled={translatingPhrase !== null}
+                >
+                  {translatingPhrase === phrase ? 'Translating...' : phrase}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
