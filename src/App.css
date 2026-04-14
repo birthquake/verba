@@ -16,7 +16,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 10px;
   padding: 12px 16px;
   transition: background 0.2s ease;
   background: #ffffff;
@@ -30,6 +31,7 @@
 .side.patient {
   transform: rotate(180deg);
   background: #ffffff;
+  justify-content: flex-start;
 }
 
 .side.patient.active {
@@ -50,15 +52,11 @@
   max-width: 480px;
   flex: 1;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: 4px 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
   min-height: 0;
-}
-
-.patient-messages {
-  transform: none;
 }
 
 .message {
@@ -67,7 +65,6 @@
   padding: 8px 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
 .message.sent {
@@ -101,6 +98,7 @@
   user-select: none;
   -webkit-user-select: none;
   flex-shrink: 0;
+  margin-top: auto;
 }
 
 .speak-btn:active,
@@ -113,6 +111,8 @@
 .patient .speak-btn {
   border-color: #34a853;
   color: #34a853;
+  margin-top: 0;
+  margin-bottom: auto;
 }
 
 .patient .speak-btn:active,
@@ -125,7 +125,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   padding: 8px 16px;
   border-top: 1px solid #eeeeee;
   border-bottom: 1px solid #eeeeee;
@@ -138,6 +138,33 @@
   font-weight: 700;
   color: #1a1a1a;
   letter-spacing: 0.05em;
+}
+
+.lang-select {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+.lang-select:focus {
+  border-color: #1a73e8;
+}
+
+.phrases-btn {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a73e8;
+  background: #e8f0fe;
+  border: none;
+  border-radius: 8px;
+  padding: 4px 10px;
+  cursor: pointer;
 }
 
 .status {
@@ -160,6 +187,7 @@
   color: #555;
 }
 
+/* ── Unlock overlay ── */
 .unlock-overlay {
   position: absolute;
   top: 0;
@@ -199,18 +227,100 @@
   color: #888;
 }
 
-.lang-select {
-  font-size: 13px;
-  font-weight: 500;
-  color: #1a1a1a;
-  background: #ffffff;
-  border: 1px solid #dddddd;
-  border-radius: 8px;
-  padding: 4px 8px;
-  cursor: pointer;
-  outline: none;
+/* ── Phrases panel ── */
+.phrases-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: flex-end;
+  z-index: 50;
 }
 
-.lang-select:focus {
-  border-color: #1a73e8;
+.phrases-panel {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 20px 20px 0 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 55vh;
+}
+
+.phrases-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.phrases-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.phrases-close {
+  font-size: 16px;
+  color: #aaa;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.phrases-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.phrases-tab {
+  font-size: 13px;
+  font-weight: 500;
+  color: #888;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.phrases-tab.active {
+  background: #1a73e8;
+  color: #ffffff;
+}
+
+.phrases-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.phrase-item {
+  text-align: left;
+  font-size: 15px;
+  color: #1a1a1a;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.phrase-item:active {
+  background: #e8f0fe;
+}
+
+.phrase-item.loading {
+  color: #888;
+  background: #f0f0f0;
 }
