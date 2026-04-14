@@ -58,7 +58,7 @@
 }
 
 .patient-messages {
-  transform: rotate(180deg);
+  transform: none;
 }
 
 .message {
