@@ -72,6 +72,7 @@
   padding: 9px 13px;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
 }
 
 .message.sent {
@@ -103,6 +104,26 @@
   color: #2a2018;
   font-weight: 500;
   line-height: 1.4;
+}
+
+/* ── Back-translation ── */
+.message.expanded {
+  cursor: pointer;
+}
+
+.back-translation {
+  font-size: 12px;
+  color: #a09080;
+  font-style: italic;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #e8e0d8;
+  line-height: 1.4;
+}
+
+.side.patient .back-translation {
+  border-top-color: #d8e0e8;
+  color: #8090a0;
 }
 
 /* ── Speak buttons ── */
@@ -150,8 +171,7 @@
 .divider {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  justify-content: space-between;
   padding: 9px 16px;
   border-top: 1px solid #ede8e0;
   border-bottom: 1px solid #ede8e0;
@@ -166,54 +186,114 @@
   letter-spacing: 0.08em;
 }
 
-.lang-select {
-  font-size: 13px;
-  font-weight: 500;
-  color: #2a2018;
-  background: #ffffff;
-  border: 1px solid #ddd8d0;
-  border-radius: 8px;
-  padding: 4px 8px;
+.status {
+  font-size: 12px;
+  color: #a09080;
+  flex: 1;
+  text-align: center;
+}
+
+.divider-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-btn {
+  font-size: 20px;
+  background: none;
+  border: none;
   cursor: pointer;
-  outline: none;
+  padding: 4px 6px;
+  border-radius: 8px;
+  color: #a09080;
+  line-height: 1;
 }
 
-.lang-select:focus {
-  border-color: #e87840;
+.settings-btn:active {
+  background: #f0ece8;
 }
 
-.phrases-btn {
-  font-size: 13px;
+/* ── Specialty badge ── */
+.specialty-badge {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 10px;
   font-weight: 600;
   color: #e87840;
   background: #e8784015;
   border: 1px solid #e8784030;
-  border-radius: 8px;
-  padding: 4px 10px;
-  cursor: pointer;
-}
-
-.phrases-btn:active {
-  background: #e8784025;
-}
-
-.status {
-  font-size: 12px;
-  color: #a09080;
-}
-
-.clear-btn {
-  font-size: 12px;
-  color: #b0a898;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px 8px;
   border-radius: 6px;
+  padding: 2px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
 }
 
-.clear-btn:active {
+/* ── Settings panel ── */
+.settings-panel {
+  max-height: 70vh;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: #2a2018;
+}
+
+.settings-select {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2a2018;
+  background: #f5f2ee;
+  border: 1px solid #ede8e0;
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.settings-divider {
+  height: 1px;
+  background: #ede8e0;
+  width: 100%;
+  margin: 2px 0;
+}
+
+.settings-action-btn {
+  width: 100%;
+  padding: 13px;
+  border-radius: 14px;
+  border: 1px solid #ede8e0;
+  background: #faf7f4;
+  color: #2a2018;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.settings-action-btn:active {
   background: #f0ece8;
+}
+
+.settings-action-btn.danger {
+  color: #c0392b;
+  background: #fdf0f0;
+  border-color: #f0d8d8;
+}
+
+.settings-action-btn.danger:active {
+  background: #f8e0e0;
 }
 
 /* ── Unlock overlay ── */
@@ -365,21 +445,6 @@
 }
 
 /* ── Export ── */
-.export-btn {
-  font-size: 13px;
-  font-weight: 600;
-  color: #6a8a5a;
-  background: #6a8a5a15;
-  border: 1px solid #6a8a5a30;
-  border-radius: 8px;
-  padding: 4px 10px;
-  cursor: pointer;
-}
-
-.export-btn:active {
-  background: #6a8a5a25;
-}
-
 .export-panel {
   max-height: 40vh;
 }
@@ -417,58 +482,7 @@
   background: #ede8e0;
 }
 
-.specialty-badge {
-  display: inline-block;
-  margin-left: 8px;
-  font-size: 10px;
-  font-weight: 600;
-  color: #e87840;
-  background: #e8784015;
-  border: 1px solid #e8784030;
-  border-radius: 6px;
-  padding: 2px 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  vertical-align: middle;
-}
-
-/* ── Back-translation ── */
-.message.expanded {
-  cursor: pointer;
-}
-
-.back-translation {
-  font-size: 12px;
-  color: #a09080;
-  font-style: italic;
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px solid #e8e0d8;
-  line-height: 1.4;
-}
-
-.side.patient .back-translation {
-  border-top-color: #d8e0e8;
-  color: #8090a0;
-}
-
-/* ── Intro button ── */
-.intro-btn {
-  font-size: 13px;
-  font-weight: 600;
-  color: #6a7a9a;
-  background: #6a7a9a15;
-  border: 1px solid #6a7a9a30;
-  border-radius: 8px;
-  padding: 4px 10px;
-  cursor: pointer;
-}
-
-.intro-btn:active {
-  background: #6a7a9a25;
-}
-
-/* ── Patient onboarding overlay ── */
+/* ── Patient onboarding ── */
 .onboarding-overlay {
   position: absolute;
   top: 0;
@@ -527,25 +541,6 @@
   line-height: 1.5;
 }
 
-.onboarding-dismiss {
-  width: 100%;
-  padding: 16px;
-  border-radius: 16px;
-  border: none;
-  background: #4a78e8;
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 8px;
-  transition: background 0.15s ease;
-}
-
-.onboarding-dismiss:active {
-  background: #2a58c8;
-}
-
-/* ── Onboarding repeat button ── */
 .onboarding-repeat {
   width: 100%;
   padding: 12px;
@@ -566,4 +561,22 @@
 .onboarding-repeat:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+.onboarding-dismiss {
+  width: 100%;
+  padding: 16px;
+  border-radius: 16px;
+  border: none;
+  background: #4a78e8;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.15s ease;
+}
+
+.onboarding-dismiss:active {
+  background: #2a58c8;
 }
