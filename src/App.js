@@ -162,6 +162,7 @@ export default function App() {
   const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
   const [selectedSpecialty, setSelectedSpecialty] = useState(SPECIALTIES[0]);
   const [showPhrases, setShowPhrases] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [activeCategory, setActiveCategory] = useState(0);
   const [translatingPhrase, setTranslatingPhrase] = useState(null);
   const [showExport, setShowExport] = useState(false);
@@ -623,6 +624,7 @@ Your rules:
     setStatus('');
     setShowExport(false);
     setExpandedMessages({});
+    setShowSettings(false);
   };
 
   const handleLangChange = (e) => {
@@ -714,43 +716,12 @@ Your rules:
       {/* Center divider */}
       <div className="divider">
         <span className="app-name">Verba</span>
-        <select
-          className="lang-select"
-          value={selectedLang.code}
-          onChange={handleLangChange}
-        >
-          {LANGUAGES.map((l) => (
-            <option key={l.code} value={l.code}>{l.label}</option>
-          ))}
-        </select>
-        <select
-          className="lang-select"
-          value={selectedSpecialty.code}
-          onChange={handleSpecialtyChange}
-        >
-          {SPECIALTIES.map((s) => (
-            <option key={s.code} value={s.code}>{s.label}</option>
-          ))}
-        </select>
-        <button
-          className="phrases-btn"
-          onClick={() => setShowPhrases(true)}
-        >
-          Phrases
-        </button>
-        <button
-          className="intro-btn"
-          onClick={() => setShowOnboarding(true)}
-        >
-          Intro
-        </button>
-        {status ? <span className="status">{status}</span> : null}
-        {messages.length > 0 && (
-          <>
-            <button className="export-btn" onClick={() => setShowExport(true)}>Export</button>
-            <button className="clear-btn" onClick={clearSession}>Clear</button>
-          </>
-        )}
+        {status && <span className="status">{status}</span>}
+        <div className="divider-actions">
+          <button className="settings-btn" onClick={() => setShowSettings(true)}>
+            ⚙
+          </button>
+        </div>
       </div>
 
       {/* Patient side (bottom, rotated) */}
@@ -767,6 +738,78 @@ Your rules:
         {renderMessages('patient', patientRef)}
         <div className="side-label">{patientLabel}</div>
       </div>
+
+      {/* Settings panel */}
+      {showSettings && (
+        <div className="phrases-overlay" onClick={() => setShowSettings(false)}>
+          <div className="phrases-panel settings-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="phrases-header">
+              <span className="phrases-title">Session Settings</span>
+              <button className="phrases-close" onClick={() => setShowSettings(false)}>✕</button>
+            </div>
+
+            <div className="settings-row">
+              <span className="settings-label">Patient language</span>
+              <select
+                className="settings-select"
+                value={selectedLang.code}
+                onChange={handleLangChange}
+              >
+                {LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code}>{l.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="settings-row">
+              <span className="settings-label">Specialty</span>
+              <select
+                className="settings-select"
+                value={selectedSpecialty.code}
+                onChange={handleSpecialtyChange}
+              >
+                {SPECIALTIES.map((s) => (
+                  <option key={s.code} value={s.code}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="settings-divider" />
+
+            <button
+              className="settings-action-btn"
+              onClick={() => { setShowSettings(false); setShowPhrases(true); }}
+            >
+              Quick Phrases
+            </button>
+
+            <button
+              className="settings-action-btn"
+              onClick={() => { setShowSettings(false); setShowOnboarding(true); }}
+            >
+              Patient Intro
+            </button>
+
+            {messages.length > 0 && (
+              <>
+                <div className="settings-divider" />
+                <button
+                  className="settings-action-btn"
+                  onClick={() => { setShowSettings(false); setShowExport(true); }}
+                >
+                  Export Transcript
+                </button>
+                <button
+                  className="settings-action-btn danger"
+                  onClick={clearSession}
+                >
+                  Clear Session
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Patient onboarding overlay */}
       {showOnboarding && (
