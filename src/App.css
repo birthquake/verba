@@ -889,3 +889,219 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+/* ── Medication Instructions — provider panel ── */
+.med-panel {
+  max-height: 75vh;
+}
+
+.med-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.med-input {
+  flex: 1;
+  font-size: 15px;
+  padding: 10px 12px;
+  border: 1px solid #ede8e0;
+  border-radius: 12px;
+  background: #faf7f4;
+  color: #2a2018;
+  outline: none;
+}
+
+.med-input:focus {
+  border-color: #e87840;
+  background: #ffffff;
+}
+
+.med-input-add {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  background: #e87840;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.med-input-add:disabled {
+  background: #c0b8b0;
+  cursor: default;
+}
+
+.med-mic-btn {
+  font-size: 20px;
+  background: #f5f2ee;
+  border: 1px solid #ede8e0;
+  border-radius: 12px;
+  padding: 8px 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.med-mic-btn.recording {
+  background: #fdf0f0;
+  border-color: #f0d8d8;
+}
+
+.med-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.med-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #faf7f4;
+  border: 1px solid #ede8e0;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.med-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.med-item-english {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2a2018;
+}
+
+.med-item-translated {
+  font-size: 13px;
+  color: #a09080;
+  font-style: italic;
+}
+
+.med-item-remove {
+  font-size: 13px;
+  color: #c0b8b0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  flex-shrink: 0;
+}
+
+/* ── Medication Instructions — patient overlay ── */
+.med-patient-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #f0f4fd;
+  display: flex;
+  flex-direction: column;
+  z-index: 90;
+  padding: 24px 20px 20px;
+}
+
+.med-patient-header {
+  flex-shrink: 0;
+  margin-bottom: 16px;
+}
+
+.med-patient-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a2a4a;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.med-patient-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+
+.med-patient-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px 18px;
+  border: 1px solid #c8d4e8;
+}
+
+.med-patient-number {
+  font-size: 18px;
+  font-weight: 700;
+  color: #4a78e8;
+  flex-shrink: 0;
+  min-width: 24px;
+}
+
+.med-patient-text {
+  font-size: 22px;
+  font-weight: 500;
+  color: #1a2a4a;
+  line-height: 1.5;
+}
+
+.med-patient-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-shrink: 0;
+}
+
+.med-patient-repeat {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  border: 2px solid #4a78e8;
+  background: #ffffff;
+  color: #4a78e8;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.med-patient-repeat:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.med-patient-done {
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px solid #c8d4e8;
+  background: #ffffff;
+  color: #4a78e8;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.med-patient-close {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: #4a78e8;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
