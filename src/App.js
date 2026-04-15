@@ -174,6 +174,8 @@ export default function App() {
   const [sessionSummary, setSessionSummary] = useState(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [summaryCopyConfirmed, setSummaryCopyConfirmed] = useState(false);
+  const [caregiverMode, setCaregiverMode] = useState(false);
+  const [caregiverSpeaksEnglish, setCaregiverSpeaksEnglish] = useState(true);
   const providerRef = useRef(null);
   const patientRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -272,6 +274,24 @@ Your rules:
     return base;
   };
 
+  // Returns translation direction for a given speaker side
+  const getSideLanguages = (side) => {
+    if (side === 'provider' || (side === 'caregiver' && caregiverSpeaksEnglish)) {
+      return {
+        sourceLang: 'English',
+        targetLang: selectedLang.label,
+        targetVoice: selectedLang.voice,
+        whisperLang: 'en',
+      };
+    }
+    return {
+      sourceLang: selectedLang.label,
+      targetLang: 'English',
+      targetVoice: 'en-US',
+      whisperLang: selectedLang.whisper,
+    };
+  };
+
   const generateSummary = async (forceRegenerate = false) => {
     if (sessionSummary && !forceRegenerate) {
       setShowSettings(false);
@@ -287,11 +307,11 @@ Your rules:
     const transcriptLines = messages
       .filter((m) => m.translated)
       .map((m) => {
-        if (m.side === 'provider') {
-          return `Provider: ${m.original}\nPatient (translated): ${m.translated}`;
-        } else {
-          return `Patient: ${m.original}\nProvider (translated): ${m.translated}`;
-        }
+        const speakerLabel =
+          m.side === 'provider' ? 'Provider'
+          : m.side === 'caregiver' ? 'Caregiver'
+          : 'Patient';
+        return `${speakerLabel}: ${m.original}\n→ (translated): ${m.translated}`;
       })
       .join('\n\n');
 
@@ -356,16 +376,16 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       return;
     }
 
-    const shownText = viewSide === 'provider'
-      ? (message.side === 'provider' ? message.original : message.translated)
-      : (message.side === 'patient' ? message.original : message.translated);
+    const isSent =
+      message.side === viewSide ||
+      (viewSide === 'provider' && message.side === 'caregiver' && caregiverSpeaksEnglish) ||
+      (viewSide === 'patient' && message.side === 'caregiver' && !caregiverSpeaksEnglish);
 
+    const shownText = isSent ? message.original : (message.translated ?? '...');
     if (!shownText || shownText === '...') return;
 
-    const shownLang = viewSide === 'provider'
-      ? (message.side === 'provider' ? 'English' : selectedLang.label)
-      : (message.side === 'patient' ? selectedLang.label : 'English');
-
+    const { sourceLang, targetLang } = getSideLanguages(message.side);
+    const shownLang = isSent ? sourceLang : targetLang;
     const backLang = shownLang === 'English' ? selectedLang.label : 'English';
 
     if (message.backTranslations?.[key]) {
@@ -494,11 +514,13 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         return;
       }
 
+      const { sourceLang, targetLang, targetVoice, whisperLang } = getSideLanguages(side);
+
       const extension = getFileExtension(mimeType);
       const formData = new FormData();
       formData.append('file', audioBlob, `audio.${extension}`);
       formData.append('model', 'whisper-1');
-      formData.append('language', side === 'provider' ? 'en' : selectedLang.whisper);
+      formData.append('language', whisperLang);
 
       const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
         method: 'POST',
@@ -533,9 +555,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         },
       ]);
       setStatus('');
-
-      const sourceLang = side === 'provider' ? 'English' : selectedLang.label;
-      const targetLang = side === 'provider' ? selectedLang.label : 'English';
 
       const translateRes = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -577,7 +596,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       );
 
       const utterance = new SpeechSynthesisUtterance(translatedText);
-      utterance.lang = side === 'provider' ? selectedLang.voice : 'en-US';
+      utterance.lang = targetVoice;
       utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
 
@@ -647,30 +666,30 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
     const time = new Date().toLocaleTimeString('en-US', {
       hour: '2-digit', minute: '2-digit',
     });
-    const header = [
+    const lines = [
       'Verba Session Transcript',
       `Date: ${date} at ${time}`,
       `Languages: English — ${selectedLang.label}`,
       `Specialty: ${selectedSpecialty.label}`,
-      '',
-      '---',
-      '',
-    ].join('\n');
+    ];
+    if (caregiverMode) {
+      lines.push(`Caregiver mode: on (caregiver speaks ${caregiverSpeaksEnglish ? 'English' : selectedLang.label})`);
+    }
+    lines.push('', '---', '');
 
     const body = messages
       .filter((m) => m.translated)
       .map((m) => {
-        const providerLabel = 'Provider';
-        const patientLabel = selectedLang.label;
-        if (m.side === 'provider') {
-          return `[${providerLabel}] ${m.original}\n[${patientLabel}] ${m.translated}`;
-        } else {
-          return `[${patientLabel}] ${m.original}\n[${providerLabel}] ${m.translated}`;
-        }
+        const speakerLabel =
+          m.side === 'provider' ? 'Provider'
+          : m.side === 'caregiver' ? 'Caregiver'
+          : selectedLang.label;
+        const { targetLang } = getSideLanguages(m.side);
+        return `[${speakerLabel}] ${m.original}\n[${targetLang}] ${m.translated}`;
       })
       .join('\n\n');
 
-    return header + body;
+    return lines.join('\n') + body;
   };
 
   const handleCopy = async () => {
@@ -732,7 +751,12 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
     <div className="messages" ref={ref}>
       {messages.map((m) => {
         const key = `${m.id}-${viewSide}`;
-        const isSent = m.side === viewSide;
+
+        const isSent =
+          m.side === viewSide ||
+          (viewSide === 'provider' && m.side === 'caregiver' && caregiverSpeaksEnglish) ||
+          (viewSide === 'patient' && m.side === 'caregiver' && !caregiverSpeaksEnglish);
+
         const shownText = isSent ? m.original : (m.translated ?? '...');
         const backText = expandedMessages[key];
         const isExpanded = !!backText;
@@ -740,9 +764,12 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         return (
           <div
             key={m.id}
-            className={`message ${isSent ? 'sent' : 'received'} ${isExpanded ? 'expanded' : ''}`}
+            className={`message ${isSent ? 'sent' : 'received'} ${isExpanded ? 'expanded' : ''} ${m.side === 'caregiver' ? 'caregiver-message' : ''}`}
             onClick={() => m.translated && handleBubbleTap(m, viewSide)}
           >
+            {m.side === 'caregiver' && (
+              <span className="caregiver-tag">Caregiver</span>
+            )}
             <span className="original">{shownText}</span>
             {isExpanded && (
               <span className="back-translation">
@@ -806,7 +833,37 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       </div>
 
       {/* Patient side (bottom, rotated) */}
-      <div className={`side patient ${activeSide === 'patient' && isListening ? 'active' : ''}`}>
+      <div className={`side patient ${(activeSide === 'patient' || activeSide === 'caregiver') && isListening ? 'active' : ''}`}>
+
+        {caregiverMode && (
+          <div className="caregiver-controls">
+            <button
+              className={`speak-btn caregiver-btn ${activeSide === 'caregiver' && isListening ? 'listening' : ''}`}
+              onMouseDown={() => startListening('caregiver')}
+              onMouseUp={stopListening}
+              onTouchStart={(e) => { e.preventDefault(); startListening('caregiver'); }}
+              onTouchEnd={(e) => { e.preventDefault(); stopListening(); }}
+            >
+              {activeSide === 'caregiver' && isListening ? 'Listening...' : 'Caregiver — Hold to Speak'}
+            </button>
+            <div className="caregiver-lang-toggle">
+              <span className="caregiver-lang-label">Caregiver speaks</span>
+              <button
+                className={`caregiver-lang-btn ${caregiverSpeaksEnglish ? 'active' : ''}`}
+                onClick={() => setCaregiverSpeaksEnglish(true)}
+              >
+                English
+              </button>
+              <button
+                className={`caregiver-lang-btn ${!caregiverSpeaksEnglish ? 'active' : ''}`}
+                onClick={() => setCaregiverSpeaksEnglish(false)}
+              >
+                {selectedLang.label}
+              </button>
+            </div>
+          </div>
+        )}
+
         <button
           className={`speak-btn ${activeSide === 'patient' && isListening ? 'listening' : ''}`}
           onMouseDown={() => startListening('patient')}
@@ -853,6 +910,16 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
                   <option key={s.code} value={s.code}>{s.label}</option>
                 ))}
               </select>
+            </div>
+
+            <div className="settings-row">
+              <span className="settings-label">Caregiver mode</span>
+              <button
+                className={`caregiver-toggle ${caregiverMode ? 'on' : ''}`}
+                onClick={() => setCaregiverMode((prev) => !prev)}
+              >
+                {caregiverMode ? 'On' : 'Off'}
+              </button>
             </div>
 
             <div className="settings-divider" />
