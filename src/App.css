@@ -580,3 +580,14 @@
 .onboarding-dismiss:active {
   background: #2a58c8;
 }
+
+/* ── Session Summary ── */
+.summary-text {
+  font-size: 14px;
+  color: #2a2018;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
