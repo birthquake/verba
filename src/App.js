@@ -170,6 +170,10 @@ export default function App() {
   const [expandedMessages, setExpandedMessages] = useState({});
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isSpeakingOnboarding, setIsSpeakingOnboarding] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
+  const [sessionSummary, setSessionSummary] = useState(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryCopyConfirmed, setSummaryCopyConfirmed] = useState(false);
   const providerRef = useRef(null);
   const patientRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -266,6 +270,81 @@ Your rules:
       return `${base}\n\nSpecialty context:\n${selectedSpecialty.prompt}`;
     }
     return base;
+  };
+
+  const generateSummary = async (forceRegenerate = false) => {
+    if (sessionSummary && !forceRegenerate) {
+      setShowSettings(false);
+      setShowSummary(true);
+      return;
+    }
+
+    setShowSettings(false);
+    setShowSummary(true);
+    setSummaryLoading(true);
+    setSessionSummary(null);
+
+    const transcriptLines = messages
+      .filter((m) => m.translated)
+      .map((m) => {
+        if (m.side === 'provider') {
+          return `Provider: ${m.original}\nPatient (translated): ${m.translated}`;
+        } else {
+          return `Patient: ${m.original}\nProvider (translated): ${m.translated}`;
+        }
+      })
+      .join('\n\n');
+
+    try {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'system',
+              content: `You are a clinical documentation assistant. Given a bilingual clinical conversation transcript, generate a concise session summary in English for the healthcare provider.
+
+The summary should be structured with these sections, and only include a section if relevant content exists in the transcript:
+- Chief Complaint
+- Key Symptoms
+- Instructions Given
+- Follow-up Needed
+
+Write in clear, clinical language. Be brief — this is a quick reference, not a full note. Do not include patient names or identifying information. Return only the summary, no preamble.`,
+            },
+            {
+              role: 'user',
+              content: `Specialty: ${selectedSpecialty.label}\nLanguages: English — ${selectedLang.label}\n\nTranscript:\n${transcriptLines}`,
+            },
+          ],
+        }),
+      });
+
+      const data = await res.json();
+      const summary = data.choices?.[0]?.message?.content?.trim();
+      setSessionSummary(summary || 'Could not generate summary. Please try again.');
+    } catch (err) {
+      console.error('Summary error:', err);
+      setSessionSummary('Something went wrong. Please try again.');
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
+
+  const handleSummaryCopy = async () => {
+    if (!sessionSummary) return;
+    try {
+      await navigator.clipboard.writeText(sessionSummary);
+      setSummaryCopyConfirmed(true);
+      setTimeout(() => setSummaryCopyConfirmed(false), 2000);
+    } catch (err) {
+      console.error('Copy failed:', err);
+    }
   };
 
   const handleBubbleTap = async (message, viewSide) => {
@@ -625,6 +704,8 @@ Your rules:
     setShowExport(false);
     setExpandedMessages({});
     setShowSettings(false);
+    setSessionSummary(null);
+    setShowSummary(false);
   };
 
   const handleLangChange = (e) => {
@@ -795,6 +876,12 @@ Your rules:
                 <div className="settings-divider" />
                 <button
                   className="settings-action-btn"
+                  onClick={() => generateSummary()}
+                >
+                  Session Summary
+                </button>
+                <button
+                  className="settings-action-btn"
                   onClick={() => { setShowSettings(false); setShowExport(true); }}
                 >
                   Export Transcript
@@ -889,6 +976,34 @@ Your rules:
             <button className="export-action-btn share" onClick={handleShare}>
               Share via...
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Session summary panel */}
+      {showSummary && (
+        <div className="phrases-overlay" onClick={() => setShowSummary(false)}>
+          <div className="phrases-panel export-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="phrases-header">
+              <span className="phrases-title">Session Summary</span>
+              <button className="phrases-close" onClick={() => setShowSummary(false)}>✕</button>
+            </div>
+            {summaryLoading ? (
+              <p className="export-desc">Generating summary...</p>
+            ) : (
+              <>
+                <p className="summary-text">{sessionSummary}</p>
+                <button className="export-action-btn" onClick={handleSummaryCopy}>
+                  {summaryCopyConfirmed ? '✓ Copied to clipboard' : 'Copy to clipboard'}
+                </button>
+                <button
+                  className="export-action-btn share"
+                  onClick={() => generateSummary(true)}
+                >
+                  Regenerate
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
