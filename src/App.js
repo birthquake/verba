@@ -115,8 +115,6 @@ const PATIENT_ONBOARDING = {
   },
 };
 
-// PHRASE_CATEGORIES now includes pre-translated versions for all 6 languages.
-// Each phrase object has: english + translations keyed by language code.
 const PHRASE_CATEGORIES = [
   {
     category: 'Pain',
@@ -300,13 +298,26 @@ export default function App() {
   const [caregiverSpeaksEnglish, setCaregiverSpeaksEnglish] = useState(true);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [offlineManual, setOfflineManual] = useState(false);
+
+  // Medication instruction mode state
+  const [showMedInstructions, setShowMedInstructions] = useState(false);
+  const [showMedPatient, setShowMedPatient] = useState(false);
+  const [medInstructions, setMedInstructions] = useState([]); // [{english, translated}]
+  const [medInputText, setMedInputText] = useState('');
+  const [medInputLoading, setMedInputLoading] = useState(false);
+  const [medIsRecording, setMedIsRecording] = useState(false);
+  const [medIsSpeaking, setMedIsSpeaking] = useState(false);
+  const medRecorderRef = useRef(null);
+  const medChunksRef = useRef([]);
+  const medStreamRef = useRef(null);
+
   const providerRef = useRef(null);
   const patientRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const streamRef = useRef(null);
 
-  // Auto-detect online/offline status
+  // Auto-detect online/offline
   useEffect(() => {
     const handleOffline = () => setIsOffline(true);
     const handleOnline = () => setIsOffline(false);
@@ -318,7 +329,6 @@ export default function App() {
     };
   }, []);
 
-  // Combined offline state: auto-detected OR manually set
   const offlineActive = isOffline || offlineManual;
 
   useEffect(() => {
@@ -332,7 +342,6 @@ export default function App() {
 
   useEffect(() => {
     let wakeLock = null;
-
     const requestWakeLock = async () => {
       try {
         if ('wakeLock' in navigator) {
@@ -342,16 +351,11 @@ export default function App() {
         console.log('Wake lock not available:', err);
       }
     };
-
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        requestWakeLock();
-      }
+      if (document.visibilityState === 'visible') requestWakeLock();
     };
-
     requestWakeLock();
     document.addEventListener('visibilitychange', handleVisibilityChange);
-
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       if (wakeLock) wakeLock.release();
@@ -379,6 +383,48 @@ export default function App() {
       setIsSpeakingOnboarding(false);
     }
   }, [showOnboarding, speakOnboarding]);
+
+  // Speak all medication instructions in sequence
+  const speakMedInstructions = useCallback((instructions) => {
+    window.speechSynthesis.cancel();
+    if (!instructions || instructions.length === 0) return;
+
+    const texts = instructions.map(i => i.translated).filter(Boolean);
+    if (texts.length === 0) return;
+
+    setMedIsSpeaking(true);
+
+    let index = 0;
+    const speakNext = () => {
+      if (index >= texts.length) {
+        setMedIsSpeaking(false);
+        return;
+      }
+      const utterance = new SpeechSynthesisUtterance(texts[index]);
+      utterance.lang = selectedLang.voice;
+      utterance.rate = 0.85;
+      utterance.onend = () => {
+        index++;
+        speakNext();
+      };
+      utterance.onerror = () => {
+        setMedIsSpeaking(false);
+      };
+      window.speechSynthesis.speak(utterance);
+    };
+
+    speakNext();
+  }, [selectedLang]);
+
+  // Auto-speak when patient view opens
+  useEffect(() => {
+    if (showMedPatient && medInstructions.length > 0) {
+      setTimeout(() => speakMedInstructions(medInstructions), 400);
+    } else if (!showMedPatient) {
+      window.speechSynthesis.cancel();
+      setMedIsSpeaking(false);
+    }
+  }, [showMedPatient, speakMedInstructions, medInstructions]);
 
   const getSupportedMimeType = () => {
     const types = [
@@ -430,13 +476,127 @@ Your rules:
     };
   };
 
+  // Translate a single medication instruction
+  const translateMedInstruction = async (text) => {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a certified medical interpreter. Translate the following discharge or medication instruction from English to ${selectedLang.label}. Use clear, plain language the patient can understand. Preserve medication names, dosages, and timing exactly. Return only the translated text, nothing else.`,
+          },
+          { role: 'user', content: text },
+        ],
+      }),
+    });
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content?.trim() || null;
+  };
+
+  // Add instruction via typed text
+  const handleMedAddText = async () => {
+    const text = medInputText.trim();
+    if (!text) return;
+    setMedInputLoading(true);
+    try {
+      const translated = await translateMedInstruction(text);
+      if (translated) {
+        setMedInstructions((prev) => [...prev, { english: text, translated }]);
+        setMedInputText('');
+      }
+    } catch (err) {
+      console.error('Med instruction translation error:', err);
+    } finally {
+      setMedInputLoading(false);
+    }
+  };
+
+  // Add instruction via voice
+  const handleMedStartRecording = async () => {
+    if (medIsRecording) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      medStreamRef.current = stream;
+      setMedIsRecording(true);
+      medChunksRef.current = [];
+
+      const mimeType = getSupportedMimeType();
+      const options = mimeType ? { mimeType } : {};
+      const recorder = new MediaRecorder(stream, options);
+      medRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) medChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        if (medStreamRef.current) {
+          medStreamRef.current.getTracks().forEach(t => t.stop());
+          medStreamRef.current = null;
+        }
+        setMedInputLoading(true);
+        const mimeUsed = recorder.mimeType || mimeType || 'audio/mp4';
+        const ext = mimeUsed.includes('webm') ? 'webm' : mimeUsed.includes('ogg') ? 'ogg' : 'mp4';
+        const blob = new Blob(medChunksRef.current, { type: mimeUsed });
+
+        try {
+          const formData = new FormData();
+          formData.append('file', blob, `audio.${ext}`);
+          formData.append('model', 'whisper-1');
+          formData.append('language', 'en');
+
+          const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
+            body: formData,
+          });
+
+          const whisperData = await whisperRes.json();
+          const transcribed = whisperData.text?.trim();
+
+          if (transcribed) {
+            const translated = await translateMedInstruction(transcribed);
+            if (translated) {
+              setMedInstructions((prev) => [...prev, { english: transcribed, translated }]);
+            }
+          }
+        } catch (err) {
+          console.error('Med voice error:', err);
+        } finally {
+          setMedInputLoading(false);
+        }
+      };
+
+      recorder.start(250);
+    } catch (err) {
+      console.error('Med mic error:', err);
+      setMedIsRecording(false);
+    }
+  };
+
+  const handleMedStopRecording = () => {
+    if (medRecorderRef.current && medIsRecording) {
+      medRecorderRef.current.stop();
+      setMedIsRecording(false);
+    }
+  };
+
+  const handleMedRemove = (index) => {
+    setMedInstructions((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const generateSummary = async (forceRegenerate = false) => {
     if (sessionSummary && !forceRegenerate) {
       setShowSettings(false);
       setShowSummary(true);
       return;
     }
-
     setShowSettings(false);
     setShowSummary(true);
     setSummaryLoading(true);
@@ -482,7 +642,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
           ],
         }),
       });
-
       const data = await res.json();
       const summary = data.choices?.[0]?.message?.content?.trim();
       setSessionSummary(summary || 'Could not generate summary. Please try again.');
@@ -508,7 +667,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
   const handleBubbleTap = async (message, viewSide) => {
     const key = `${message.id}-${viewSide}`;
     const isExpanded = expandedMessages[key];
-
     if (isExpanded) {
       setExpandedMessages((prev) => ({ ...prev, [key]: null }));
       return;
@@ -527,10 +685,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
     const backLang = shownLang === 'English' ? selectedLang.label : 'English';
 
     if (message.backTranslations?.[key]) {
-      setExpandedMessages((prev) => ({
-        ...prev,
-        [key]: message.backTranslations[key],
-      }));
+      setExpandedMessages((prev) => ({ ...prev, [key]: message.backTranslations[key] }));
       return;
     }
 
@@ -554,10 +709,8 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
           ],
         }),
       });
-
       const data = await res.json();
       const backText = data.choices?.[0]?.message?.content?.trim();
-
       if (backText) {
         setMessages((prev) =>
           prev.map((m) =>
@@ -583,16 +736,10 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       setTimeout(() => setStatus(''), 3000);
       return;
     }
-
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 44100,
-        }
+        audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 }
       });
-
       streamRef.current = stream;
       setIsListening(true);
       setActiveSide(side);
@@ -605,9 +752,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) {
-          audioChunksRef.current.push(e.data);
-        }
+        if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data);
       };
 
       mediaRecorder.onstop = async () => {
@@ -622,7 +767,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       };
 
       mediaRecorder.start(250);
-
     } catch (err) {
       console.error('Mic error:', err);
       setStatus('Microphone access denied. Please allow microphone in Safari settings.');
@@ -633,11 +777,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
 
   const stopListening = () => {
     if (mediaRecorderRef.current && isListening) {
-      try {
-        mediaRecorderRef.current.stop();
-      } catch (e) {
-        console.error('Stop error:', e);
-      }
+      try { mediaRecorderRef.current.stop(); } catch (e) { console.error('Stop error:', e); }
       setIsListening(false);
       setActiveSide(null);
     }
@@ -656,9 +796,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         setStatus('Recording too short. Hold longer and speak clearly.');
         return;
       }
-
       const { sourceLang, targetLang, targetVoice, whisperLang } = getSideLanguages(side);
-
       const extension = getFileExtension(mimeType);
       const formData = new FormData();
       formData.append('file', audioBlob, `audio.${extension}`);
@@ -672,157 +810,90 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       });
 
       if (!whisperRes.ok) {
-        const errData = await whisperRes.json();
-        console.error('Whisper error:', errData);
         setStatus('Transcription failed. Please try again.');
         return;
       }
 
       const whisperData = await whisperRes.json();
       const originalText = whisperData.text?.trim();
-
       if (!originalText) {
         setStatus('No speech detected. Hold longer and speak clearly.');
         return;
       }
 
       const messageId = Date.now();
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: messageId,
-          side,
-          original: originalText,
-          translated: null,
-          backTranslations: {},
-        },
-      ]);
+      setMessages((prev) => [...prev, { id: messageId, side, original: originalText, translated: null, backTranslations: {} }]);
       setStatus('');
 
       const translateRes = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'gpt-4o',
           messages: [
-            {
-              role: 'system',
-              content: buildSystemPrompt(sourceLang, targetLang),
-            },
+            { role: 'system', content: buildSystemPrompt(sourceLang, targetLang) },
             { role: 'user', content: originalText },
           ],
         }),
       });
 
       if (!translateRes.ok) {
-        const errData = await translateRes.json();
-        console.error('Translation error:', errData);
         setStatus('Translation failed. Please try again.');
         return;
       }
 
       const translateData = await translateRes.json();
       const translatedText = translateData.choices?.[0]?.message?.content?.trim();
+      if (!translatedText) { setStatus('Translation failed. Try again.'); return; }
 
-      if (!translatedText) {
-        setStatus('Translation failed. Try again.');
-        return;
-      }
-
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === messageId ? { ...m, translated: translatedText } : m
-        )
-      );
-
+      setMessages((prev) => prev.map((m) => m.id === messageId ? { ...m, translated: translatedText } : m));
       const utterance = new SpeechSynthesisUtterance(translatedText);
       utterance.lang = targetVoice;
       utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
-
     } catch (err) {
       console.error('Process error:', err);
       setStatus('Something went wrong. Please try again.');
     }
   };
 
-  // Offline-aware phrase tap: uses hardcoded translation if offline, API if online
   const handlePhraseTap = async (phrase) => {
     if (offlineActive) {
-      // Use hardcoded translation directly
       const translatedText = phrase[selectedLang.code];
       if (!translatedText) return;
-
       const messageId = Date.now();
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: messageId,
-          side: 'provider',
-          original: phrase.english,
-          translated: translatedText,
-          backTranslations: {},
-        },
-      ]);
-
+      setMessages((prev) => [...prev, { id: messageId, side: 'provider', original: phrase.english, translated: translatedText, backTranslations: {} }]);
       const utterance = new SpeechSynthesisUtterance(translatedText);
       utterance.lang = selectedLang.voice;
       utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
-
       setShowPhrases(false);
       return;
     }
 
-    // Online: use API as before
     setTranslatingPhrase(phrase.english);
-
     try {
       const translateRes = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'gpt-4o',
           messages: [
-            {
-              role: 'system',
-              content: buildSystemPrompt('English', selectedLang.label),
-            },
+            { role: 'system', content: buildSystemPrompt('English', selectedLang.label) },
             { role: 'user', content: phrase.english },
           ],
         }),
       });
-
       const translateData = await translateRes.json();
       const translatedText = translateData.choices?.[0]?.message?.content?.trim();
-
       if (!translatedText) return;
-
       const messageId = Date.now();
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: messageId,
-          side: 'provider',
-          original: phrase.english,
-          translated: translatedText,
-          backTranslations: {},
-        },
-      ]);
-
+      setMessages((prev) => [...prev, { id: messageId, side: 'provider', original: phrase.english, translated: translatedText, backTranslations: {} }]);
       const utterance = new SpeechSynthesisUtterance(translatedText);
       utterance.lang = selectedLang.voice;
       utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
-
       setShowPhrases(false);
-
     } catch (err) {
       console.error('Phrase translation error:', err);
     } finally {
@@ -831,30 +902,21 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
   };
 
   const buildTranscript = () => {
-    const date = new Date().toLocaleDateString('en-US', {
-      year: 'numeric', month: 'long', day: 'numeric',
-    });
-    const time = new Date().toLocaleTimeString('en-US', {
-      hour: '2-digit', minute: '2-digit',
-    });
+    const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     const lines = [
       'Verba Session Transcript',
       `Date: ${date} at ${time}`,
       `Languages: English — ${selectedLang.label}`,
       `Specialty: ${selectedSpecialty.label}`,
     ];
-    if (caregiverMode) {
-      lines.push(`Caregiver mode: on (caregiver speaks ${caregiverSpeaksEnglish ? 'English' : selectedLang.label})`);
-    }
+    if (caregiverMode) lines.push(`Caregiver mode: on (caregiver speaks ${caregiverSpeaksEnglish ? 'English' : selectedLang.label})`);
     lines.push('', '---', '');
 
     const body = messages
       .filter((m) => m.translated)
       .map((m) => {
-        const speakerLabel =
-          m.side === 'provider' ? 'Provider'
-          : m.side === 'caregiver' ? 'Caregiver'
-          : selectedLang.label;
+        const speakerLabel = m.side === 'provider' ? 'Provider' : m.side === 'caregiver' ? 'Caregiver' : selectedLang.label;
         const { targetLang } = getSideLanguages(m.side);
         return `[${speakerLabel}] ${m.original}\n[${targetLang}] ${m.translated}`;
       })
@@ -864,28 +926,17 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
   };
 
   const handleCopy = async () => {
-    const transcript = buildTranscript();
     try {
-      await navigator.clipboard.writeText(transcript);
+      await navigator.clipboard.writeText(buildTranscript());
       setCopyConfirmed(true);
       setTimeout(() => setCopyConfirmed(false), 2000);
-    } catch (err) {
-      console.error('Copy failed:', err);
-    }
+    } catch (err) { console.error('Copy failed:', err); }
   };
 
   const handleShare = async () => {
-    const transcript = buildTranscript();
     try {
-      if (navigator.share) {
-        await navigator.share({
-          title: 'Verba Session Transcript',
-          text: transcript,
-        });
-      }
-    } catch (err) {
-      console.error('Share failed:', err);
-    }
+      if (navigator.share) await navigator.share({ title: 'Verba Session Transcript', text: buildTranscript() });
+    } catch (err) { console.error('Share failed:', err); }
   };
 
   const clearSession = () => {
@@ -900,18 +951,12 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
 
   const handleLangChange = (e) => {
     const lang = LANGUAGES.find(l => l.code === e.target.value);
-    if (lang) {
-      setSelectedLang(lang);
-      clearSession();
-    }
+    if (lang) { setSelectedLang(lang); clearSession(); }
   };
 
   const handleSpecialtyChange = (e) => {
     const specialty = SPECIALTIES.find(s => s.code === e.target.value);
-    if (specialty) {
-      setSelectedSpecialty(specialty);
-      clearSession();
-    }
+    if (specialty) { setSelectedSpecialty(specialty); clearSession(); }
   };
 
   const patientLabel = PATIENT_LABELS[selectedLang.code];
@@ -922,25 +967,20 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
     <div className="messages" ref={ref}>
       {messages.map((m) => {
         const key = `${m.id}-${viewSide}`;
-
         const isSent =
           m.side === viewSide ||
           (viewSide === 'provider' && m.side === 'caregiver' && caregiverSpeaksEnglish) ||
           (viewSide === 'patient' && m.side === 'caregiver' && !caregiverSpeaksEnglish);
-
         const shownText = isSent ? m.original : (m.translated ?? '...');
         const backText = expandedMessages[key];
         const isExpanded = !!backText;
-
         return (
           <div
             key={m.id}
             className={`message ${isSent ? 'sent' : 'received'} ${isExpanded ? 'expanded' : ''} ${m.side === 'caregiver' ? 'caregiver-message' : ''}`}
             onClick={() => m.translated && handleBubbleTap(m, viewSide)}
           >
-            {m.side === 'caregiver' && (
-              <span className="caregiver-tag">Caregiver</span>
-            )}
+            {m.side === 'caregiver' && <span className="caregiver-tag">Caregiver</span>}
             <span className="original">{shownText}</span>
             {isExpanded && (
               <span className="back-translation">
@@ -978,9 +1018,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
           {isOffline ? '⚠ No connection — ' : '⚠ Offline mode — '}
           Voice unavailable. Use Quick Phrases.
           {!isOffline && (
-            <button className="offline-banner-dismiss" onClick={() => setOfflineManual(false)}>
-              Go online
-            </button>
+            <button className="offline-banner-dismiss" onClick={() => setOfflineManual(false)}>Go online</button>
           )}
         </div>
       )}
@@ -1010,15 +1048,12 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         <span className="app-name">Verba</span>
         {status && <span className="status">{status}</span>}
         <div className="divider-actions">
-          <button className="settings-btn" onClick={() => setShowSettings(true)}>
-            ⚙
-          </button>
+          <button className="settings-btn" onClick={() => setShowSettings(true)}>⚙</button>
         </div>
       </div>
 
       {/* Patient side (bottom, rotated) */}
       <div className={`side patient ${(activeSide === 'patient' || activeSide === 'caregiver') && isListening ? 'active' : ''}`}>
-
         {caregiverMode && (
           <div className="caregiver-controls">
             <button
@@ -1032,22 +1067,11 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
             </button>
             <div className="caregiver-lang-toggle">
               <span className="caregiver-lang-label">Caregiver speaks</span>
-              <button
-                className={`caregiver-lang-btn ${caregiverSpeaksEnglish ? 'active' : ''}`}
-                onClick={() => setCaregiverSpeaksEnglish(true)}
-              >
-                English
-              </button>
-              <button
-                className={`caregiver-lang-btn ${!caregiverSpeaksEnglish ? 'active' : ''}`}
-                onClick={() => setCaregiverSpeaksEnglish(false)}
-              >
-                {selectedLang.label}
-              </button>
+              <button className={`caregiver-lang-btn ${caregiverSpeaksEnglish ? 'active' : ''}`} onClick={() => setCaregiverSpeaksEnglish(true)}>English</button>
+              <button className={`caregiver-lang-btn ${!caregiverSpeaksEnglish ? 'active' : ''}`} onClick={() => setCaregiverSpeaksEnglish(false)}>{selectedLang.label}</button>
             </div>
           </div>
         )}
-
         <button
           className={`speak-btn ${activeSide === 'patient' && isListening ? 'listening' : ''} ${offlineActive ? 'offline-disabled' : ''}`}
           onMouseDown={() => startListening('patient')}
@@ -1069,90 +1093,40 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
               <span className="phrases-title">Session Settings</span>
               <button className="phrases-close" onClick={() => setShowSettings(false)}>✕</button>
             </div>
-
             <div className="settings-row">
               <span className="settings-label">Patient language</span>
-              <select
-                className="settings-select"
-                value={selectedLang.code}
-                onChange={handleLangChange}
-              >
-                {LANGUAGES.map((l) => (
-                  <option key={l.code} value={l.code}>{l.label}</option>
-                ))}
+              <select className="settings-select" value={selectedLang.code} onChange={handleLangChange}>
+                {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
               </select>
             </div>
-
             <div className="settings-row">
               <span className="settings-label">Specialty</span>
-              <select
-                className="settings-select"
-                value={selectedSpecialty.code}
-                onChange={handleSpecialtyChange}
-              >
-                {SPECIALTIES.map((s) => (
-                  <option key={s.code} value={s.code}>{s.label}</option>
-                ))}
+              <select className="settings-select" value={selectedSpecialty.code} onChange={handleSpecialtyChange}>
+                {SPECIALTIES.map((s) => <option key={s.code} value={s.code}>{s.label}</option>)}
               </select>
             </div>
-
             <div className="settings-row">
               <span className="settings-label">Caregiver mode</span>
-              <button
-                className={`caregiver-toggle ${caregiverMode ? 'on' : ''}`}
-                onClick={() => setCaregiverMode((prev) => !prev)}
-              >
+              <button className={`caregiver-toggle ${caregiverMode ? 'on' : ''}`} onClick={() => setCaregiverMode((prev) => !prev)}>
                 {caregiverMode ? 'On' : 'Off'}
               </button>
             </div>
-
             <div className="settings-row">
               <span className="settings-label">Offline mode</span>
-              <button
-                className={`caregiver-toggle ${offlineManual ? 'on' : ''}`}
-                onClick={() => setOfflineManual((prev) => !prev)}
-              >
+              <button className={`caregiver-toggle ${offlineManual ? 'on' : ''}`} onClick={() => setOfflineManual((prev) => !prev)}>
                 {offlineManual ? 'On' : 'Off'}
               </button>
             </div>
-
             <div className="settings-divider" />
-
-            <button
-              className="settings-action-btn"
-              onClick={() => { setShowSettings(false); setShowPhrases(true); }}
-            >
-              Quick Phrases
-            </button>
-
-            <button
-              className="settings-action-btn"
-              onClick={() => { setShowSettings(false); setShowOnboarding(true); }}
-            >
-              Patient Intro
-            </button>
-
+            <button className="settings-action-btn" onClick={() => { setShowSettings(false); setShowPhrases(true); }}>Quick Phrases</button>
+            <button className="settings-action-btn" onClick={() => { setShowSettings(false); setShowOnboarding(true); }}>Patient Intro</button>
+            <button className="settings-action-btn" onClick={() => { setShowSettings(false); setShowMedInstructions(true); }}>Medication Instructions</button>
             {messages.length > 0 && (
               <>
                 <div className="settings-divider" />
-                <button
-                  className="settings-action-btn"
-                  onClick={() => generateSummary()}
-                >
-                  Session Summary
-                </button>
-                <button
-                  className="settings-action-btn"
-                  onClick={() => { setShowSettings(false); setShowExport(true); }}
-                >
-                  Export Transcript
-                </button>
-                <button
-                  className="settings-action-btn danger"
-                  onClick={clearSession}
-                >
-                  Clear Session
-                </button>
+                <button className="settings-action-btn" onClick={() => generateSummary()}>Session Summary</button>
+                <button className="settings-action-btn" onClick={() => { setShowSettings(false); setShowExport(true); }}>Export Transcript</button>
+                <button className="settings-action-btn danger" onClick={clearSession}>Clear Session</button>
               </>
             )}
           </div>
@@ -1168,19 +1142,10 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
             <p className="onboarding-body">{onboarding.body}</p>
             <p className="onboarding-instruction">{onboarding.instruction}</p>
             <p className="onboarding-privacy">{onboarding.privacy}</p>
-            <button
-              className="onboarding-repeat"
-              onClick={speakOnboarding}
-              disabled={isSpeakingOnboarding}
-            >
+            <button className="onboarding-repeat" onClick={speakOnboarding} disabled={isSpeakingOnboarding}>
               {isSpeakingOnboarding ? '🔊 ...' : `🔊 ${onboarding.repeat}`}
             </button>
-            <button
-              className="onboarding-dismiss"
-              onClick={() => setShowOnboarding(false)}
-            >
-              {onboarding.dismiss}
-            </button>
+            <button className="onboarding-dismiss" onClick={() => setShowOnboarding(false)}>{onboarding.dismiss}</button>
           </div>
         </div>
       )}
@@ -1198,11 +1163,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
             </div>
             <div className="phrases-tabs">
               {PHRASE_CATEGORIES.map((cat, i) => (
-                <button
-                  key={cat.category}
-                  className={`phrases-tab ${activeCategory === i ? 'active' : ''}`}
-                  onClick={() => setActiveCategory(i)}
-                >
+                <button key={cat.category} className={`phrases-tab ${activeCategory === i ? 'active' : ''}`} onClick={() => setActiveCategory(i)}>
                   {cat.category}
                 </button>
               ))}
@@ -1216,12 +1177,8 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
                   disabled={translatingPhrase !== null}
                 >
                   <span className="phrase-english">{phrase.english}</span>
-                  {offlineActive && (
-                    <span className="phrase-pretranslated">{phrase[selectedLang.code]}</span>
-                  )}
-                  {translatingPhrase === phrase.english && (
-                    <span className="phrase-pretranslated">Translating...</span>
-                  )}
+                  {offlineActive && <span className="phrase-pretranslated">{phrase[selectedLang.code]}</span>}
+                  {translatingPhrase === phrase.english && <span className="phrase-pretranslated">Translating...</span>}
                 </button>
               ))}
             </div>
@@ -1237,15 +1194,9 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
               <span className="phrases-title">Export Transcript</span>
               <button className="phrases-close" onClick={() => setShowExport(false)}>✕</button>
             </div>
-            <p className="export-desc">
-              Export the full bilingual transcript from this session.
-            </p>
-            <button className="export-action-btn" onClick={handleCopy}>
-              {copyConfirmed ? '✓ Copied to clipboard' : 'Copy to clipboard'}
-            </button>
-            <button className="export-action-btn share" onClick={handleShare}>
-              Share via...
-            </button>
+            <p className="export-desc">Export the full bilingual transcript from this session.</p>
+            <button className="export-action-btn" onClick={handleCopy}>{copyConfirmed ? '✓ Copied to clipboard' : 'Copy to clipboard'}</button>
+            <button className="export-action-btn share" onClick={handleShare}>Share via...</button>
           </div>
         </div>
       )}
@@ -1263,17 +1214,116 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
             ) : (
               <>
                 <p className="summary-text">{sessionSummary}</p>
-                <button className="export-action-btn" onClick={handleSummaryCopy}>
-                  {summaryCopyConfirmed ? '✓ Copied to clipboard' : 'Copy to clipboard'}
-                </button>
-                <button
-                  className="export-action-btn share"
-                  onClick={() => generateSummary(true)}
-                >
-                  Regenerate
-                </button>
+                <button className="export-action-btn" onClick={handleSummaryCopy}>{summaryCopyConfirmed ? '✓ Copied to clipboard' : 'Copy to clipboard'}</button>
+                <button className="export-action-btn share" onClick={() => generateSummary(true)}>Regenerate</button>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Medication instructions — provider input panel */}
+      {showMedInstructions && (
+        <div className="phrases-overlay" onClick={() => setShowMedInstructions(false)}>
+          <div className="phrases-panel med-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="phrases-header">
+              <span className="phrases-title">Medication Instructions</span>
+              <button className="phrases-close" onClick={() => setShowMedInstructions(false)}>✕</button>
+            </div>
+
+            {/* Input row */}
+            <div className="med-input-row">
+              <input
+                className="med-input"
+                type="text"
+                placeholder="Type an instruction..."
+                value={medInputText}
+                onChange={(e) => setMedInputText(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleMedAddText(); }}
+                disabled={medInputLoading || medIsRecording}
+              />
+              <button
+                className="med-input-add"
+                onClick={handleMedAddText}
+                disabled={medInputLoading || medIsRecording || !medInputText.trim()}
+              >
+                {medInputLoading ? '...' : 'Add'}
+              </button>
+              <button
+                className={`med-mic-btn ${medIsRecording ? 'recording' : ''}`}
+                onMouseDown={handleMedStartRecording}
+                onMouseUp={handleMedStopRecording}
+                onTouchStart={(e) => { e.preventDefault(); handleMedStartRecording(); }}
+                onTouchEnd={(e) => { e.preventDefault(); handleMedStopRecording(); }}
+                disabled={medInputLoading}
+              >
+                {medIsRecording ? '🔴' : '🎙'}
+              </button>
+            </div>
+
+            {medInputLoading && <p className="export-desc">Translating...</p>}
+
+            {/* Instruction list */}
+            {medInstructions.length > 0 && (
+              <div className="med-list">
+                {medInstructions.map((instr, i) => (
+                  <div key={i} className="med-item">
+                    <div className="med-item-content">
+                      <span className="med-item-english">{instr.english}</span>
+                      <span className="med-item-translated">{instr.translated}</span>
+                    </div>
+                    <button className="med-item-remove" onClick={() => handleMedRemove(i)}>✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {medInstructions.length > 0 && (
+              <button
+                className="export-action-btn"
+                onClick={() => { setShowMedInstructions(false); setShowMedPatient(true); }}
+              >
+                Show Patient →
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Medication instructions — patient-facing full screen overlay */}
+      {showMedPatient && (
+        <div className="med-patient-overlay">
+          <div className="med-patient-header">
+            <span className="med-patient-title">💊 {selectedLang.label}</span>
+          </div>
+          <div className="med-patient-list">
+            {medInstructions.map((instr, i) => (
+              <div key={i} className="med-patient-item">
+                <span className="med-patient-number">{i + 1}</span>
+                <span className="med-patient-text">{instr.translated}</span>
+              </div>
+            ))}
+          </div>
+          <div className="med-patient-actions">
+            <button
+              className="med-patient-repeat"
+              onClick={() => speakMedInstructions(medInstructions)}
+              disabled={medIsSpeaking}
+            >
+              {medIsSpeaking ? '🔊 Reading...' : '🔊 Repeat'}
+            </button>
+            <button
+              className="med-patient-done"
+              onClick={() => { setShowMedPatient(false); setShowMedInstructions(true); }}
+            >
+              ← Back
+            </button>
+            <button
+              className="med-patient-close"
+              onClick={() => { setShowMedPatient(false); window.speechSynthesis.cancel(); }}
+            >
+              Done
+            </button>
           </div>
         </div>
       )}
