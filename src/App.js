@@ -115,40 +115,162 @@ const PATIENT_ONBOARDING = {
   },
 };
 
+// PHRASE_CATEGORIES now includes pre-translated versions for all 6 languages.
+// Each phrase object has: english + translations keyed by language code.
 const PHRASE_CATEGORIES = [
   {
     category: 'Pain',
     phrases: [
-      'Where is your pain?',
-      'Rate your pain 1 to 10.',
-      'Is the pain constant or does it come and go?',
-      'Does the pain radiate anywhere?',
+      {
+        english: 'Where is your pain?',
+        es: '¿Dónde le duele?',
+        zh: '您哪里疼？',
+        yue: '你喺邊度痛？',
+        pt: 'Onde é a sua dor?',
+        fr: 'Où avez-vous mal?',
+        ar: 'أين يوجد ألمك؟',
+      },
+      {
+        english: 'Rate your pain 1 to 10.',
+        es: 'Califique su dolor del 1 al 10.',
+        zh: '请用1到10分来描述您的疼痛程度。',
+        yue: '請用1至10分評估你嘅痛楚程度。',
+        pt: 'Classifique sua dor de 1 a 10.',
+        fr: 'Évaluez votre douleur de 1 à 10.',
+        ar: 'قيّم ألمك من 1 إلى 10.',
+      },
+      {
+        english: 'Is the pain constant or does it come and go?',
+        es: '¿El dolor es constante o va y viene?',
+        zh: '疼痛是持续的还是时好时坏？',
+        yue: '痛楚係持續定係時好時壞？',
+        pt: 'A dor é constante ou vai e vem?',
+        fr: 'La douleur est-elle constante ou intermittente?',
+        ar: 'هل الألم مستمر أم يأتي ويذهب؟',
+      },
+      {
+        english: 'Does the pain radiate anywhere?',
+        es: '¿El dolor se irradia a algún lugar?',
+        zh: '疼痛是否向其他部位放射？',
+        yue: '痛楚有冇擴散到其他地方？',
+        pt: 'A dor irradia para algum lugar?',
+        fr: 'La douleur irradie-t-elle quelque part?',
+        ar: 'هل ينتشر الألم إلى مكان آخر؟',
+      },
     ],
   },
   {
     category: 'Assessment',
     phrases: [
-      'Are you having trouble breathing?',
-      'Do you feel dizzy or nauseous?',
-      'Do you have a fever?',
-      'How long have you had this symptom?',
+      {
+        english: 'Are you having trouble breathing?',
+        es: '¿Tiene dificultad para respirar?',
+        zh: '您呼吸困难吗？',
+        yue: '你有冇呼吸困難？',
+        pt: 'Você está tendo dificuldade para respirar?',
+        fr: 'Avez-vous des difficultés à respirer?',
+        ar: 'هل تعاني من صعوبة في التنفس؟',
+      },
+      {
+        english: 'Do you feel dizzy or nauseous?',
+        es: '¿Se siente mareado o con náuseas?',
+        zh: '您感到头晕或恶心吗？',
+        yue: '你有冇頭暈或作嘔？',
+        pt: 'Você se sente tonto ou com náusea?',
+        fr: 'Vous sentez-vous étourdi ou nauséeux?',
+        ar: 'هل تشعر بالدوار أو الغثيان؟',
+      },
+      {
+        english: 'Do you have a fever?',
+        es: '¿Tiene fiebre?',
+        zh: '您发烧了吗？',
+        yue: '你有冇發燒？',
+        pt: 'Você tem febre?',
+        fr: 'Avez-vous de la fièvre?',
+        ar: 'هل لديك حمى؟',
+      },
+      {
+        english: 'How long have you had this symptom?',
+        es: '¿Cuánto tiempo lleva con este síntoma?',
+        zh: '这个症状持续多久了？',
+        yue: '呢個症狀持續幾耐了？',
+        pt: 'Há quanto tempo você tem esse sintoma?',
+        fr: 'Depuis combien de temps avez-vous ce symptôme?',
+        ar: 'منذ متى وأنت تعاني من هذا العَرَض؟',
+      },
     ],
   },
   {
     category: 'History',
     phrases: [
-      'Do you have any allergies?',
-      'What medications are you currently taking?',
-      'Do you have any chronic conditions?',
+      {
+        english: 'Do you have any allergies?',
+        es: '¿Tiene alguna alergia?',
+        zh: '您有过敏症吗？',
+        yue: '你有冇過敏？',
+        pt: 'Você tem alguma alergia?',
+        fr: 'Avez-vous des allergies?',
+        ar: 'هل لديك أي حساسية؟',
+      },
+      {
+        english: 'What medications are you currently taking?',
+        es: '¿Qué medicamentos está tomando actualmente?',
+        zh: '您目前在服用哪些药物？',
+        yue: '你而家食緊咩藥？',
+        pt: 'Quais medicamentos você está tomando atualmente?',
+        fr: 'Quels médicaments prenez-vous actuellement?',
+        ar: 'ما الأدوية التي تتناولها حالياً؟',
+      },
+      {
+        english: 'Do you have any chronic conditions?',
+        es: '¿Tiene alguna enfermedad crónica?',
+        zh: '您有慢性疾病吗？',
+        yue: '你有冇慢性病？',
+        pt: 'Você tem alguma condição crônica?',
+        fr: 'Avez-vous des maladies chroniques?',
+        ar: 'هل لديك أي أمراض مزمنة؟',
+      },
     ],
   },
   {
     category: 'Consent',
     phrases: [
-      'I need to examine you.',
-      'I am going to give you medication.',
-      'Do you understand?',
-      'Please sign here.',
+      {
+        english: 'I need to examine you.',
+        es: 'Necesito examinarlo/a.',
+        zh: '我需要给您做检查。',
+        yue: '我需要為你進行檢查。',
+        pt: 'Preciso examiná-lo/a.',
+        fr: 'Je dois vous examiner.',
+        ar: 'أحتاج إلى فحصك.',
+      },
+      {
+        english: 'I am going to give you medication.',
+        es: 'Le voy a administrar medicamento.',
+        zh: '我要给您用药。',
+        yue: '我將會為你用藥。',
+        pt: 'Vou lhe administrar medicamento.',
+        fr: 'Je vais vous administrer un médicament.',
+        ar: 'سأعطيك دواءً.',
+      },
+      {
+        english: 'Do you understand?',
+        es: '¿Entiende?',
+        zh: '您明白吗？',
+        yue: '你明白嗎？',
+        pt: 'Você entende?',
+        fr: 'Comprenez-vous?',
+        ar: 'هل تفهم؟',
+      },
+      {
+        english: 'Please sign here.',
+        es: 'Por favor firme aquí.',
+        zh: '请在这里签名。',
+        yue: '請喺呢度簽名。',
+        pt: 'Por favor, assine aqui.',
+        fr: 'Veuillez signer ici.',
+        ar: 'من فضلك وقّع هنا.',
+      },
     ],
   },
 ];
@@ -176,11 +298,28 @@ export default function App() {
   const [summaryCopyConfirmed, setSummaryCopyConfirmed] = useState(false);
   const [caregiverMode, setCaregiverMode] = useState(false);
   const [caregiverSpeaksEnglish, setCaregiverSpeaksEnglish] = useState(true);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [offlineManual, setOfflineManual] = useState(false);
   const providerRef = useRef(null);
   const patientRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const streamRef = useRef(null);
+
+  // Auto-detect online/offline status
+  useEffect(() => {
+    const handleOffline = () => setIsOffline(true);
+    const handleOnline = () => setIsOffline(false);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, []);
+
+  // Combined offline state: auto-detected OR manually set
+  const offlineActive = isOffline || offlineManual;
 
   useEffect(() => {
     if (providerRef.current) {
@@ -274,7 +413,6 @@ Your rules:
     return base;
   };
 
-  // Returns translation direction for a given speaker side
   const getSideLanguages = (side) => {
     if (side === 'provider' || (side === 'caregiver' && caregiverSpeaksEnglish)) {
       return {
@@ -440,6 +578,11 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
 
   const startListening = async (side) => {
     if (isListening) return;
+    if (offlineActive) {
+      setStatus('Voice unavailable offline. Use Quick Phrases.');
+      setTimeout(() => setStatus(''), 3000);
+      return;
+    }
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -606,8 +749,36 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
     }
   };
 
+  // Offline-aware phrase tap: uses hardcoded translation if offline, API if online
   const handlePhraseTap = async (phrase) => {
-    setTranslatingPhrase(phrase);
+    if (offlineActive) {
+      // Use hardcoded translation directly
+      const translatedText = phrase[selectedLang.code];
+      if (!translatedText) return;
+
+      const messageId = Date.now();
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: messageId,
+          side: 'provider',
+          original: phrase.english,
+          translated: translatedText,
+          backTranslations: {},
+        },
+      ]);
+
+      const utterance = new SpeechSynthesisUtterance(translatedText);
+      utterance.lang = selectedLang.voice;
+      utterance.rate = 0.9;
+      window.speechSynthesis.speak(utterance);
+
+      setShowPhrases(false);
+      return;
+    }
+
+    // Online: use API as before
+    setTranslatingPhrase(phrase.english);
 
     try {
       const translateRes = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -623,7 +794,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
               role: 'system',
               content: buildSystemPrompt('English', selectedLang.label),
             },
-            { role: 'user', content: phrase },
+            { role: 'user', content: phrase.english },
           ],
         }),
       });
@@ -639,7 +810,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         {
           id: messageId,
           side: 'provider',
-          original: phrase,
+          original: phrase.english,
           translated: translatedText,
           backTranslations: {},
         },
@@ -801,6 +972,19 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         </div>
       )}
 
+      {/* Offline banner */}
+      {offlineActive && (
+        <div className="offline-banner">
+          {isOffline ? '⚠ No connection — ' : '⚠ Offline mode — '}
+          Voice unavailable. Use Quick Phrases.
+          {!isOffline && (
+            <button className="offline-banner-dismiss" onClick={() => setOfflineManual(false)}>
+              Go online
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Provider side (top) */}
       <div className={`side provider ${activeSide === 'provider' && isListening ? 'active' : ''}`}>
         <div className="side-label">
@@ -811,13 +995,13 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         </div>
         {renderMessages('provider', providerRef)}
         <button
-          className={`speak-btn ${activeSide === 'provider' && isListening ? 'listening' : ''}`}
+          className={`speak-btn ${activeSide === 'provider' && isListening ? 'listening' : ''} ${offlineActive ? 'offline-disabled' : ''}`}
           onMouseDown={() => startListening('provider')}
           onMouseUp={stopListening}
           onTouchStart={(e) => { e.preventDefault(); startListening('provider'); }}
           onTouchEnd={(e) => { e.preventDefault(); stopListening(); }}
         >
-          {activeSide === 'provider' && isListening ? 'Listening...' : 'Hold to Speak'}
+          {offlineActive ? 'Voice unavailable offline' : (activeSide === 'provider' && isListening ? 'Listening...' : 'Hold to Speak')}
         </button>
       </div>
 
@@ -838,13 +1022,13 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         {caregiverMode && (
           <div className="caregiver-controls">
             <button
-              className={`speak-btn caregiver-btn ${activeSide === 'caregiver' && isListening ? 'listening' : ''}`}
+              className={`speak-btn caregiver-btn ${activeSide === 'caregiver' && isListening ? 'listening' : ''} ${offlineActive ? 'offline-disabled' : ''}`}
               onMouseDown={() => startListening('caregiver')}
               onMouseUp={stopListening}
               onTouchStart={(e) => { e.preventDefault(); startListening('caregiver'); }}
               onTouchEnd={(e) => { e.preventDefault(); stopListening(); }}
             >
-              {activeSide === 'caregiver' && isListening ? 'Listening...' : 'Caregiver — Hold to Speak'}
+              {offlineActive ? 'Voice unavailable offline' : (activeSide === 'caregiver' && isListening ? 'Listening...' : 'Caregiver — Hold to Speak')}
             </button>
             <div className="caregiver-lang-toggle">
               <span className="caregiver-lang-label">Caregiver speaks</span>
@@ -865,13 +1049,13 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         )}
 
         <button
-          className={`speak-btn ${activeSide === 'patient' && isListening ? 'listening' : ''}`}
+          className={`speak-btn ${activeSide === 'patient' && isListening ? 'listening' : ''} ${offlineActive ? 'offline-disabled' : ''}`}
           onMouseDown={() => startListening('patient')}
           onMouseUp={stopListening}
           onTouchStart={(e) => { e.preventDefault(); startListening('patient'); }}
           onTouchEnd={(e) => { e.preventDefault(); stopListening(); }}
         >
-          {activeSide === 'patient' && isListening ? patientBtn.listening : patientBtn.idle}
+          {offlineActive ? 'Voice unavailable offline' : (activeSide === 'patient' && isListening ? patientBtn.listening : patientBtn.idle)}
         </button>
         {renderMessages('patient', patientRef)}
         <div className="side-label">{patientLabel}</div>
@@ -919,6 +1103,16 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
                 onClick={() => setCaregiverMode((prev) => !prev)}
               >
                 {caregiverMode ? 'On' : 'Off'}
+              </button>
+            </div>
+
+            <div className="settings-row">
+              <span className="settings-label">Offline mode</span>
+              <button
+                className={`caregiver-toggle ${offlineManual ? 'on' : ''}`}
+                onClick={() => setOfflineManual((prev) => !prev)}
+              >
+                {offlineManual ? 'On' : 'Off'}
               </button>
             </div>
 
@@ -996,7 +1190,10 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         <div className="phrases-overlay" onClick={() => setShowPhrases(false)}>
           <div className="phrases-panel" onClick={(e) => e.stopPropagation()}>
             <div className="phrases-header">
-              <span className="phrases-title">Quick Phrases</span>
+              <span className="phrases-title">
+                Quick Phrases
+                {offlineActive && <span className="offline-phrases-badge">Offline</span>}
+              </span>
               <button className="phrases-close" onClick={() => setShowPhrases(false)}>✕</button>
             </div>
             <div className="phrases-tabs">
@@ -1013,12 +1210,18 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
             <div className="phrases-list">
               {PHRASE_CATEGORIES[activeCategory].phrases.map((phrase) => (
                 <button
-                  key={phrase}
-                  className={`phrase-item ${translatingPhrase === phrase ? 'loading' : ''}`}
+                  key={phrase.english}
+                  className={`phrase-item ${translatingPhrase === phrase.english ? 'loading' : ''}`}
                   onClick={() => handlePhraseTap(phrase)}
                   disabled={translatingPhrase !== null}
                 >
-                  {translatingPhrase === phrase ? 'Translating...' : phrase}
+                  <span className="phrase-english">{phrase.english}</span>
+                  {offlineActive && (
+                    <span className="phrase-pretranslated">{phrase[selectedLang.code]}</span>
+                  )}
+                  {translatingPhrase === phrase.english && (
+                    <span className="phrase-pretranslated">Translating...</span>
+                  )}
                 </button>
               ))}
             </div>
