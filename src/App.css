@@ -591,3 +591,85 @@
   flex: 1;
   min-height: 0;
 }
+
+/* ── Caregiver mode ── */
+.caregiver-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 4px;
+}
+
+.caregiver-btn {
+  background: #7c5cbf;
+  box-shadow: 0 2px 8px rgba(124, 92, 191, 0.25);
+}
+
+.caregiver-btn:active,
+.caregiver-btn.listening {
+  background: #5c3a9f;
+  box-shadow: none;
+}
+
+.caregiver-lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.caregiver-lang-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #90a0c0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.caregiver-lang-btn {
+  font-size: 12px;
+  font-weight: 600;
+  color: #90a0c0;
+  background: #e8edf8;
+  border: 1px solid #c8d4e8;
+  border-radius: 20px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.caregiver-lang-btn.active {
+  background: #7c5cbf;
+  color: #ffffff;
+  border-color: #7c5cbf;
+}
+
+.caregiver-toggle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #a09080;
+  background: #f5f2ee;
+  border: 1px solid #ede8e0;
+  border-radius: 20px;
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.caregiver-toggle.on {
+  background: #7c5cbf;
+  color: #ffffff;
+  border-color: #7c5cbf;
+}
+
+.caregiver-message .caregiver-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: #7c5cbf;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 3px;
+  display: block;
+}
