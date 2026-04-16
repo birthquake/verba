@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import Ably from 'ably';
 import './App.css';
 
 const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
+const ABLY_API_KEY = process.env.REACT_APP_ABLY_API_KEY;
 
 const LANGUAGES = [
   { label: 'Spanish',    code: 'es',  voice: 'es-ES', whisper: 'es' },
@@ -83,7 +85,7 @@ const PATIENT_ONBOARDING = {
   es: {
     title: 'Bienvenido a Verba',
     body: 'Esta aplicación traduce lo que usted y su médico dicen en tiempo real.',
-    instruction: 'Mantenga presionado el botón verde para hablar. Hable con naturalidad.',
+    instruction: 'Mantenga presionado el botón para hablar. Hable con naturalidad.',
     privacy: 'Su conversación es privada y no se almacena.',
     dismiss: 'Entendido',
     repeat: 'Repetir',
@@ -91,7 +93,7 @@ const PATIENT_ONBOARDING = {
   zh: {
     title: '欢迎使用 Verba',
     body: '此应用程序可实时翻译您和医生之间的对话。',
-    instruction: '按住绿色按钮说话。请自然地说话。',
+    instruction: '按住按钮说话。请自然地说话。',
     privacy: '您的对话是私密的，不会被存储。',
     dismiss: '我明白了',
     repeat: '重复',
@@ -99,7 +101,7 @@ const PATIENT_ONBOARDING = {
   yue: {
     title: '歡迎使用 Verba',
     body: '此應用程式可即時翻譯您和醫生之間的對話。',
-    instruction: '按住綠色按鈕說話。請自然地說話。',
+    instruction: '按住按鈕說話。請自然地說話。',
     privacy: '您的對話是私密的，不會被儲存。',
     dismiss: '我明白了',
     repeat: '重複',
@@ -107,7 +109,7 @@ const PATIENT_ONBOARDING = {
   pt: {
     title: 'Bem-vindo ao Verba',
     body: 'Este aplicativo traduz em tempo real o que você e seu médico dizem.',
-    instruction: 'Mantenha o botão verde pressionado para falar. Fale naturalmente.',
+    instruction: 'Mantenha o botão pressionado para falar. Fale naturalmente.',
     privacy: 'Sua conversa é privada e não é armazenada.',
     dismiss: 'Entendi',
     repeat: 'Repetir',
@@ -115,7 +117,7 @@ const PATIENT_ONBOARDING = {
   fr: {
     title: 'Bienvenue sur Verba',
     body: 'Cette application traduit en temps réel ce que vous et votre médecin dites.',
-    instruction: 'Maintenez le bouton vert appuyé pour parler. Parlez naturellement.',
+    instruction: 'Maintenez le bouton appuyé pour parler. Parlez naturellement.',
     privacy: "Votre conversation est privée et n'est pas enregistrée.",
     dismiss: "J'ai compris",
     repeat: 'Répéter',
@@ -123,7 +125,7 @@ const PATIENT_ONBOARDING = {
   ar: {
     title: 'مرحباً بك في Verba',
     body: 'يترجم هذا التطبيق ما تقوله أنت وطبيبك في الوقت الفعلي.',
-    instruction: 'اضغط باستمرار على الزر الأخضر للتحدث. تحدث بشكل طبيعي.',
+    instruction: 'اضغط باستمرار على الزر للتحدث. تحدث بشكل طبيعي.',
     privacy: 'محادثتك خاصة ولا يتم تخزينها.',
     dismiss: 'فهمت',
     repeat: 'كرر',
@@ -131,7 +133,7 @@ const PATIENT_ONBOARDING = {
   vi: {
     title: 'Chào mừng đến với Verba',
     body: 'Ứng dụng này dịch theo thời gian thực những gì bạn và bác sĩ nói.',
-    instruction: 'Giữ nút xanh để nói. Hãy nói tự nhiên.',
+    instruction: 'Giữ nút để nói. Hãy nói tự nhiên.',
     privacy: 'Cuộc trò chuyện của bạn được bảo mật và không được lưu trữ.',
     dismiss: 'Đã hiểu',
     repeat: 'Lặp lại',
@@ -139,7 +141,7 @@ const PATIENT_ONBOARDING = {
   hi: {
     title: 'Verba में आपका स्वागत है',
     body: 'यह ऐप आप और आपके डॉक्टर की बातों का रियल टाइम में अनुवाद करता है।',
-    instruction: 'बोलने के लिए हरे बटन को दबाए रखें। स्वाभाविक रूप से बोलें।',
+    instruction: 'बोलने के लिए बटन को दबाए रखें। स्वाभाविक रूप से बोलें।',
     privacy: 'आपकी बातचीत निजी है और संग्रहीत नहीं की जाती।',
     dismiss: 'समझ गया',
     repeat: 'दोहराएं',
@@ -147,7 +149,7 @@ const PATIENT_ONBOARDING = {
   ko: {
     title: 'Verba에 오신 것을 환영합니다',
     body: '이 앱은 귀하와 의사의 대화를 실시간으로 번역합니다.',
-    instruction: '말하려면 초록색 버튼을 누르고 계세요. 자연스럽게 말씀하세요.',
+    instruction: '말하려면 버튼을 누르고 계세요. 자연스럽게 말씀하세요.',
     privacy: '대화 내용은 비공개이며 저장되지 않습니다.',
     dismiss: '확인했습니다',
     repeat: '반복',
@@ -155,7 +157,7 @@ const PATIENT_ONBOARDING = {
   ru: {
     title: 'Добро пожаловать в Verba',
     body: 'Это приложение переводит в реальном времени то, что говорите вы и ваш врач.',
-    instruction: 'Удерживайте зелёную кнопку, чтобы говорить. Говорите естественно.',
+    instruction: 'Удерживайте кнопку, чтобы говорить. Говорите естественно.',
     privacy: 'Ваш разговор конфиденциален и не сохраняется.',
     dismiss: 'Понятно',
     repeat: 'Повторить',
@@ -163,7 +165,7 @@ const PATIENT_ONBOARDING = {
   uk: {
     title: 'Ласкаво просимо до Verba',
     body: 'Цей застосунок перекладає в реальному часі те, що говорите ви та ваш лікар.',
-    instruction: 'Утримуйте зелену кнопку, щоб говорити. Говоріть природно.',
+    instruction: 'Утримуйте кнопку, щоб говорити. Говоріть природно.',
     privacy: 'Ваша розмова є конфіденційною і не зберігається.',
     dismiss: 'Зрозуміло',
     repeat: 'Повторити',
@@ -176,59 +178,32 @@ const PHRASE_CATEGORIES = [
     phrases: [
       {
         english: 'Where is your pain?',
-        es:  '¿Dónde le duele?',
-        zh:  '您哪里疼？',
-        yue: '你喺邊度痛？',
-        pt:  'Onde é a sua dor?',
-        fr:  'Où avez-vous mal?',
-        ar:  'أين يوجد ألمك؟',
-        vi:  'Bạn đau ở đâu?',
-        hi:  'आपको दर्द कहाँ है?',
-        ko:  '어디가 아프세요?',
-        ru:  'Где у вас боль?',
-        uk:  'Де у вас біль?',
+        es: '¿Dónde le duele?', zh: '您哪里疼？', yue: '你喺邊度痛？', pt: 'Onde é a sua dor?',
+        fr: 'Où avez-vous mal?', ar: 'أين يوجد ألمك؟', vi: 'Bạn đau ở đâu?',
+        hi: 'आपको दर्द कहाँ है?', ko: '어디가 아프세요?', ru: 'Где у вас боль?', uk: 'Де у вас біль?',
       },
       {
         english: 'Rate your pain 1 to 10.',
-        es:  'Califique su dolor del 1 al 10.',
-        zh:  '请用1到10分来描述您的疼痛程度。',
-        yue: '請用1至10分評估你嘅痛楚程度。',
-        pt:  'Classifique sua dor de 1 a 10.',
-        fr:  'Évaluez votre douleur de 1 à 10.',
-        ar:  'قيّم ألمك من 1 إلى 10.',
-        vi:  'Đánh giá cơn đau của bạn từ 1 đến 10.',
-        hi:  'अपने दर्द को 1 से 10 के पैमाने पर बताएं।',
-        ko:  '통증을 1에서 10으로 평가해 주세요.',
-        ru:  'Оцените боль по шкале от 1 до 10.',
-        uk:  'Оцініть біль за шкалою від 1 до 10.',
+        es: 'Califique su dolor del 1 al 10.', zh: '请用1到10分来描述您的疼痛程度。', yue: '請用1至10分評估你嘅痛楚程度。',
+        pt: 'Classifique sua dor de 1 a 10.', fr: 'Évaluez votre douleur de 1 à 10.', ar: 'قيّم ألمك من 1 إلى 10.',
+        vi: 'Đánh giá cơn đau của bạn từ 1 đến 10.', hi: 'अपने दर्द को 1 से 10 के पैमाने पर बताएं।',
+        ko: '통증을 1에서 10으로 평가해 주세요.', ru: 'Оцените боль по шкале от 1 до 10.', uk: 'Оцініть біль за шкалою від 1 до 10.',
       },
       {
         english: 'Is the pain constant or does it come and go?',
-        es:  '¿El dolor es constante o va y viene?',
-        zh:  '疼痛是持续的还是时好时坏？',
-        yue: '痛楚係持續定係時好時壞？',
-        pt:  'A dor é constante ou vai e vem?',
-        fr:  'La douleur est-elle constante ou intermittente?',
-        ar:  'هل الألم مستمر أم يأتي ويذهب؟',
-        vi:  'Cơn đau có liên tục hay đến rồi đi?',
-        hi:  'क्या दर्द लगातार है या आता-जाता है?',
-        ko:  '통증이 지속적인가요, 아니면 왔다 갔다 하나요?',
-        ru:  'Боль постоянная или приходит и уходит?',
-        uk:  'Біль постійний чи приходить і відходить?',
+        es: '¿El dolor es constante o va y viene?', zh: '疼痛是持续的还是时好时坏？', yue: '痛楚係持續定係時好時壞？',
+        pt: 'A dor é constante ou vai e vem?', fr: 'La douleur est-elle constante ou intermittente?',
+        ar: 'هل الألم مستمر أم يأتي ويذهب؟', vi: 'Cơn đau có liên tục hay đến rồi đi?',
+        hi: 'क्या दर्द लगातार है या आता-जाता है?', ko: '통증이 지속적인가요, 아니면 왔다 갔다 하나요?',
+        ru: 'Боль постоянная или приходит и уходит?', uk: 'Біль постійний чи приходить і відходить?',
       },
       {
         english: 'Does the pain radiate anywhere?',
-        es:  '¿El dolor se irradia a algún lugar?',
-        zh:  '疼痛是否向其他部位放射？',
-        yue: '痛楚有冇擴散到其他地方？',
-        pt:  'A dor irradia para algum lugar?',
-        fr:  'La douleur irradie-t-elle quelque part?',
-        ar:  'هل ينتشر الألم إلى مكان آخر؟',
-        vi:  'Cơn đau có lan ra nơi nào không?',
-        hi:  'क्या दर्द कहीं और फैलता है?',
-        ko:  '통증이 다른 곳으로 퍼지나요?',
-        ru:  'Боль отдаёт куда-нибудь?',
-        uk:  'Біль віддає кудись?',
+        es: '¿El dolor se irradia a algún lugar?', zh: '疼痛是否向其他部位放射？', yue: '痛楚有冇擴散到其他地方？',
+        pt: 'A dor irradia para algum lugar?', fr: 'La douleur irradie-t-elle quelque part?',
+        ar: 'هل ينتشر الألم إلى مكان آخر؟', vi: 'Cơn đau có lan ra nơi nào không?',
+        hi: 'क्या दर्द कहीं और फैलता है?', ko: '통증이 다른 곳으로 퍼지나요?',
+        ru: 'Боль отдаёт куда-нибудь?', uk: 'Біль віддає кудись?',
       },
     ],
   },
@@ -237,59 +212,33 @@ const PHRASE_CATEGORIES = [
     phrases: [
       {
         english: 'Are you having trouble breathing?',
-        es:  '¿Tiene dificultad para respirar?',
-        zh:  '您呼吸困难吗？',
-        yue: '你有冇呼吸困難？',
-        pt:  'Você está tendo dificuldade para respirar?',
-        fr:  'Avez-vous des difficultés à respirer?',
-        ar:  'هل تعاني من صعوبة في التنفس؟',
-        vi:  'Bạn có khó thở không?',
-        hi:  'क्या आपको सांस लेने में तकलीफ हो रही है?',
-        ko:  '숨쉬기가 힘드세요?',
-        ru:  'У вас есть затруднение дыхания?',
-        uk:  'У вас є труднощі з диханням?',
+        es: '¿Tiene dificultad para respirar?', zh: '您呼吸困难吗？', yue: '你有冇呼吸困難？',
+        pt: 'Você está tendo dificuldade para respirar?', fr: 'Avez-vous des difficultés à respirer?',
+        ar: 'هل تعاني من صعوبة في التنفس؟', vi: 'Bạn có khó thở không?',
+        hi: 'क्या आपको सांस लेने में तकलीफ हो रही है?', ko: '숨쉬기가 힘드세요?',
+        ru: 'У вас есть затруднение дыхания?', uk: 'У вас є труднощі з диханням?',
       },
       {
         english: 'Do you feel dizzy or nauseous?',
-        es:  '¿Se siente mareado o con náuseas?',
-        zh:  '您感到头晕或恶心吗？',
-        yue: '你有冇頭暈或作嘔？',
-        pt:  'Você se sente tonto ou com náusea?',
-        fr:  'Vous sentez-vous étourdi ou nauséeux?',
-        ar:  'هل تشعر بالدوار أو الغثيان؟',
-        vi:  'Bạn có cảm thấy chóng mặt hoặc buồn nôn không?',
-        hi:  'क्या आपको चक्कर आ रहे हैं या मतली हो रही है?',
-        ko:  '어지럽거나 메스꺼움을 느끼시나요?',
-        ru:  'Вы чувствуете головокружение или тошноту?',
-        uk:  'Ви відчуваєте запаморочення або нудоту?',
+        es: '¿Se siente mareado o con náuseas?', zh: '您感到头晕或恶心吗？', yue: '你有冇頭暈或作嘔？',
+        pt: 'Você se sente tonto ou com náusea?', fr: 'Vous sentez-vous étourdi ou nauséeux?',
+        ar: 'هل تشعر بالدوار أو الغثيان؟', vi: 'Bạn có cảm thấy chóng mặt hoặc buồn nôn không?',
+        hi: 'क्या आपको चक्कर आ रहे हैं या मतली हो रही है?', ko: '어지럽거나 메스꺼움을 느끼시나요?',
+        ru: 'Вы чувствуете головокружение или тошноту?', uk: 'Ви відчуваєте запаморочення або нудоту?',
       },
       {
         english: 'Do you have a fever?',
-        es:  '¿Tiene fiebre?',
-        zh:  '您发烧了吗？',
-        yue: '你有冇發燒？',
-        pt:  'Você tem febre?',
-        fr:  'Avez-vous de la fièvre?',
-        ar:  'هل لديك حمى؟',
-        vi:  'Bạn có bị sốt không?',
-        hi:  'क्या आपको बुखार है?',
-        ko:  '열이 있으세요?',
-        ru:  'У вас есть температура?',
-        uk:  'У вас є температура?',
+        es: '¿Tiene fiebre?', zh: '您发烧了吗？', yue: '你有冇發燒？', pt: 'Você tem febre?',
+        fr: 'Avez-vous de la fièvre?', ar: 'هل لديك حمى؟', vi: 'Bạn có bị sốt không?',
+        hi: 'क्या आपको बुखार है?', ko: '열이 있으세요?', ru: 'У вас есть температура?', uk: 'У вас є температура?',
       },
       {
         english: 'How long have you had this symptom?',
-        es:  '¿Cuánto tiempo lleva con este síntoma?',
-        zh:  '这个症状持续多久了？',
-        yue: '呢個症狀持續幾耐了？',
-        pt:  'Há quanto tempo você tem esse sintoma?',
-        fr:  'Depuis combien de temps avez-vous ce symptôme?',
-        ar:  'منذ متى وأنت تعاني من هذا العَرَض؟',
-        vi:  'Bạn có triệu chứng này bao lâu rồi?',
-        hi:  'यह लक्षण आपको कितने समय से है?',
-        ko:  '이 증상이 얼마나 됐나요?',
-        ru:  'Как давно у вас этот симптом?',
-        uk:  'Як давно у вас цей симптом?',
+        es: '¿Cuánto tiempo lleva con este síntoma?', zh: '这个症状持续多久了？', yue: '呢個症狀持續幾耐了？',
+        pt: 'Há quanto tempo você tem esse sintoma?', fr: 'Depuis combien de temps avez-vous ce symptôme?',
+        ar: 'منذ متى وأنت تعاني من هذا العَرَض؟', vi: 'Bạn có triệu chứng này bao lâu rồi?',
+        hi: 'यह लक्षण आपको कितने समय से है?', ko: '이 증상이 얼마나 됐나요?',
+        ru: 'Как давно у вас этот симптом?', uk: 'Як давно у вас цей симптом?',
       },
     ],
   },
@@ -298,45 +247,26 @@ const PHRASE_CATEGORIES = [
     phrases: [
       {
         english: 'Do you have any allergies?',
-        es:  '¿Tiene alguna alergia?',
-        zh:  '您有过敏症吗？',
-        yue: '你有冇過敏？',
-        pt:  'Você tem alguma alergia?',
-        fr:  'Avez-vous des allergies?',
-        ar:  'هل لديك أي حساسية؟',
-        vi:  'Bạn có bị dị ứng gì không?',
-        hi:  'क्या आपको कोई एलर्जी है?',
-        ko:  '알레르기가 있으세요?',
-        ru:  'Есть ли у вас аллергия?',
-        uk:  'Чи є у вас алергія?',
+        es: '¿Tiene alguna alergia?', zh: '您有过敏症吗？', yue: '你有冇過敏？', pt: 'Você tem alguma alergia?',
+        fr: 'Avez-vous des allergies?', ar: 'هل لديك أي حساسية؟', vi: 'Bạn có bị dị ứng gì không?',
+        hi: 'क्या आपको कोई एलर्जी है?', ko: '알레르기가 있으세요?',
+        ru: 'Есть ли у вас аллергия?', uk: 'Чи є у вас алергія?',
       },
       {
         english: 'What medications are you currently taking?',
-        es:  '¿Qué medicamentos está tomando actualmente?',
-        zh:  '您目前在服用哪些药物？',
-        yue: '你而家食緊咩藥？',
-        pt:  'Quais medicamentos você está tomando atualmente?',
-        fr:  'Quels médicaments prenez-vous actuellement?',
-        ar:  'ما الأدوية التي تتناولها حالياً؟',
-        vi:  'Bạn đang dùng thuốc gì?',
-        hi:  'आप अभी कौन सी दवाएं ले रहे हैं?',
-        ko:  '현재 복용 중인 약이 있으세요?',
-        ru:  'Какие лекарства вы сейчас принимаете?',
-        uk:  'Які ліки ви зараз приймаєте?',
+        es: '¿Qué medicamentos está tomando actualmente?', zh: '您目前在服用哪些药物？', yue: '你而家食緊咩藥？',
+        pt: 'Quais medicamentos você está tomando atualmente?', fr: 'Quels médicaments prenez-vous actuellement?',
+        ar: 'ما الأدوية التي تتناولها حالياً؟', vi: 'Bạn đang dùng thuốc gì?',
+        hi: 'आप अभी कौन सी दवाएं ले रहे हैं?', ko: '현재 복용 중인 약이 있으세요?',
+        ru: 'Какие лекарства вы сейчас принимаете?', uk: 'Які ліки ви зараз приймаєте?',
       },
       {
         english: 'Do you have any chronic conditions?',
-        es:  '¿Tiene alguna enfermedad crónica?',
-        zh:  '您有慢性疾病吗？',
-        yue: '你有冇慢性病？',
-        pt:  'Você tem alguma condição crônica?',
-        fr:  'Avez-vous des maladies chroniques?',
-        ar:  'هل لديك أي أمراض مزمنة؟',
-        vi:  'Bạn có bệnh mãn tính nào không?',
-        hi:  'क्या आपको कोई पुरानी बीमारी है?',
-        ko:  '만성 질환이 있으세요?',
-        ru:  'Есть ли у вас хронические заболевания?',
-        uk:  'Чи є у вас хронічні захворювання?',
+        es: '¿Tiene alguna enfermedad crónica?', zh: '您有慢性疾病吗？', yue: '你有冇慢性病？',
+        pt: 'Você tem alguma condição crônica?', fr: 'Avez-vous des maladies chroniques?',
+        ar: 'هل لديك أي أمراض مزمنة؟', vi: 'Bạn có bệnh mãn tính nào không?',
+        hi: 'क्या आपको कोई पुरानी बीमारी है?', ko: '만성 질환이 있으세요?',
+        ru: 'Есть ли у вас хронические заболевания?', uk: 'Чи є у вас хронічні захворювання?',
       },
     ],
   },
@@ -345,63 +275,42 @@ const PHRASE_CATEGORIES = [
     phrases: [
       {
         english: 'I need to examine you.',
-        es:  'Necesito examinarlo/a.',
-        zh:  '我需要给您做检查。',
-        yue: '我需要為你進行檢查。',
-        pt:  'Preciso examiná-lo/a.',
-        fr:  'Je dois vous examiner.',
-        ar:  'أحتاج إلى فحصك.',
-        vi:  'Tôi cần khám cho bạn.',
-        hi:  'मुझे आपकी जांच करनी है।',
-        ko:  '진찰을 해야 합니다.',
-        ru:  'Мне нужно вас осмотреть.',
-        uk:  'Мені потрібно вас оглянути.',
+        es: 'Necesito examinarlo/a.', zh: '我需要给您做检查。', yue: '我需要為你進行檢查。',
+        pt: 'Preciso examiná-lo/a.', fr: 'Je dois vous examiner.', ar: 'أحتاج إلى فحصك.',
+        vi: 'Tôi cần khám cho bạn.', hi: 'मुझे आपकी जांच करनी है।', ko: '진찰을 해야 합니다.',
+        ru: 'Мне нужно вас осмотреть.', uk: 'Мені потрібно вас оглянути.',
       },
       {
         english: 'I am going to give you medication.',
-        es:  'Le voy a administrar medicamento.',
-        zh:  '我要给您用药。',
-        yue: '我將會為你用藥。',
-        pt:  'Vou lhe administrar medicamento.',
-        fr:  'Je vais vous administrer un médicament.',
-        ar:  'سأعطيك دواءً.',
-        vi:  'Tôi sẽ cho bạn dùng thuốc.',
-        hi:  'मैं आपको दवा दूंगा।',
-        ko:  '약을 드릴 것입니다.',
-        ru:  'Я дам вам лекарство.',
-        uk:  'Я дам вам ліки.',
+        es: 'Le voy a administrar medicamento.', zh: '我要给您用药。', yue: '我將會為你用藥。',
+        pt: 'Vou lhe administrar medicamento.', fr: 'Je vais vous administrer un médicament.',
+        ar: 'سأعطيك دواءً.', vi: 'Tôi sẽ cho bạn dùng thuốc.', hi: 'मैं आपको दवा दूंगा।',
+        ko: '약을 드릴 것입니다.', ru: 'Я дам вам лекарство.', uk: 'Я дам вам ліки.',
       },
       {
         english: 'Do you understand?',
-        es:  '¿Entiende?',
-        zh:  '您明白吗？',
-        yue: '你明白嗎？',
-        pt:  'Você entende?',
-        fr:  'Comprenez-vous?',
-        ar:  'هل تفهم؟',
-        vi:  'Bạn có hiểu không?',
-        hi:  'क्या आप समझे?',
-        ko:  '이해하셨나요?',
-        ru:  'Вы понимаете?',
-        uk:  'Ви розумієте?',
+        es: '¿Entiende?', zh: '您明白吗？', yue: '你明白嗎？', pt: 'Você entende?',
+        fr: 'Comprenez-vous?', ar: 'هل تفهم؟', vi: 'Bạn có hiểu không?',
+        hi: 'क्या आप समझे?', ko: '이해하셨나요?', ru: 'Вы понимаете?', uk: 'Ви розумієте?',
       },
       {
         english: 'Please sign here.',
-        es:  'Por favor firme aquí.',
-        zh:  '请在这里签名。',
-        yue: '請喺呢度簽名。',
-        pt:  'Por favor, assine aqui.',
-        fr:  'Veuillez signer ici.',
-        ar:  'من فضلك وقّع هنا.',
-        vi:  'Vui lòng ký vào đây.',
-        hi:  'कृपया यहाँ हस्ताक्षर करें।',
-        ko:  '여기에 서명해 주세요.',
-        ru:  'Пожалуйста, подпишите здесь.',
-        uk:  'Будь ласка, підпишіть тут.',
+        es: 'Por favor firme aquí.', zh: '请在这里签名。', yue: '請喺呢度簽名。',
+        pt: 'Por favor, assine aqui.', fr: 'Veuillez signer ici.', ar: 'من فضلك وقّع هنا.',
+        vi: 'Vui lòng ký vào đây.', hi: 'कृपया यहाँ हस्ताक्षर करें।', ko: '여기에 서명해 주세요.',
+        ru: 'Пожалуйста, подпишите здесь.', uk: 'Будь ласка, підпишіть тут.',
       },
     ],
   },
 ];
+
+// Generate a random session code like HAWK-4291
+const generateSessionCode = () => {
+  const words = ['HAWK', 'BLUE', 'PINE', 'SALT', 'GOLD', 'IRON', 'LAKE', 'MOON', 'RAIN', 'WIND'];
+  const word = words[Math.floor(Math.random() * words.length)];
+  const num = Math.floor(1000 + Math.random() * 9000);
+  return `${word}-${num}`;
+};
 
 export default function App() {
   const [messages, setMessages] = useState([]);
@@ -437,6 +346,18 @@ export default function App() {
   const [medIsSpeaking, setMedIsSpeaking] = useState(false);
   const [sessionStartTime, setSessionStartTime] = useState(null);
   const [sessionElapsed, setSessionElapsed] = useState('0:00');
+
+  // Two-device mode state
+  const [twoDeviceMode, setTwoDeviceMode] = useState(false); // active or not
+  const [twoDeviceRole, setTwoDeviceRole] = useState(null); // 'provider' | 'patient'
+  const [twoDeviceCode, setTwoDeviceCode] = useState('');
+  const [twoDeviceJoinCode, setTwoDeviceJoinCode] = useState('');
+  const [twoDeviceConnected, setTwoDeviceConnected] = useState(false);
+  const [showTwoDeviceSetup, setShowTwoDeviceSetup] = useState(false);
+  const [twoDeviceStatus, setTwoDeviceStatus] = useState('');
+  const ablyRef = useRef(null);
+  const ablyChannelRef = useRef(null);
+
   const medRecorderRef = useRef(null);
   const medChunksRef = useRef([]);
   const medStreamRef = useRef(null);
@@ -445,6 +366,7 @@ export default function App() {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const streamRef = useRef(null);
+  const swipeStartX = useRef({});
 
   useEffect(() => {
     const handleOffline = () => setIsOffline(true);
@@ -482,14 +404,12 @@ export default function App() {
     };
   }, []);
 
-  // Start session timer on first message
   useEffect(() => {
     if (messages.length === 1 && !sessionStartTime) {
       setSessionStartTime(Date.now());
     }
   }, [messages, sessionStartTime]);
 
-  // Tick session timer every second
   useEffect(() => {
     if (!sessionStartTime) return;
     const interval = setInterval(() => {
@@ -500,6 +420,115 @@ export default function App() {
     }, 1000);
     return () => clearInterval(interval);
   }, [sessionStartTime]);
+
+  // ── Ably two-device connection ──
+  const connectAbly = useCallback((code, role) => {
+    if (ablyRef.current) {
+      ablyRef.current.close();
+      ablyRef.current = null;
+      ablyChannelRef.current = null;
+    }
+
+    const client = new Ably.Realtime({ key: ABLY_API_KEY });
+    ablyRef.current = client;
+
+    client.connection.on('connected', () => {
+      setTwoDeviceStatus('Connected');
+      setTwoDeviceConnected(true);
+    });
+
+    client.connection.on('disconnected', () => {
+      setTwoDeviceStatus('Disconnected');
+      setTwoDeviceConnected(false);
+    });
+
+    client.connection.on('failed', () => {
+      setTwoDeviceStatus('Connection failed');
+      setTwoDeviceConnected(false);
+    });
+
+    const channel = client.channels.get(`verba-${code}`);
+    ablyChannelRef.current = channel;
+
+    // Listen for messages from the other device
+    channel.subscribe('translation', (msg) => {
+      const { fromRole, original, translated, side, messageId } = msg.data;
+      // Only process messages from the other role
+      if (fromRole === role) return;
+
+      // Add message to transcript
+      setMessages((prev) => {
+        // Avoid duplicates
+        if (prev.find(m => m.id === messageId)) return prev;
+        return [...prev, { id: messageId, side, original, translated, backTranslations: {}, dismissed: false }];
+      });
+
+      // Speak the translation on this device
+      const speakText = role === 'provider' ? original : translated;
+      const speakLang = role === 'provider' ? 'en-US' : selectedLang.voice;
+      const utterance = new SpeechSynthesisUtterance(speakText);
+      utterance.lang = speakLang;
+      utterance.rate = 0.9;
+      window.speechSynthesis.speak(utterance);
+    });
+
+    channel.subscribe('end-session', () => {
+      setTwoDeviceStatus('Session ended by other device');
+      disconnectAbly();
+    });
+
+  }, [selectedLang]);
+
+  const disconnectAbly = useCallback(() => {
+    if (ablyChannelRef.current) {
+      ablyChannelRef.current.unsubscribe();
+      ablyChannelRef.current = null;
+    }
+    if (ablyRef.current) {
+      ablyRef.current.close();
+      ablyRef.current = null;
+    }
+    setTwoDeviceConnected(false);
+    setTwoDeviceMode(false);
+    setTwoDeviceRole(null);
+    setTwoDeviceCode('');
+    setTwoDeviceStatus('');
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (ablyRef.current) ablyRef.current.close();
+    };
+  }, []);
+
+  const handleStartTwoDeviceAsProvider = () => {
+    const code = generateSessionCode();
+    setTwoDeviceCode(code);
+    setTwoDeviceRole('provider');
+    setTwoDeviceMode(true);
+    connectAbly(code, 'provider');
+    setShowTwoDeviceSetup(false);
+    setShowSettings(false);
+  };
+
+  const handleJoinTwoDeviceAsPatient = () => {
+    const code = twoDeviceJoinCode.trim().toUpperCase();
+    if (!code) return;
+    setTwoDeviceCode(code);
+    setTwoDeviceRole('patient');
+    setTwoDeviceMode(true);
+    connectAbly(code, 'patient');
+    setShowTwoDeviceSetup(false);
+    setShowSettings(false);
+  };
+
+  const handleEndTwoDeviceSession = () => {
+    if (ablyChannelRef.current) {
+      ablyChannelRef.current.publish('end-session', {});
+    }
+    disconnectAbly();
+  };
 
   const speakOnboarding = useCallback(() => {
     window.speechSynthesis.cancel();
@@ -636,9 +665,7 @@ Your rules:
           formData.append('model', 'whisper-1');
           formData.append('language', 'en');
           const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
-            body: formData,
+            method: 'POST', headers: { Authorization: `Bearer ${OPENAI_API_KEY}` }, body: formData,
           });
           const whisperData = await whisperRes.json();
           const transcribed = whisperData.text?.trim();
@@ -737,9 +764,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
     } catch (err) { console.error('Back-translation error:', err); setExpandedMessages((prev) => ({ ...prev, [key]: null })); }
   };
 
-  // Swipe to dismiss
-  const swipeStartX = useRef({});
-
   const handleSwipeStart = (e, messageId) => {
     const touch = e.touches?.[0] || e;
     swipeStartX.current[messageId] = touch.clientX;
@@ -824,9 +848,31 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       const translatedText = (await translateRes.json()).choices?.[0]?.message?.content?.trim();
       if (!translatedText) { setStatus('Translation failed. Try again.'); return; }
       setMessages((prev) => prev.map((m) => m.id === messageId ? { ...m, translated: translatedText } : m));
-      const utterance = new SpeechSynthesisUtterance(translatedText);
-      utterance.lang = targetVoice; utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
+
+      // In two-device mode, publish to Ably channel
+      if (twoDeviceMode && ablyChannelRef.current && twoDeviceConnected) {
+        ablyChannelRef.current.publish('translation', {
+          fromRole: twoDeviceRole,
+          messageId,
+          side,
+          original: originalText,
+          translated: translatedText,
+        });
+      }
+
+      // In single-device mode, speak locally as normal
+      if (!twoDeviceMode) {
+        const utterance = new SpeechSynthesisUtterance(translatedText);
+        utterance.lang = targetVoice; utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+      } else {
+        // In two-device mode, speak own side's text
+        const speakText = twoDeviceRole === 'provider' ? translatedText : originalText;
+        const speakLang = twoDeviceRole === 'provider' ? selectedLang.voice : 'en-US';
+        const utterance = new SpeechSynthesisUtterance(speakText);
+        utterance.lang = speakLang; utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+      }
     } catch (err) { console.error('Process error:', err); setStatus('Something went wrong. Please try again.'); }
   };
 
@@ -851,6 +897,14 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       if (!translatedText) return;
       const messageId = Date.now();
       setMessages((prev) => [...prev, { id: messageId, side: 'provider', original: phrase.english, translated: translatedText, backTranslations: {}, dismissed: false }]);
+
+      if (twoDeviceMode && ablyChannelRef.current && twoDeviceConnected) {
+        ablyChannelRef.current.publish('translation', {
+          fromRole: 'provider', messageId, side: 'provider',
+          original: phrase.english, translated: translatedText,
+        });
+      }
+
       const utterance = new SpeechSynthesisUtterance(translatedText);
       utterance.lang = selectedLang.voice; utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
@@ -864,6 +918,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
     const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     const lines = ['Verba Session Transcript', `Date: ${date} at ${time}`, `Languages: English — ${selectedLang.label}`, `Specialty: ${selectedSpecialty.label}`];
     if (caregiverMode) lines.push(`Caregiver mode: on (caregiver speaks ${caregiverSpeaksEnglish ? 'English' : selectedLang.label})`);
+    if (twoDeviceMode) lines.push(`Two-device mode: on (session code: ${twoDeviceCode})`);
     if (sessionStartTime) lines.push(`Session duration: ${sessionElapsed}`);
     lines.push('', '---', '');
     const body = messages.filter((m) => m.translated).map((m) => {
@@ -905,6 +960,9 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
   const patientBtn = PATIENT_BUTTONS[selectedLang.code];
   const onboarding = PATIENT_ONBOARDING[selectedLang.code];
 
+  // In two-device mode, determine what this device shows
+  const twoDeviceSide = twoDeviceRole; // 'provider' or 'patient'
+
   const renderMessages = (viewSide, ref) => (
     <div className="messages" ref={ref}>
       {messages.map((m) => {
@@ -934,6 +992,65 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
     </div>
   );
 
+  // ── Two-device mode single-side layout ──
+  if (twoDeviceMode && twoDeviceRole) {
+    const isProvider = twoDeviceRole === 'provider';
+    return (
+      <div className="app">
+        {!audioUnlocked && (
+          <div className="splash-overlay">
+            <div className="splash-content">
+              <div className="splash-logo">
+                <span className="splash-logo-icon">🌐</span>
+                <h1 className="splash-logo-name">Verba</h1>
+              </div>
+              <p className="splash-tagline">Real-time voice translation<br />for clinical care</p>
+              <button className="splash-btn" onClick={() => {
+                const utterance = new SpeechSynthesisUtterance(' ');
+                utterance.volume = 0;
+                window.speechSynthesis.speak(utterance);
+                setAudioUnlocked(true);
+              }}>Begin Session</button>
+            </div>
+          </div>
+        )}
+
+        <div className="two-device-bar">
+          <span className="two-device-code">
+            {twoDeviceConnected ? '🟢' : '🔴'} {twoDeviceCode}
+          </span>
+          <span className="two-device-role">{isProvider ? 'Provider' : selectedLang.label}</span>
+          <button className="two-device-end" onClick={handleEndTwoDeviceSession}>End</button>
+        </div>
+
+        <div className={`side ${isProvider ? 'provider' : 'patient'} two-device-full ${activeSide && isListening ? 'active' : ''}`}
+          style={{ flex: 1, transform: 'none' }}>
+          <div className="side-label">
+            {isProvider ? `Healthcare Provider — English` : patientLabel}
+            {isProvider && selectedSpecialty.code !== 'general' && <span className="specialty-badge">{selectedSpecialty.label}</span>}
+          </div>
+          {renderMessages(twoDeviceRole, isProvider ? providerRef : patientRef)}
+          <button
+            className={`speak-btn ${activeSide && isListening ? 'listening' : ''}`}
+            onMouseDown={() => startListening(twoDeviceRole)}
+            onMouseUp={stopListening}
+            onTouchStart={(e) => { e.preventDefault(); startListening(twoDeviceRole); }}
+            onTouchEnd={(e) => { e.preventDefault(); stopListening(); }}
+          >
+            {activeSide && isListening
+              ? (isProvider ? 'Listening...' : patientBtn.listening)
+              : (isProvider ? 'Hold to Speak' : patientBtn.idle)}
+          </button>
+        </div>
+
+        {status && (
+          <div className="two-device-status">{status}</div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Standard single-device layout ──
   return (
     <div className="app">
 
@@ -950,17 +1067,12 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
               <span>AR</span><span>VI</span><span>HI</span><span>KO</span>
               <span>RU</span><span>UK</span><span>粵</span>
             </div>
-            <button
-              className="splash-btn"
-              onClick={() => {
-                const utterance = new SpeechSynthesisUtterance(' ');
-                utterance.volume = 0;
-                window.speechSynthesis.speak(utterance);
-                setAudioUnlocked(true);
-              }}
-            >
-              Begin Session
-            </button>
+            <button className="splash-btn" onClick={() => {
+              const utterance = new SpeechSynthesisUtterance(' ');
+              utterance.volume = 0;
+              window.speechSynthesis.speak(utterance);
+              setAudioUnlocked(true);
+            }}>Begin Session</button>
             <p className="splash-privacy">Conversations are private and never stored</p>
           </div>
         </div>
@@ -971,12 +1083,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
           {isOffline ? '⚠ No connection — ' : '⚠ Offline mode — '}
           Voice unavailable. <span style={{ textDecoration: 'underline' }}>Open Quick Phrases</span>
           {!isOffline && (
-            <button
-              className="offline-banner-dismiss"
-              onClick={(e) => { e.stopPropagation(); setOfflineManual(false); }}
-            >
-              Go online
-            </button>
+            <button className="offline-banner-dismiss" onClick={(e) => { e.stopPropagation(); setOfflineManual(false); }}>Go online</button>
           )}
         </div>
       )}
@@ -1001,9 +1108,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       <div className="divider">
         <span className="app-name">Verba</span>
         {status && <span className="status">{status}</span>}
-        {sessionStartTime && !status && (
-          <span className="session-timer">{sessionElapsed}</span>
-        )}
+        {sessionStartTime && !status && <span className="session-timer">{sessionElapsed}</span>}
         <div className="divider-actions">
           <button className="settings-btn" onClick={() => setShowSettings(true)}>⚙</button>
         </div>
@@ -1076,6 +1181,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
             <button className="settings-action-btn" onClick={() => { setShowSettings(false); setShowPhrases(true); }}>Quick Phrases</button>
             <button className="settings-action-btn" onClick={() => { setShowSettings(false); setShowOnboarding(true); }}>Patient Intro</button>
             <button className="settings-action-btn" onClick={() => { setShowSettings(false); setShowMedInstructions(true); }}>Medication Instructions</button>
+            <button className="settings-action-btn" onClick={() => { setShowTwoDeviceSetup(true); setShowSettings(false); }}>Two-Device Mode</button>
             {messages.length > 0 && (
               <>
                 <div className="settings-divider" />
@@ -1084,6 +1190,43 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
                 <button className="settings-action-btn danger" onClick={clearSession}>Clear Session</button>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Two-device setup panel */}
+      {showTwoDeviceSetup && (
+        <div className="phrases-overlay" onClick={() => setShowTwoDeviceSetup(false)}>
+          <div className="phrases-panel settings-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="phrases-header">
+              <span className="phrases-title">Two-Device Mode</span>
+              <button className="phrases-close" onClick={() => setShowTwoDeviceSetup(false)}>✕</button>
+            </div>
+            <p className="export-desc">Each person uses their own phone. The provider starts a session and shares the code with the patient.</p>
+            <div className="settings-divider" />
+            <p className="two-device-section-label">Provider — Start a session</p>
+            <button className="export-action-btn" onClick={handleStartTwoDeviceAsProvider}>
+              Generate Session Code
+            </button>
+            <div className="settings-divider" />
+            <p className="two-device-section-label">Patient — Join a session</p>
+            <div className="med-input-row">
+              <input
+                className="med-input"
+                type="text"
+                placeholder="Enter code e.g. HAWK-4291"
+                value={twoDeviceJoinCode}
+                onChange={(e) => setTwoDeviceJoinCode(e.target.value.toUpperCase())}
+                maxLength={9}
+              />
+              <button
+                className="med-input-add"
+                onClick={handleJoinTwoDeviceAsPatient}
+                disabled={!twoDeviceJoinCode.trim()}
+              >
+                Join
+              </button>
+            </div>
           </div>
         </div>
       )}
