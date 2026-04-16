@@ -1290,3 +1290,158 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.04em;
 }
+
+/* ── Two-device mode ── */
+.two-device-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #2a2018;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.two-device-code {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #fdf6f0;
+}
+
+.two-device-role {
+  font-size: 12px;
+  color: #b0a090;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.two-device-end {
+  font-size: 13px;
+  font-weight: 600;
+  color: #c0392b;
+  background: rgba(192, 57, 43, 0.15);
+  border: 1px solid rgba(192, 57, 43, 0.3);
+  border-radius: 8px;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+
+.two-device-status {
+  text-align: center;
+  font-size: 13px;
+  color: #a09080;
+  padding: 8px;
+  flex-shrink: 0;
+}
+
+.two-device-full {
+  flex: 1;
+  transform: none !important;
+}
+
+.two-device-section-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #a09080;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+/* ── Dismissed messages ── */
+.message.dismissed {
+  opacity: 0.45;
+}
+
+.message.dismissed .original {
+  text-decoration: line-through;
+  color: #a09080;
+}
+
+.dismissed-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: #c0392b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 3px;
+  display: block;
+}
+
+/* ── Session timer ── */
+.session-timer {
+  font-size: 12px;
+  color: #b0a090;
+  flex: 1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+/* ── Offline mode ── */
+.offline-banner {
+  background: #c0392b;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  padding: 8px 16px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.offline-banner-dismiss {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.4);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 3px 10px;
+  cursor: pointer;
+}
+
+.speak-btn.offline-disabled {
+  background: #c0b8b0;
+  box-shadow: none;
+  cursor: default;
+}
+
+.patient .speak-btn.offline-disabled {
+  background: #c0b8b0;
+  box-shadow: none;
+}
+
+.offline-phrases-badge {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #c0392b;
+  background: #fdf0f0;
+  border: 1px solid #f0d8d8;
+  border-radius: 6px;
+  padding: 2px 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
+.phrase-english {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  color: #2a2018;
+}
+
+.phrase-pretranslated {
+  display: block;
+  font-size: 13px;
+  color: #a09080;
+  margin-top: 3px;
+  font-style: italic;
+}
