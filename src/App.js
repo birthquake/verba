@@ -722,6 +722,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 } });
       streamRef.current = stream;
+    if (navigator.vibrate) navigator.vibrate(30);
       setIsListening(true); setActiveSide(side); setStatus('Listening...'); audioChunksRef.current = [];
       const mimeType = getSupportedMimeType();
       const options = mimeType ? { mimeType } : {};
@@ -744,6 +745,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
 
   const stopListening = () => {
     if (mediaRecorderRef.current && isListening) {
+    if (navigator.vibrate) navigator.vibrate([20, 50, 20]);
       try { mediaRecorderRef.current.stop(); } catch (e) { console.error('Stop error:', e); }
       setIsListening(false); setActiveSide(null);
     }
