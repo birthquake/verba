@@ -1105,3 +1105,14 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+/* ── Settings panel fixes ── */
+.settings-panel {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.med-panel {
+  max-height: 80vh;
+  overflow-y: auto;
+}
