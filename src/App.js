@@ -4,12 +4,17 @@ import './App.css';
 const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
 
 const LANGUAGES = [
-  { label: 'Spanish',    code: 'es', voice: 'es-ES', whisper: 'es' },
-  { label: 'Mandarin',   code: 'zh', voice: 'zh-CN', whisper: 'zh' },
+  { label: 'Spanish',    code: 'es',  voice: 'es-ES', whisper: 'es' },
+  { label: 'Mandarin',   code: 'zh',  voice: 'zh-CN', whisper: 'zh' },
   { label: 'Cantonese',  code: 'yue', voice: 'zh-HK', whisper: 'yue' },
-  { label: 'Portuguese', code: 'pt', voice: 'pt-BR', whisper: 'pt' },
-  { label: 'French',     code: 'fr', voice: 'fr-FR', whisper: 'fr' },
-  { label: 'Arabic',     code: 'ar', voice: 'ar-SA', whisper: 'ar' },
+  { label: 'Portuguese', code: 'pt',  voice: 'pt-BR', whisper: 'pt' },
+  { label: 'French',     code: 'fr',  voice: 'fr-FR', whisper: 'fr' },
+  { label: 'Arabic',     code: 'ar',  voice: 'ar-SA', whisper: 'ar' },
+  { label: 'Vietnamese', code: 'vi',  voice: 'vi-VN', whisper: 'vi' },
+  { label: 'Hindi',      code: 'hi',  voice: 'hi-IN', whisper: 'hi' },
+  { label: 'Korean',     code: 'ko',  voice: 'ko-KR', whisper: 'ko' },
+  { label: 'Russian',    code: 'ru',  voice: 'ru-RU', whisper: 'ru' },
+  { label: 'Ukrainian',  code: 'uk',  voice: 'uk-UA', whisper: 'uk' },
 ];
 
 const SPECIALTIES = [
@@ -53,15 +58,25 @@ const PATIENT_LABELS = {
   pt:  'Paciente — Português',
   fr:  'Patient — Français',
   ar:  'مريض — العربية',
+  vi:  'Bệnh nhân — Tiếng Việt',
+  hi:  'रोगी — हिन्दी',
+  ko:  '환자 — 한국어',
+  ru:  'Пациент — Русский',
+  uk:  'Пацієнт — Українська',
 };
 
 const PATIENT_BUTTONS = {
-  es:  { idle: 'Mantén para hablar',    listening: 'Escuchando...' },
-  zh:  { idle: '按住说话',               listening: '聆听中...' },
-  yue: { idle: '按住講嘢',               listening: '聆聽中...' },
-  pt:  { idle: 'Segure para falar',     listening: 'Ouvindo...' },
-  fr:  { idle: 'Maintenir pour parler', listening: 'Écoute...' },
-  ar:  { idle: 'اضغط للتحدث',           listening: 'جارٍ الاستماع...' },
+  es:  { idle: 'Mantén para hablar',       listening: 'Escuchando...' },
+  zh:  { idle: '按住说话',                  listening: '聆听中...' },
+  yue: { idle: '按住講嘢',                  listening: '聆聽中...' },
+  pt:  { idle: 'Segure para falar',        listening: 'Ouvindo...' },
+  fr:  { idle: 'Maintenir pour parler',    listening: 'Écoute...' },
+  ar:  { idle: 'اضغط للتحدث',              listening: 'جارٍ الاستماع...' },
+  vi:  { idle: 'Giữ để nói',               listening: 'Đang nghe...' },
+  hi:  { idle: 'बोलने के लिए दबाएं',        listening: 'सुन रहा है...' },
+  ko:  { idle: '눌러서 말하기',              listening: '듣는 중...' },
+  ru:  { idle: 'Держите для разговора',    listening: 'Слушаю...' },
+  uk:  { idle: 'Утримуйте для розмови',    listening: 'Слухаю...' },
 };
 
 const PATIENT_ONBOARDING = {
@@ -113,6 +128,46 @@ const PATIENT_ONBOARDING = {
     dismiss: 'فهمت',
     repeat: 'كرر',
   },
+  vi: {
+    title: 'Chào mừng đến với Verba',
+    body: 'Ứng dụng này dịch theo thời gian thực những gì bạn và bác sĩ nói.',
+    instruction: 'Giữ nút xanh để nói. Hãy nói tự nhiên.',
+    privacy: 'Cuộc trò chuyện của bạn được bảo mật và không được lưu trữ.',
+    dismiss: 'Đã hiểu',
+    repeat: 'Lặp lại',
+  },
+  hi: {
+    title: 'Verba में आपका स्वागत है',
+    body: 'यह ऐप आप और आपके डॉक्टर की बातों का रियल टाइम में अनुवाद करता है।',
+    instruction: 'बोलने के लिए हरे बटन को दबाए रखें। स्वाभाविक रूप से बोलें।',
+    privacy: 'आपकी बातचीत निजी है और संग्रहीत नहीं की जाती।',
+    dismiss: 'समझ गया',
+    repeat: 'दोहराएं',
+  },
+  ko: {
+    title: 'Verba에 오신 것을 환영합니다',
+    body: '이 앱은 귀하와 의사의 대화를 실시간으로 번역합니다.',
+    instruction: '말하려면 초록색 버튼을 누르고 계세요. 자연스럽게 말씀하세요.',
+    privacy: '대화 내용은 비공개이며 저장되지 않습니다.',
+    dismiss: '확인했습니다',
+    repeat: '반복',
+  },
+  ru: {
+    title: 'Добро пожаловать в Verba',
+    body: 'Это приложение переводит в реальном времени то, что говорите вы и ваш врач.',
+    instruction: 'Удерживайте зелёную кнопку, чтобы говорить. Говорите естественно.',
+    privacy: 'Ваш разговор конфиденциален и не сохраняется.',
+    dismiss: 'Понятно',
+    repeat: 'Повторить',
+  },
+  uk: {
+    title: 'Ласкаво просимо до Verba',
+    body: 'Цей застосунок перекладає в реальному часі те, що говорите ви та ваш лікар.',
+    instruction: 'Утримуйте зелену кнопку, щоб говорити. Говоріть природно.',
+    privacy: 'Ваша розмова є конфіденційною і не зберігається.',
+    dismiss: 'Зрозуміло',
+    repeat: 'Повторити',
+  },
 };
 
 const PHRASE_CATEGORIES = [
@@ -121,39 +176,59 @@ const PHRASE_CATEGORIES = [
     phrases: [
       {
         english: 'Where is your pain?',
-        es: '¿Dónde le duele?',
-        zh: '您哪里疼？',
+        es:  '¿Dónde le duele?',
+        zh:  '您哪里疼？',
         yue: '你喺邊度痛？',
-        pt: 'Onde é a sua dor?',
-        fr: 'Où avez-vous mal?',
-        ar: 'أين يوجد ألمك؟',
+        pt:  'Onde é a sua dor?',
+        fr:  'Où avez-vous mal?',
+        ar:  'أين يوجد ألمك؟',
+        vi:  'Bạn đau ở đâu?',
+        hi:  'आपको दर्द कहाँ है?',
+        ko:  '어디가 아프세요?',
+        ru:  'Где у вас боль?',
+        uk:  'Де у вас біль?',
       },
       {
         english: 'Rate your pain 1 to 10.',
-        es: 'Califique su dolor del 1 al 10.',
-        zh: '请用1到10分来描述您的疼痛程度。',
+        es:  'Califique su dolor del 1 al 10.',
+        zh:  '请用1到10分来描述您的疼痛程度。',
         yue: '請用1至10分評估你嘅痛楚程度。',
-        pt: 'Classifique sua dor de 1 a 10.',
-        fr: 'Évaluez votre douleur de 1 à 10.',
-        ar: 'قيّم ألمك من 1 إلى 10.',
+        pt:  'Classifique sua dor de 1 a 10.',
+        fr:  'Évaluez votre douleur de 1 à 10.',
+        ar:  'قيّم ألمك من 1 إلى 10.',
+        vi:  'Đánh giá cơn đau của bạn từ 1 đến 10.',
+        hi:  'अपने दर्द को 1 से 10 के पैमाने पर बताएं।',
+        ko:  '통증을 1에서 10으로 평가해 주세요.',
+        ru:  'Оцените боль по шкале от 1 до 10.',
+        uk:  'Оцініть біль за шкалою від 1 до 10.',
       },
       {
         english: 'Is the pain constant or does it come and go?',
-        es: '¿El dolor es constante o va y viene?',
-        zh: '疼痛是持续的还是时好时坏？',
+        es:  '¿El dolor es constante o va y viene?',
+        zh:  '疼痛是持续的还是时好时坏？',
         yue: '痛楚係持續定係時好時壞？',
-        pt: 'A dor é constante ou vai e vem?',
-        fr: 'La douleur est-elle constante ou intermittente?',
-        ar: 'هل الألم مستمر أم يأتي ويذهب؟',
+        pt:  'A dor é constante ou vai e vem?',
+        fr:  'La douleur est-elle constante ou intermittente?',
+        ar:  'هل الألم مستمر أم يأتي ويذهب؟',
+        vi:  'Cơn đau có liên tục hay đến rồi đi?',
+        hi:  'क्या दर्द लगातार है या आता-जाता है?',
+        ko:  '통증이 지속적인가요, 아니면 왔다 갔다 하나요?',
+        ru:  'Боль постоянная или приходит и уходит?',
+        uk:  'Біль постійний чи приходить і відходить?',
       },
       {
         english: 'Does the pain radiate anywhere?',
-        es: '¿El dolor se irradia a algún lugar?',
-        zh: '疼痛是否向其他部位放射？',
+        es:  '¿El dolor se irradia a algún lugar?',
+        zh:  '疼痛是否向其他部位放射？',
         yue: '痛楚有冇擴散到其他地方？',
-        pt: 'A dor irradia para algum lugar?',
-        fr: 'La douleur irradie-t-elle quelque part?',
-        ar: 'هل ينتشر الألم إلى مكان آخر؟',
+        pt:  'A dor irradia para algum lugar?',
+        fr:  'La douleur irradie-t-elle quelque part?',
+        ar:  'هل ينتشر الألم إلى مكان آخر؟',
+        vi:  'Cơn đau có lan ra nơi nào không?',
+        hi:  'क्या दर्द कहीं और फैलता है?',
+        ko:  '통증이 다른 곳으로 퍼지나요?',
+        ru:  'Боль отдаёт куда-нибудь?',
+        uk:  'Біль віддає кудись?',
       },
     ],
   },
@@ -162,39 +237,59 @@ const PHRASE_CATEGORIES = [
     phrases: [
       {
         english: 'Are you having trouble breathing?',
-        es: '¿Tiene dificultad para respirar?',
-        zh: '您呼吸困难吗？',
+        es:  '¿Tiene dificultad para respirar?',
+        zh:  '您呼吸困难吗？',
         yue: '你有冇呼吸困難？',
-        pt: 'Você está tendo dificuldade para respirar?',
-        fr: 'Avez-vous des difficultés à respirer?',
-        ar: 'هل تعاني من صعوبة في التنفس؟',
+        pt:  'Você está tendo dificuldade para respirar?',
+        fr:  'Avez-vous des difficultés à respirer?',
+        ar:  'هل تعاني من صعوبة في التنفس؟',
+        vi:  'Bạn có khó thở không?',
+        hi:  'क्या आपको सांस लेने में तकलीफ हो रही है?',
+        ko:  '숨쉬기가 힘드세요?',
+        ru:  'У вас есть затруднение дыхания?',
+        uk:  'У вас є труднощі з диханням?',
       },
       {
         english: 'Do you feel dizzy or nauseous?',
-        es: '¿Se siente mareado o con náuseas?',
-        zh: '您感到头晕或恶心吗？',
+        es:  '¿Se siente mareado o con náuseas?',
+        zh:  '您感到头晕或恶心吗？',
         yue: '你有冇頭暈或作嘔？',
-        pt: 'Você se sente tonto ou com náusea?',
-        fr: 'Vous sentez-vous étourdi ou nauséeux?',
-        ar: 'هل تشعر بالدوار أو الغثيان؟',
+        pt:  'Você se sente tonto ou com náusea?',
+        fr:  'Vous sentez-vous étourdi ou nauséeux?',
+        ar:  'هل تشعر بالدوار أو الغثيان؟',
+        vi:  'Bạn có cảm thấy chóng mặt hoặc buồn nôn không?',
+        hi:  'क्या आपको चक्कर आ रहे हैं या मतली हो रही है?',
+        ko:  '어지럽거나 메스꺼움을 느끼시나요?',
+        ru:  'Вы чувствуете головокружение или тошноту?',
+        uk:  'Ви відчуваєте запаморочення або нудоту?',
       },
       {
         english: 'Do you have a fever?',
-        es: '¿Tiene fiebre?',
-        zh: '您发烧了吗？',
+        es:  '¿Tiene fiebre?',
+        zh:  '您发烧了吗？',
         yue: '你有冇發燒？',
-        pt: 'Você tem febre?',
-        fr: 'Avez-vous de la fièvre?',
-        ar: 'هل لديك حمى؟',
+        pt:  'Você tem febre?',
+        fr:  'Avez-vous de la fièvre?',
+        ar:  'هل لديك حمى؟',
+        vi:  'Bạn có bị sốt không?',
+        hi:  'क्या आपको बुखार है?',
+        ko:  '열이 있으세요?',
+        ru:  'У вас есть температура?',
+        uk:  'У вас є температура?',
       },
       {
         english: 'How long have you had this symptom?',
-        es: '¿Cuánto tiempo lleva con este síntoma?',
-        zh: '这个症状持续多久了？',
+        es:  '¿Cuánto tiempo lleva con este síntoma?',
+        zh:  '这个症状持续多久了？',
         yue: '呢個症狀持續幾耐了？',
-        pt: 'Há quanto tempo você tem esse sintoma?',
-        fr: 'Depuis combien de temps avez-vous ce symptôme?',
-        ar: 'منذ متى وأنت تعاني من هذا العَرَض؟',
+        pt:  'Há quanto tempo você tem esse sintoma?',
+        fr:  'Depuis combien de temps avez-vous ce symptôme?',
+        ar:  'منذ متى وأنت تعاني من هذا العَرَض؟',
+        vi:  'Bạn có triệu chứng này bao lâu rồi?',
+        hi:  'यह लक्षण आपको कितने समय से है?',
+        ko:  '이 증상이 얼마나 됐나요?',
+        ru:  'Как давно у вас этот симптом?',
+        uk:  'Як давно у вас цей симптом?',
       },
     ],
   },
@@ -203,30 +298,45 @@ const PHRASE_CATEGORIES = [
     phrases: [
       {
         english: 'Do you have any allergies?',
-        es: '¿Tiene alguna alergia?',
-        zh: '您有过敏症吗？',
+        es:  '¿Tiene alguna alergia?',
+        zh:  '您有过敏症吗？',
         yue: '你有冇過敏？',
-        pt: 'Você tem alguma alergia?',
-        fr: 'Avez-vous des allergies?',
-        ar: 'هل لديك أي حساسية؟',
+        pt:  'Você tem alguma alergia?',
+        fr:  'Avez-vous des allergies?',
+        ar:  'هل لديك أي حساسية؟',
+        vi:  'Bạn có bị dị ứng gì không?',
+        hi:  'क्या आपको कोई एलर्जी है?',
+        ko:  '알레르기가 있으세요?',
+        ru:  'Есть ли у вас аллергия?',
+        uk:  'Чи є у вас алергія?',
       },
       {
         english: 'What medications are you currently taking?',
-        es: '¿Qué medicamentos está tomando actualmente?',
-        zh: '您目前在服用哪些药物？',
+        es:  '¿Qué medicamentos está tomando actualmente?',
+        zh:  '您目前在服用哪些药物？',
         yue: '你而家食緊咩藥？',
-        pt: 'Quais medicamentos você está tomando atualmente?',
-        fr: 'Quels médicaments prenez-vous actuellement?',
-        ar: 'ما الأدوية التي تتناولها حالياً؟',
+        pt:  'Quais medicamentos você está tomando atualmente?',
+        fr:  'Quels médicaments prenez-vous actuellement?',
+        ar:  'ما الأدوية التي تتناولها حالياً؟',
+        vi:  'Bạn đang dùng thuốc gì?',
+        hi:  'आप अभी कौन सी दवाएं ले रहे हैं?',
+        ko:  '현재 복용 중인 약이 있으세요?',
+        ru:  'Какие лекарства вы сейчас принимаете?',
+        uk:  'Які ліки ви зараз приймаєте?',
       },
       {
         english: 'Do you have any chronic conditions?',
-        es: '¿Tiene alguna enfermedad crónica?',
-        zh: '您有慢性疾病吗？',
+        es:  '¿Tiene alguna enfermedad crónica?',
+        zh:  '您有慢性疾病吗？',
         yue: '你有冇慢性病？',
-        pt: 'Você tem alguma condição crônica?',
-        fr: 'Avez-vous des maladies chroniques?',
-        ar: 'هل لديك أي أمراض مزمنة؟',
+        pt:  'Você tem alguma condição crônica?',
+        fr:  'Avez-vous des maladies chroniques?',
+        ar:  'هل لديك أي أمراض مزمنة؟',
+        vi:  'Bạn có bệnh mãn tính nào không?',
+        hi:  'क्या आपको कोई पुरानी बीमारी है?',
+        ko:  '만성 질환이 있으세요?',
+        ru:  'Есть ли у вас хронические заболевания?',
+        uk:  'Чи є у вас хронічні захворювання?',
       },
     ],
   },
@@ -235,39 +345,59 @@ const PHRASE_CATEGORIES = [
     phrases: [
       {
         english: 'I need to examine you.',
-        es: 'Necesito examinarlo/a.',
-        zh: '我需要给您做检查。',
+        es:  'Necesito examinarlo/a.',
+        zh:  '我需要给您做检查。',
         yue: '我需要為你進行檢查。',
-        pt: 'Preciso examiná-lo/a.',
-        fr: 'Je dois vous examiner.',
-        ar: 'أحتاج إلى فحصك.',
+        pt:  'Preciso examiná-lo/a.',
+        fr:  'Je dois vous examiner.',
+        ar:  'أحتاج إلى فحصك.',
+        vi:  'Tôi cần khám cho bạn.',
+        hi:  'मुझे आपकी जांच करनी है।',
+        ko:  '진찰을 해야 합니다.',
+        ru:  'Мне нужно вас осмотреть.',
+        uk:  'Мені потрібно вас оглянути.',
       },
       {
         english: 'I am going to give you medication.',
-        es: 'Le voy a administrar medicamento.',
-        zh: '我要给您用药。',
+        es:  'Le voy a administrar medicamento.',
+        zh:  '我要给您用药。',
         yue: '我將會為你用藥。',
-        pt: 'Vou lhe administrar medicamento.',
-        fr: 'Je vais vous administrer un médicament.',
-        ar: 'سأعطيك دواءً.',
+        pt:  'Vou lhe administrar medicamento.',
+        fr:  'Je vais vous administrer un médicament.',
+        ar:  'سأعطيك دواءً.',
+        vi:  'Tôi sẽ cho bạn dùng thuốc.',
+        hi:  'मैं आपको दवा दूंगा।',
+        ko:  '약을 드릴 것입니다.',
+        ru:  'Я дам вам лекарство.',
+        uk:  'Я дам вам ліки.',
       },
       {
         english: 'Do you understand?',
-        es: '¿Entiende?',
-        zh: '您明白吗？',
+        es:  '¿Entiende?',
+        zh:  '您明白吗？',
         yue: '你明白嗎？',
-        pt: 'Você entende?',
-        fr: 'Comprenez-vous?',
-        ar: 'هل تفهم؟',
+        pt:  'Você entende?',
+        fr:  'Comprenez-vous?',
+        ar:  'هل تفهم؟',
+        vi:  'Bạn có hiểu không?',
+        hi:  'क्या आप समझे?',
+        ko:  '이해하셨나요?',
+        ru:  'Вы понимаете?',
+        uk:  'Ви розумієте?',
       },
       {
         english: 'Please sign here.',
-        es: 'Por favor firme aquí.',
-        zh: '请在这里签名。',
+        es:  'Por favor firme aquí.',
+        zh:  '请在这里签名。',
         yue: '請喺呢度簽名。',
-        pt: 'Por favor, assine aqui.',
-        fr: 'Veuillez signer ici.',
-        ar: 'من فضلك وقّع هنا.',
+        pt:  'Por favor, assine aqui.',
+        fr:  'Veuillez signer ici.',
+        ar:  'من فضلك وقّع هنا.',
+        vi:  'Vui lòng ký vào đây.',
+        hi:  'कृपया यहाँ हस्ताक्षर करें।',
+        ko:  '여기에 서명해 주세요.',
+        ru:  'Пожалуйста, подпишите здесь.',
+        uk:  'Будь ласка, підпишіть тут.',
       },
     ],
   },
@@ -298,11 +428,9 @@ export default function App() {
   const [caregiverSpeaksEnglish, setCaregiverSpeaksEnglish] = useState(true);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [offlineManual, setOfflineManual] = useState(false);
-
-  // Medication instruction mode state
   const [showMedInstructions, setShowMedInstructions] = useState(false);
   const [showMedPatient, setShowMedPatient] = useState(false);
-  const [medInstructions, setMedInstructions] = useState([]); // [{english, translated}]
+  const [medInstructions, setMedInstructions] = useState([]);
   const [medInputText, setMedInputText] = useState('');
   const [medInputLoading, setMedInputLoading] = useState(false);
   const [medIsRecording, setMedIsRecording] = useState(false);
@@ -310,14 +438,12 @@ export default function App() {
   const medRecorderRef = useRef(null);
   const medChunksRef = useRef([]);
   const medStreamRef = useRef(null);
-
   const providerRef = useRef(null);
   const patientRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const streamRef = useRef(null);
 
-  // Auto-detect online/offline
   useEffect(() => {
     const handleOffline = () => setIsOffline(true);
     const handleOnline = () => setIsOffline(false);
@@ -332,24 +458,16 @@ export default function App() {
   const offlineActive = isOffline || offlineManual;
 
   useEffect(() => {
-    if (providerRef.current) {
-      providerRef.current.scrollTop = providerRef.current.scrollHeight;
-    }
-    if (patientRef.current) {
-      patientRef.current.scrollTop = patientRef.current.scrollHeight;
-    }
+    if (providerRef.current) providerRef.current.scrollTop = providerRef.current.scrollHeight;
+    if (patientRef.current) patientRef.current.scrollTop = patientRef.current.scrollHeight;
   }, [messages]);
 
   useEffect(() => {
     let wakeLock = null;
     const requestWakeLock = async () => {
       try {
-        if ('wakeLock' in navigator) {
-          wakeLock = await navigator.wakeLock.request('screen');
-        }
-      } catch (err) {
-        console.log('Wake lock not available:', err);
-      }
+        if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen');
+      } catch (err) { console.log('Wake lock not available:', err); }
     };
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') requestWakeLock();
@@ -384,39 +502,25 @@ export default function App() {
     }
   }, [showOnboarding, speakOnboarding]);
 
-  // Speak all medication instructions in sequence
   const speakMedInstructions = useCallback((instructions) => {
     window.speechSynthesis.cancel();
     if (!instructions || instructions.length === 0) return;
-
     const texts = instructions.map(i => i.translated).filter(Boolean);
     if (texts.length === 0) return;
-
     setMedIsSpeaking(true);
-
     let index = 0;
     const speakNext = () => {
-      if (index >= texts.length) {
-        setMedIsSpeaking(false);
-        return;
-      }
+      if (index >= texts.length) { setMedIsSpeaking(false); return; }
       const utterance = new SpeechSynthesisUtterance(texts[index]);
       utterance.lang = selectedLang.voice;
       utterance.rate = 0.85;
-      utterance.onend = () => {
-        index++;
-        speakNext();
-      };
-      utterance.onerror = () => {
-        setMedIsSpeaking(false);
-      };
+      utterance.onend = () => { index++; speakNext(); };
+      utterance.onerror = () => setMedIsSpeaking(false);
       window.speechSynthesis.speak(utterance);
     };
-
     speakNext();
   }, [selectedLang]);
 
-  // Auto-speak when patient view opens
   useEffect(() => {
     if (showMedPatient && medInstructions.length > 0) {
       setTimeout(() => speakMedInstructions(medInstructions), 400);
@@ -427,13 +531,7 @@ export default function App() {
   }, [showMedPatient, speakMedInstructions, medInstructions]);
 
   const getSupportedMimeType = () => {
-    const types = [
-      'audio/mp4',
-      'audio/aac',
-      'audio/webm;codecs=opus',
-      'audio/webm',
-      'audio/ogg;codecs=opus',
-    ];
+    const types = ['audio/mp4', 'audio/aac', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'];
     for (const type of types) {
       if (MediaRecorder.isTypeSupported(type)) return type;
     }
@@ -452,38 +550,21 @@ Your rules:
 - Do not soften or rephrase symptoms — translate them as stated
 - If a term has no direct equivalent, use the closest clinical term in the target language
 - Return only the translated text, nothing else`;
-
-    if (selectedSpecialty.prompt) {
-      return `${base}\n\nSpecialty context:\n${selectedSpecialty.prompt}`;
-    }
+    if (selectedSpecialty.prompt) return `${base}\n\nSpecialty context:\n${selectedSpecialty.prompt}`;
     return base;
   };
 
   const getSideLanguages = (side) => {
     if (side === 'provider' || (side === 'caregiver' && caregiverSpeaksEnglish)) {
-      return {
-        sourceLang: 'English',
-        targetLang: selectedLang.label,
-        targetVoice: selectedLang.voice,
-        whisperLang: 'en',
-      };
+      return { sourceLang: 'English', targetLang: selectedLang.label, targetVoice: selectedLang.voice, whisperLang: 'en' };
     }
-    return {
-      sourceLang: selectedLang.label,
-      targetLang: 'English',
-      targetVoice: 'en-US',
-      whisperLang: selectedLang.whisper,
-    };
+    return { sourceLang: selectedLang.label, targetLang: 'English', targetVoice: 'en-US', whisperLang: selectedLang.whisper };
   };
 
-  // Translate a single medication instruction
   const translateMedInstruction = async (text) => {
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'gpt-4o',
         messages: [
@@ -499,25 +580,17 @@ Your rules:
     return data.choices?.[0]?.message?.content?.trim() || null;
   };
 
-  // Add instruction via typed text
   const handleMedAddText = async () => {
     const text = medInputText.trim();
     if (!text) return;
     setMedInputLoading(true);
     try {
       const translated = await translateMedInstruction(text);
-      if (translated) {
-        setMedInstructions((prev) => [...prev, { english: text, translated }]);
-        setMedInputText('');
-      }
-    } catch (err) {
-      console.error('Med instruction translation error:', err);
-    } finally {
-      setMedInputLoading(false);
-    }
+      if (translated) { setMedInstructions((prev) => [...prev, { english: text, translated }]); setMedInputText(''); }
+    } catch (err) { console.error('Med instruction translation error:', err); }
+    finally { setMedInputLoading(false); }
   };
 
-  // Add instruction via voice
   const handleMedStartRecording = async () => {
     if (medIsRecording) return;
     try {
@@ -525,101 +598,57 @@ Your rules:
       medStreamRef.current = stream;
       setMedIsRecording(true);
       medChunksRef.current = [];
-
       const mimeType = getSupportedMimeType();
       const options = mimeType ? { mimeType } : {};
       const recorder = new MediaRecorder(stream, options);
       medRecorderRef.current = recorder;
-
-      recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) medChunksRef.current.push(e.data);
-      };
-
+      recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) medChunksRef.current.push(e.data); };
       recorder.onstop = async () => {
-        if (medStreamRef.current) {
-          medStreamRef.current.getTracks().forEach(t => t.stop());
-          medStreamRef.current = null;
-        }
+        if (medStreamRef.current) { medStreamRef.current.getTracks().forEach(t => t.stop()); medStreamRef.current = null; }
         setMedInputLoading(true);
         const mimeUsed = recorder.mimeType || mimeType || 'audio/mp4';
         const ext = mimeUsed.includes('webm') ? 'webm' : mimeUsed.includes('ogg') ? 'ogg' : 'mp4';
         const blob = new Blob(medChunksRef.current, { type: mimeUsed });
-
         try {
           const formData = new FormData();
           formData.append('file', blob, `audio.${ext}`);
           formData.append('model', 'whisper-1');
           formData.append('language', 'en');
-
           const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
             method: 'POST',
             headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
             body: formData,
           });
-
           const whisperData = await whisperRes.json();
           const transcribed = whisperData.text?.trim();
-
           if (transcribed) {
             const translated = await translateMedInstruction(transcribed);
-            if (translated) {
-              setMedInstructions((prev) => [...prev, { english: transcribed, translated }]);
-            }
+            if (translated) setMedInstructions((prev) => [...prev, { english: transcribed, translated }]);
           }
-        } catch (err) {
-          console.error('Med voice error:', err);
-        } finally {
-          setMedInputLoading(false);
-        }
+        } catch (err) { console.error('Med voice error:', err); }
+        finally { setMedInputLoading(false); }
       };
-
       recorder.start(250);
-    } catch (err) {
-      console.error('Med mic error:', err);
-      setMedIsRecording(false);
-    }
+    } catch (err) { console.error('Med mic error:', err); setMedIsRecording(false); }
   };
 
   const handleMedStopRecording = () => {
-    if (medRecorderRef.current && medIsRecording) {
-      medRecorderRef.current.stop();
-      setMedIsRecording(false);
-    }
+    if (medRecorderRef.current && medIsRecording) { medRecorderRef.current.stop(); setMedIsRecording(false); }
   };
 
-  const handleMedRemove = (index) => {
-    setMedInstructions((prev) => prev.filter((_, i) => i !== index));
-  };
+  const handleMedRemove = (index) => setMedInstructions((prev) => prev.filter((_, i) => i !== index));
 
   const generateSummary = async (forceRegenerate = false) => {
-    if (sessionSummary && !forceRegenerate) {
-      setShowSettings(false);
-      setShowSummary(true);
-      return;
-    }
-    setShowSettings(false);
-    setShowSummary(true);
-    setSummaryLoading(true);
-    setSessionSummary(null);
-
-    const transcriptLines = messages
-      .filter((m) => m.translated)
-      .map((m) => {
-        const speakerLabel =
-          m.side === 'provider' ? 'Provider'
-          : m.side === 'caregiver' ? 'Caregiver'
-          : 'Patient';
-        return `${speakerLabel}: ${m.original}\n→ (translated): ${m.translated}`;
-      })
-      .join('\n\n');
-
+    if (sessionSummary && !forceRegenerate) { setShowSettings(false); setShowSummary(true); return; }
+    setShowSettings(false); setShowSummary(true); setSummaryLoading(true); setSessionSummary(null);
+    const transcriptLines = messages.filter((m) => m.translated).map((m) => {
+      const speakerLabel = m.side === 'provider' ? 'Provider' : m.side === 'caregiver' ? 'Caregiver' : 'Patient';
+      return `${speakerLabel}: ${m.original}\n→ (translated): ${m.translated}`;
+    }).join('\n\n');
     try {
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'gpt-4o',
           messages: [
@@ -635,76 +664,45 @@ The summary should be structured with these sections, and only include a section
 
 Write in clear, clinical language. Be brief — this is a quick reference, not a full note. Do not include patient names or identifying information. Return only the summary, no preamble.`,
             },
-            {
-              role: 'user',
-              content: `Specialty: ${selectedSpecialty.label}\nLanguages: English — ${selectedLang.label}\n\nTranscript:\n${transcriptLines}`,
-            },
+            { role: 'user', content: `Specialty: ${selectedSpecialty.label}\nLanguages: English — ${selectedLang.label}\n\nTranscript:\n${transcriptLines}` },
           ],
         }),
       });
       const data = await res.json();
-      const summary = data.choices?.[0]?.message?.content?.trim();
-      setSessionSummary(summary || 'Could not generate summary. Please try again.');
-    } catch (err) {
-      console.error('Summary error:', err);
-      setSessionSummary('Something went wrong. Please try again.');
-    } finally {
-      setSummaryLoading(false);
-    }
+      setSessionSummary(data.choices?.[0]?.message?.content?.trim() || 'Could not generate summary. Please try again.');
+    } catch (err) { console.error('Summary error:', err); setSessionSummary('Something went wrong. Please try again.'); }
+    finally { setSummaryLoading(false); }
   };
 
   const handleSummaryCopy = async () => {
     if (!sessionSummary) return;
-    try {
-      await navigator.clipboard.writeText(sessionSummary);
-      setSummaryCopyConfirmed(true);
-      setTimeout(() => setSummaryCopyConfirmed(false), 2000);
-    } catch (err) {
-      console.error('Copy failed:', err);
-    }
+    try { await navigator.clipboard.writeText(sessionSummary); setSummaryCopyConfirmed(true); setTimeout(() => setSummaryCopyConfirmed(false), 2000); }
+    catch (err) { console.error('Copy failed:', err); }
   };
 
   const handleBubbleTap = async (message, viewSide) => {
     const key = `${message.id}-${viewSide}`;
     const isExpanded = expandedMessages[key];
-    if (isExpanded) {
-      setExpandedMessages((prev) => ({ ...prev, [key]: null }));
-      return;
-    }
-
+    if (isExpanded) { setExpandedMessages((prev) => ({ ...prev, [key]: null })); return; }
     const isSent =
       message.side === viewSide ||
       (viewSide === 'provider' && message.side === 'caregiver' && caregiverSpeaksEnglish) ||
       (viewSide === 'patient' && message.side === 'caregiver' && !caregiverSpeaksEnglish);
-
     const shownText = isSent ? message.original : (message.translated ?? '...');
     if (!shownText || shownText === '...') return;
-
     const { sourceLang, targetLang } = getSideLanguages(message.side);
     const shownLang = isSent ? sourceLang : targetLang;
     const backLang = shownLang === 'English' ? selectedLang.label : 'English';
-
-    if (message.backTranslations?.[key]) {
-      setExpandedMessages((prev) => ({ ...prev, [key]: message.backTranslations[key] }));
-      return;
-    }
-
+    if (message.backTranslations?.[key]) { setExpandedMessages((prev) => ({ ...prev, [key]: message.backTranslations[key] })); return; }
     setExpandedMessages((prev) => ({ ...prev, [key]: 'loading' }));
-
     try {
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'gpt-4o',
           messages: [
-            {
-              role: 'system',
-              content: `You are a certified medical interpreter. Translate from ${shownLang} to ${backLang}. Return only the translated text, nothing else.`,
-            },
+            { role: 'system', content: `You are a certified medical interpreter. Translate from ${shownLang} to ${backLang}. Return only the translated text, nothing else.` },
             { role: 'user', content: shownText },
           ],
         }),
@@ -712,74 +710,42 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       const data = await res.json();
       const backText = data.choices?.[0]?.message?.content?.trim();
       if (backText) {
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === message.id
-              ? { ...m, backTranslations: { ...m.backTranslations, [key]: backText } }
-              : m
-          )
-        );
+        setMessages((prev) => prev.map((m) => m.id === message.id ? { ...m, backTranslations: { ...m.backTranslations, [key]: backText } } : m));
         setExpandedMessages((prev) => ({ ...prev, [key]: backText }));
-      } else {
-        setExpandedMessages((prev) => ({ ...prev, [key]: null }));
-      }
-    } catch (err) {
-      console.error('Back-translation error:', err);
-      setExpandedMessages((prev) => ({ ...prev, [key]: null }));
-    }
+      } else { setExpandedMessages((prev) => ({ ...prev, [key]: null })); }
+    } catch (err) { console.error('Back-translation error:', err); setExpandedMessages((prev) => ({ ...prev, [key]: null })); }
   };
 
   const startListening = async (side) => {
     if (isListening) return;
-    if (offlineActive) {
-      setStatus('Voice unavailable offline. Use Quick Phrases.');
-      setTimeout(() => setStatus(''), 3000);
-      return;
-    }
+    if (offlineActive) { setStatus('Voice unavailable offline. Use Quick Phrases.'); setTimeout(() => setStatus(''), 3000); return; }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 }
-      });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 } });
       streamRef.current = stream;
-      setIsListening(true);
-      setActiveSide(side);
-      setStatus('Listening...');
-      audioChunksRef.current = [];
-
+      setIsListening(true); setActiveSide(side); setStatus('Listening...'); audioChunksRef.current = [];
       const mimeType = getSupportedMimeType();
       const options = mimeType ? { mimeType } : {};
       const mediaRecorder = new MediaRecorder(stream, options);
       mediaRecorderRef.current = mediaRecorder;
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
-
+      mediaRecorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data); };
       mediaRecorder.onstop = async () => {
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach(t => t.stop());
-          streamRef.current = null;
-        }
+        if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
         setStatus('Translating...');
         const mimeUsed = mediaRecorder.mimeType || mimeType || 'audio/mp4';
-        const audioBlob = new Blob(audioChunksRef.current, { type: mimeUsed });
-        await processAudio(audioBlob, side, mimeUsed);
+        await processAudio(new Blob(audioChunksRef.current, { type: mimeUsed }), side, mimeUsed);
       };
-
       mediaRecorder.start(250);
     } catch (err) {
       console.error('Mic error:', err);
       setStatus('Microphone access denied. Please allow microphone in Safari settings.');
-      setIsListening(false);
-      setActiveSide(null);
+      setIsListening(false); setActiveSide(null);
     }
   };
 
   const stopListening = () => {
     if (mediaRecorderRef.current && isListening) {
       try { mediaRecorderRef.current.stop(); } catch (e) { console.error('Stop error:', e); }
-      setIsListening(false);
-      setActiveSide(null);
+      setIsListening(false); setActiveSide(null);
     }
   };
 
@@ -792,69 +758,34 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
 
   const processAudio = async (audioBlob, side, mimeType) => {
     try {
-      if (audioBlob.size < 500) {
-        setStatus('Recording too short. Hold longer and speak clearly.');
-        return;
-      }
+      if (audioBlob.size < 500) { setStatus('Recording too short. Hold longer and speak clearly.'); return; }
       const { sourceLang, targetLang, targetVoice, whisperLang } = getSideLanguages(side);
       const extension = getFileExtension(mimeType);
       const formData = new FormData();
       formData.append('file', audioBlob, `audio.${extension}`);
       formData.append('model', 'whisper-1');
       formData.append('language', whisperLang);
-
       const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
-        body: formData,
+        method: 'POST', headers: { Authorization: `Bearer ${OPENAI_API_KEY}` }, body: formData,
       });
-
-      if (!whisperRes.ok) {
-        setStatus('Transcription failed. Please try again.');
-        return;
-      }
-
-      const whisperData = await whisperRes.json();
-      const originalText = whisperData.text?.trim();
-      if (!originalText) {
-        setStatus('No speech detected. Hold longer and speak clearly.');
-        return;
-      }
-
+      if (!whisperRes.ok) { setStatus('Transcription failed. Please try again.'); return; }
+      const originalText = (await whisperRes.json()).text?.trim();
+      if (!originalText) { setStatus('No speech detected. Hold longer and speak clearly.'); return; }
       const messageId = Date.now();
       setMessages((prev) => [...prev, { id: messageId, side, original: originalText, translated: null, backTranslations: {} }]);
       setStatus('');
-
       const translateRes = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'gpt-4o',
-          messages: [
-            { role: 'system', content: buildSystemPrompt(sourceLang, targetLang) },
-            { role: 'user', content: originalText },
-          ],
-        }),
+        method: 'POST', headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'gpt-4o', messages: [{ role: 'system', content: buildSystemPrompt(sourceLang, targetLang) }, { role: 'user', content: originalText }] }),
       });
-
-      if (!translateRes.ok) {
-        setStatus('Translation failed. Please try again.');
-        return;
-      }
-
-      const translateData = await translateRes.json();
-      const translatedText = translateData.choices?.[0]?.message?.content?.trim();
+      if (!translateRes.ok) { setStatus('Translation failed. Please try again.'); return; }
+      const translatedText = (await translateRes.json()).choices?.[0]?.message?.content?.trim();
       if (!translatedText) { setStatus('Translation failed. Try again.'); return; }
-
       setMessages((prev) => prev.map((m) => m.id === messageId ? { ...m, translated: translatedText } : m));
       const utterance = new SpeechSynthesisUtterance(translatedText);
-      utterance.lang = targetVoice;
-      utterance.rate = 0.9;
+      utterance.lang = targetVoice; utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
-    } catch (err) {
-      console.error('Process error:', err);
-      setStatus('Something went wrong. Please try again.');
-    }
+    } catch (err) { console.error('Process error:', err); setStatus('Something went wrong. Please try again.'); }
   };
 
   const handlePhraseTap = async (phrase) => {
@@ -864,89 +795,55 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       const messageId = Date.now();
       setMessages((prev) => [...prev, { id: messageId, side: 'provider', original: phrase.english, translated: translatedText, backTranslations: {} }]);
       const utterance = new SpeechSynthesisUtterance(translatedText);
-      utterance.lang = selectedLang.voice;
-      utterance.rate = 0.9;
+      utterance.lang = selectedLang.voice; utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
-      setShowPhrases(false);
-      return;
+      setShowPhrases(false); return;
     }
-
     setTranslatingPhrase(phrase.english);
     try {
       const translateRes = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'gpt-4o',
-          messages: [
-            { role: 'system', content: buildSystemPrompt('English', selectedLang.label) },
-            { role: 'user', content: phrase.english },
-          ],
-        }),
+        method: 'POST', headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'gpt-4o', messages: [{ role: 'system', content: buildSystemPrompt('English', selectedLang.label) }, { role: 'user', content: phrase.english }] }),
       });
-      const translateData = await translateRes.json();
-      const translatedText = translateData.choices?.[0]?.message?.content?.trim();
+      const translatedText = (await translateRes.json()).choices?.[0]?.message?.content?.trim();
       if (!translatedText) return;
       const messageId = Date.now();
       setMessages((prev) => [...prev, { id: messageId, side: 'provider', original: phrase.english, translated: translatedText, backTranslations: {} }]);
       const utterance = new SpeechSynthesisUtterance(translatedText);
-      utterance.lang = selectedLang.voice;
-      utterance.rate = 0.9;
+      utterance.lang = selectedLang.voice; utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
       setShowPhrases(false);
-    } catch (err) {
-      console.error('Phrase translation error:', err);
-    } finally {
-      setTranslatingPhrase(null);
-    }
+    } catch (err) { console.error('Phrase translation error:', err); }
+    finally { setTranslatingPhrase(null); }
   };
 
   const buildTranscript = () => {
     const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    const lines = [
-      'Verba Session Transcript',
-      `Date: ${date} at ${time}`,
-      `Languages: English — ${selectedLang.label}`,
-      `Specialty: ${selectedSpecialty.label}`,
-    ];
+    const lines = ['Verba Session Transcript', `Date: ${date} at ${time}`, `Languages: English — ${selectedLang.label}`, `Specialty: ${selectedSpecialty.label}`];
     if (caregiverMode) lines.push(`Caregiver mode: on (caregiver speaks ${caregiverSpeaksEnglish ? 'English' : selectedLang.label})`);
     lines.push('', '---', '');
-
-    const body = messages
-      .filter((m) => m.translated)
-      .map((m) => {
-        const speakerLabel = m.side === 'provider' ? 'Provider' : m.side === 'caregiver' ? 'Caregiver' : selectedLang.label;
-        const { targetLang } = getSideLanguages(m.side);
-        return `[${speakerLabel}] ${m.original}\n[${targetLang}] ${m.translated}`;
-      })
-      .join('\n\n');
-
+    const body = messages.filter((m) => m.translated).map((m) => {
+      const speakerLabel = m.side === 'provider' ? 'Provider' : m.side === 'caregiver' ? 'Caregiver' : selectedLang.label;
+      const { targetLang } = getSideLanguages(m.side);
+      return `[${speakerLabel}] ${m.original}\n[${targetLang}] ${m.translated}`;
+    }).join('\n\n');
     return lines.join('\n') + body;
   };
 
   const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(buildTranscript());
-      setCopyConfirmed(true);
-      setTimeout(() => setCopyConfirmed(false), 2000);
-    } catch (err) { console.error('Copy failed:', err); }
+    try { await navigator.clipboard.writeText(buildTranscript()); setCopyConfirmed(true); setTimeout(() => setCopyConfirmed(false), 2000); }
+    catch (err) { console.error('Copy failed:', err); }
   };
 
   const handleShare = async () => {
-    try {
-      if (navigator.share) await navigator.share({ title: 'Verba Session Transcript', text: buildTranscript() });
-    } catch (err) { console.error('Share failed:', err); }
+    try { if (navigator.share) await navigator.share({ title: 'Verba Session Transcript', text: buildTranscript() }); }
+    catch (err) { console.error('Share failed:', err); }
   };
 
   const clearSession = () => {
-    setMessages([]);
-    setStatus('');
-    setShowExport(false);
-    setExpandedMessages({});
-    setShowSettings(false);
-    setSessionSummary(null);
-    setShowSummary(false);
+    setMessages([]); setStatus(''); setShowExport(false); setExpandedMessages({});
+    setShowSettings(false); setSessionSummary(null); setShowSummary(false);
   };
 
   const handleLangChange = (e) => {
@@ -982,11 +879,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
           >
             {m.side === 'caregiver' && <span className="caregiver-tag">Caregiver</span>}
             <span className="original">{shownText}</span>
-            {isExpanded && (
-              <span className="back-translation">
-                {backText === 'loading' ? 'Verifying...' : `↩ ${backText}`}
-              </span>
-            )}
+            {isExpanded && <span className="back-translation">{backText === 'loading' ? 'Verifying...' : `↩ ${backText}`}</span>}
           </div>
         );
       })}
@@ -996,7 +889,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
   return (
     <div className="app">
 
-      {/* Audio unlock overlay */}
       {!audioUnlocked && (
         <div className="unlock-overlay" onClick={() => {
           const utterance = new SpeechSynthesisUtterance(' ');
@@ -1012,24 +904,18 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         </div>
       )}
 
-      {/* Offline banner */}
       {offlineActive && (
         <div className="offline-banner">
           {isOffline ? '⚠ No connection — ' : '⚠ Offline mode — '}
           Voice unavailable. Use Quick Phrases.
-          {!isOffline && (
-            <button className="offline-banner-dismiss" onClick={() => setOfflineManual(false)}>Go online</button>
-          )}
+          {!isOffline && <button className="offline-banner-dismiss" onClick={() => setOfflineManual(false)}>Go online</button>}
         </div>
       )}
 
-      {/* Provider side (top) */}
       <div className={`side provider ${activeSide === 'provider' && isListening ? 'active' : ''}`}>
         <div className="side-label">
           Healthcare Provider — English
-          {selectedSpecialty.code !== 'general' && (
-            <span className="specialty-badge">{selectedSpecialty.label}</span>
-          )}
+          {selectedSpecialty.code !== 'general' && <span className="specialty-badge">{selectedSpecialty.label}</span>}
         </div>
         {renderMessages('provider', providerRef)}
         <button
@@ -1043,7 +929,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         </button>
       </div>
 
-      {/* Center divider */}
       <div className="divider">
         <span className="app-name">Verba</span>
         {status && <span className="status">{status}</span>}
@@ -1052,7 +937,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         </div>
       </div>
 
-      {/* Patient side (bottom, rotated) */}
       <div className={`side patient ${(activeSide === 'patient' || activeSide === 'caregiver') && isListening ? 'active' : ''}`}>
         {caregiverMode && (
           <div className="caregiver-controls">
@@ -1085,7 +969,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         <div className="side-label">{patientLabel}</div>
       </div>
 
-      {/* Settings panel */}
       {showSettings && (
         <div className="phrases-overlay" onClick={() => setShowSettings(false)}>
           <div className="phrases-panel settings-panel" onClick={(e) => e.stopPropagation()}>
@@ -1133,7 +1016,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         </div>
       )}
 
-      {/* Patient onboarding overlay */}
       {showOnboarding && (
         <div className="onboarding-overlay">
           <div className="onboarding-box">
@@ -1150,7 +1032,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         </div>
       )}
 
-      {/* Phrases panel */}
       {showPhrases && (
         <div className="phrases-overlay" onClick={() => setShowPhrases(false)}>
           <div className="phrases-panel" onClick={(e) => e.stopPropagation()}>
@@ -1186,7 +1067,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         </div>
       )}
 
-      {/* Export panel */}
       {showExport && (
         <div className="phrases-overlay" onClick={() => setShowExport(false)}>
           <div className="phrases-panel export-panel" onClick={(e) => e.stopPropagation()}>
@@ -1201,7 +1081,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         </div>
       )}
 
-      {/* Session summary panel */}
       {showSummary && (
         <div className="phrases-overlay" onClick={() => setShowSummary(false)}>
           <div className="phrases-panel export-panel" onClick={(e) => e.stopPropagation()}>
@@ -1222,7 +1101,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         </div>
       )}
 
-      {/* Medication instructions — provider input panel */}
       {showMedInstructions && (
         <div className="phrases-overlay" onClick={() => setShowMedInstructions(false)}>
           <div className="phrases-panel med-panel" onClick={(e) => e.stopPropagation()}>
@@ -1230,8 +1108,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
               <span className="phrases-title">Medication Instructions</span>
               <button className="phrases-close" onClick={() => setShowMedInstructions(false)}>✕</button>
             </div>
-
-            {/* Input row */}
             <div className="med-input-row">
               <input
                 className="med-input"
@@ -1242,11 +1118,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
                 onKeyDown={(e) => { if (e.key === 'Enter') handleMedAddText(); }}
                 disabled={medInputLoading || medIsRecording}
               />
-              <button
-                className="med-input-add"
-                onClick={handleMedAddText}
-                disabled={medInputLoading || medIsRecording || !medInputText.trim()}
-              >
+              <button className="med-input-add" onClick={handleMedAddText} disabled={medInputLoading || medIsRecording || !medInputText.trim()}>
                 {medInputLoading ? '...' : 'Add'}
               </button>
               <button
@@ -1260,10 +1132,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
                 {medIsRecording ? '🔴' : '🎙'}
               </button>
             </div>
-
             {medInputLoading && <p className="export-desc">Translating...</p>}
-
-            {/* Instruction list */}
             {medInstructions.length > 0 && (
               <div className="med-list">
                 {medInstructions.map((instr, i) => (
@@ -1277,12 +1146,8 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
                 ))}
               </div>
             )}
-
             {medInstructions.length > 0 && (
-              <button
-                className="export-action-btn"
-                onClick={() => { setShowMedInstructions(false); setShowMedPatient(true); }}
-              >
+              <button className="export-action-btn" onClick={() => { setShowMedInstructions(false); setShowMedPatient(true); }}>
                 Show Patient →
               </button>
             )}
@@ -1290,7 +1155,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         </div>
       )}
 
-      {/* Medication instructions — patient-facing full screen overlay */}
       {showMedPatient && (
         <div className="med-patient-overlay">
           <div className="med-patient-header">
@@ -1305,25 +1169,11 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
             ))}
           </div>
           <div className="med-patient-actions">
-            <button
-              className="med-patient-repeat"
-              onClick={() => speakMedInstructions(medInstructions)}
-              disabled={medIsSpeaking}
-            >
+            <button className="med-patient-repeat" onClick={() => speakMedInstructions(medInstructions)} disabled={medIsSpeaking}>
               {medIsSpeaking ? '🔊 Reading...' : '🔊 Repeat'}
             </button>
-            <button
-              className="med-patient-done"
-              onClick={() => { setShowMedPatient(false); setShowMedInstructions(true); }}
-            >
-              ← Back
-            </button>
-            <button
-              className="med-patient-close"
-              onClick={() => { setShowMedPatient(false); window.speechSynthesis.cancel(); }}
-            >
-              Done
-            </button>
+            <button className="med-patient-done" onClick={() => { setShowMedPatient(false); setShowMedInstructions(true); }}>← Back</button>
+            <button className="med-patient-close" onClick={() => { setShowMedPatient(false); window.speechSynthesis.cancel(); }}>Done</button>
           </div>
         </div>
       )}
