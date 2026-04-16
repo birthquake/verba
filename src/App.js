@@ -921,12 +921,19 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
 )}
 
       {offlineActive && (
-        <div className="offline-banner">
-          {isOffline ? '⚠ No connection — ' : '⚠ Offline mode — '}
-          Voice unavailable. Use Quick Phrases.
-          {!isOffline && <button className="offline-banner-dismiss" onClick={() => setOfflineManual(false)}>Go online</button>}
-        </div>
-      )}
+  <div className="offline-banner" onClick={() => setShowPhrases(true)} style={{ cursor: 'pointer' }}>
+    {isOffline ? '⚠ No connection — ' : '⚠ Offline mode — '}
+    Voice unavailable. <span style={{ textDecoration: 'underline' }}>Open Quick Phrases</span>
+    {!isOffline && (
+      <button
+        className="offline-banner-dismiss"
+        onClick={(e) => { e.stopPropagation(); setOfflineManual(false); }}
+      >
+        Go online
+      </button>
+    )}
+  </div>
+)}
 
       <div className={`side provider ${activeSide === 'provider' && isListening ? 'active' : ''}`}>
         <div className="side-label">
