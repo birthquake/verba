@@ -1116,3 +1116,17 @@
   max-height: 80vh;
   overflow-y: auto;
 }
+
+.phrases-panel {
+  padding-bottom: calc(18px + env(safe-area-inset-bottom));
+}
+
+.phrases-panel {
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.settings-select {
+  max-width: 140px;
+}
