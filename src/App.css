@@ -1229,3 +1229,34 @@
   margin: 0;
   line-height: 1.5;
 }
+
+/* ── Active listening pulse ── */
+@keyframes listeningPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(232, 120, 64, 0.4); }
+  70%  { box-shadow: 0 0 0 12px rgba(232, 120, 64, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(232, 120, 64, 0); }
+}
+
+@keyframes listeningPulseBlue {
+  0%   { box-shadow: 0 0 0 0 rgba(74, 120, 232, 0.4); }
+  70%  { box-shadow: 0 0 0 12px rgba(74, 120, 232, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(74, 120, 232, 0); }
+}
+
+@keyframes listeningPulsePurple {
+  0%   { box-shadow: 0 0 0 0 rgba(124, 92, 191, 0.4); }
+  70%  { box-shadow: 0 0 0 12px rgba(124, 92, 191, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(124, 92, 191, 0); }
+}
+
+.speak-btn.listening {
+  animation: listeningPulse 1.2s ease-out infinite;
+}
+
+.patient .speak-btn.listening {
+  animation: listeningPulseBlue 1.2s ease-out infinite;
+}
+
+.caregiver-btn.listening {
+  animation: listeningPulsePurple 1.2s ease-out infinite;
+}
