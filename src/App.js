@@ -435,6 +435,8 @@ export default function App() {
   const [medInputLoading, setMedInputLoading] = useState(false);
   const [medIsRecording, setMedIsRecording] = useState(false);
   const [medIsSpeaking, setMedIsSpeaking] = useState(false);
+  const [sessionStartTime, setSessionStartTime] = useState(null);
+  const [sessionElapsed, setSessionElapsed] = useState('0:00');
   const medRecorderRef = useRef(null);
   const medChunksRef = useRef([]);
   const medStreamRef = useRef(null);
@@ -479,6 +481,25 @@ export default function App() {
       if (wakeLock) wakeLock.release();
     };
   }, []);
+
+  // Start session timer on first message
+  useEffect(() => {
+    if (messages.length === 1 && !sessionStartTime) {
+      setSessionStartTime(Date.now());
+    }
+  }, [messages, sessionStartTime]);
+
+  // Tick session timer every second
+  useEffect(() => {
+    if (!sessionStartTime) return;
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+      const mins = Math.floor(elapsed / 60);
+      const secs = elapsed % 60;
+      setSessionElapsed(`${mins}:${secs.toString().padStart(2, '0')}`);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [sessionStartTime]);
 
   const speakOnboarding = useCallback(() => {
     window.speechSynthesis.cancel();
@@ -641,7 +662,7 @@ Your rules:
   const generateSummary = async (forceRegenerate = false) => {
     if (sessionSummary && !forceRegenerate) { setShowSettings(false); setShowSummary(true); return; }
     setShowSettings(false); setShowSummary(true); setSummaryLoading(true); setSessionSummary(null);
-    const transcriptLines = messages.filter((m) => m.translated).map((m) => {
+    const transcriptLines = messages.filter((m) => m.translated && !m.dismissed).map((m) => {
       const speakerLabel = m.side === 'provider' ? 'Provider' : m.side === 'caregiver' ? 'Caregiver' : 'Patient';
       return `${speakerLabel}: ${m.original}\n→ (translated): ${m.translated}`;
     }).join('\n\n');
@@ -716,13 +737,32 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
     } catch (err) { console.error('Back-translation error:', err); setExpandedMessages((prev) => ({ ...prev, [key]: null })); }
   };
 
+  // Swipe to dismiss
+  const swipeStartX = useRef({});
+
+  const handleSwipeStart = (e, messageId) => {
+    const touch = e.touches?.[0] || e;
+    swipeStartX.current[messageId] = touch.clientX;
+  };
+
+  const handleSwipeEnd = (e, messageId) => {
+    const touch = e.changedTouches?.[0] || e;
+    const startX = swipeStartX.current[messageId];
+    if (startX === undefined) return;
+    const delta = touch.clientX - startX;
+    if (Math.abs(delta) > 60) {
+      setMessages((prev) => prev.map((m) => m.id === messageId ? { ...m, dismissed: true } : m));
+    }
+    delete swipeStartX.current[messageId];
+  };
+
   const startListening = async (side) => {
     if (isListening) return;
     if (offlineActive) { setStatus('Voice unavailable offline. Use Quick Phrases.'); setTimeout(() => setStatus(''), 3000); return; }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 } });
       streamRef.current = stream;
-    if (navigator.vibrate) navigator.vibrate(30);
+      if (navigator.vibrate) navigator.vibrate(30);
       setIsListening(true); setActiveSide(side); setStatus('Listening...'); audioChunksRef.current = [];
       const mimeType = getSupportedMimeType();
       const options = mimeType ? { mimeType } : {};
@@ -745,7 +785,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
 
   const stopListening = () => {
     if (mediaRecorderRef.current && isListening) {
-    if (navigator.vibrate) navigator.vibrate([20, 50, 20]);
+      if (navigator.vibrate) navigator.vibrate([20, 50, 20]);
       try { mediaRecorderRef.current.stop(); } catch (e) { console.error('Stop error:', e); }
       setIsListening(false); setActiveSide(null);
     }
@@ -774,7 +814,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       const originalText = (await whisperRes.json()).text?.trim();
       if (!originalText) { setStatus('No speech detected. Hold longer and speak clearly.'); return; }
       const messageId = Date.now();
-      setMessages((prev) => [...prev, { id: messageId, side, original: originalText, translated: null, backTranslations: {} }]);
+      setMessages((prev) => [...prev, { id: messageId, side, original: originalText, translated: null, backTranslations: {}, dismissed: false }]);
       setStatus('');
       const translateRes = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST', headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
@@ -795,7 +835,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       const translatedText = phrase[selectedLang.code];
       if (!translatedText) return;
       const messageId = Date.now();
-      setMessages((prev) => [...prev, { id: messageId, side: 'provider', original: phrase.english, translated: translatedText, backTranslations: {} }]);
+      setMessages((prev) => [...prev, { id: messageId, side: 'provider', original: phrase.english, translated: translatedText, backTranslations: {}, dismissed: false }]);
       const utterance = new SpeechSynthesisUtterance(translatedText);
       utterance.lang = selectedLang.voice; utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
@@ -810,7 +850,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       const translatedText = (await translateRes.json()).choices?.[0]?.message?.content?.trim();
       if (!translatedText) return;
       const messageId = Date.now();
-      setMessages((prev) => [...prev, { id: messageId, side: 'provider', original: phrase.english, translated: translatedText, backTranslations: {} }]);
+      setMessages((prev) => [...prev, { id: messageId, side: 'provider', original: phrase.english, translated: translatedText, backTranslations: {}, dismissed: false }]);
       const utterance = new SpeechSynthesisUtterance(translatedText);
       utterance.lang = selectedLang.voice; utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
@@ -824,11 +864,13 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
     const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     const lines = ['Verba Session Transcript', `Date: ${date} at ${time}`, `Languages: English — ${selectedLang.label}`, `Specialty: ${selectedSpecialty.label}`];
     if (caregiverMode) lines.push(`Caregiver mode: on (caregiver speaks ${caregiverSpeaksEnglish ? 'English' : selectedLang.label})`);
+    if (sessionStartTime) lines.push(`Session duration: ${sessionElapsed}`);
     lines.push('', '---', '');
     const body = messages.filter((m) => m.translated).map((m) => {
       const speakerLabel = m.side === 'provider' ? 'Provider' : m.side === 'caregiver' ? 'Caregiver' : selectedLang.label;
       const { targetLang } = getSideLanguages(m.side);
-      return `[${speakerLabel}] ${m.original}\n[${targetLang}] ${m.translated}`;
+      const dismissedTag = m.dismissed ? ' [DISMISSED]' : '';
+      return `[${speakerLabel}]${dismissedTag} ${m.original}\n[${targetLang}]${dismissedTag} ${m.translated}`;
     }).join('\n\n');
     return lines.join('\n') + body;
   };
@@ -846,6 +888,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
   const clearSession = () => {
     setMessages([]); setStatus(''); setShowExport(false); setExpandedMessages({});
     setShowSettings(false); setSessionSummary(null); setShowSummary(false);
+    setSessionStartTime(null); setSessionElapsed('0:00');
   };
 
   const handleLangChange = (e) => {
@@ -876,12 +919,15 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         return (
           <div
             key={m.id}
-            className={`message ${isSent ? 'sent' : 'received'} ${isExpanded ? 'expanded' : ''} ${m.side === 'caregiver' ? 'caregiver-message' : ''}`}
-            onClick={() => m.translated && handleBubbleTap(m, viewSide)}
+            className={`message ${isSent ? 'sent' : 'received'} ${isExpanded ? 'expanded' : ''} ${m.side === 'caregiver' ? 'caregiver-message' : ''} ${m.dismissed ? 'dismissed' : ''}`}
+            onClick={() => !m.dismissed && m.translated && handleBubbleTap(m, viewSide)}
+            onTouchStart={(e) => handleSwipeStart(e, m.id)}
+            onTouchEnd={(e) => handleSwipeEnd(e, m.id)}
           >
             {m.side === 'caregiver' && <span className="caregiver-tag">Caregiver</span>}
+            {m.dismissed && <span className="dismissed-tag">Dismissed</span>}
             <span className="original">{shownText}</span>
-            {isExpanded && <span className="back-translation">{backText === 'loading' ? 'Verifying...' : `↩ ${backText}`}</span>}
+            {isExpanded && !m.dismissed && <span className="back-translation">{backText === 'loading' ? 'Verifying...' : `↩ ${backText}`}</span>}
           </div>
         );
       })}
@@ -892,48 +938,48 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
     <div className="app">
 
       {!audioUnlocked && (
-  <div className="splash-overlay">
-    <div className="splash-content">
-      <div className="splash-logo">
-        <span className="splash-logo-icon">🌐</span>
-        <h1 className="splash-logo-name">Verba</h1>
-      </div>
-      <p className="splash-tagline">Real-time voice translation<br />for clinical care</p>
-      <div className="splash-langs">
-        <span>ES</span><span>中</span><span>PT</span><span>FR</span>
-        <span>AR</span><span>VI</span><span>HI</span><span>KO</span>
-        <span>RU</span><span>UK</span><span>粵</span>
-      </div>
-      <button
-        className="splash-btn"
-        onClick={() => {
-          const utterance = new SpeechSynthesisUtterance(' ');
-          utterance.volume = 0;
-          window.speechSynthesis.speak(utterance);
-          setAudioUnlocked(true);
-        }}
-      >
-        Begin Session
-      </button>
-      <p className="splash-privacy">Conversations are private and never stored</p>
-    </div>
-  </div>
-)}
+        <div className="splash-overlay">
+          <div className="splash-content">
+            <div className="splash-logo">
+              <span className="splash-logo-icon">🌐</span>
+              <h1 className="splash-logo-name">Verba</h1>
+            </div>
+            <p className="splash-tagline">Real-time voice translation<br />for clinical care</p>
+            <div className="splash-langs">
+              <span>ES</span><span>中</span><span>PT</span><span>FR</span>
+              <span>AR</span><span>VI</span><span>HI</span><span>KO</span>
+              <span>RU</span><span>UK</span><span>粵</span>
+            </div>
+            <button
+              className="splash-btn"
+              onClick={() => {
+                const utterance = new SpeechSynthesisUtterance(' ');
+                utterance.volume = 0;
+                window.speechSynthesis.speak(utterance);
+                setAudioUnlocked(true);
+              }}
+            >
+              Begin Session
+            </button>
+            <p className="splash-privacy">Conversations are private and never stored</p>
+          </div>
+        </div>
+      )}
 
       {offlineActive && (
-  <div className="offline-banner" onClick={() => setShowPhrases(true)} style={{ cursor: 'pointer' }}>
-    {isOffline ? '⚠ No connection — ' : '⚠ Offline mode — '}
-    Voice unavailable. <span style={{ textDecoration: 'underline' }}>Open Quick Phrases</span>
-    {!isOffline && (
-      <button
-        className="offline-banner-dismiss"
-        onClick={(e) => { e.stopPropagation(); setOfflineManual(false); }}
-      >
-        Go online
-      </button>
-    )}
-  </div>
-)}
+        <div className="offline-banner" onClick={() => setShowPhrases(true)} style={{ cursor: 'pointer' }}>
+          {isOffline ? '⚠ No connection — ' : '⚠ Offline mode — '}
+          Voice unavailable. <span style={{ textDecoration: 'underline' }}>Open Quick Phrases</span>
+          {!isOffline && (
+            <button
+              className="offline-banner-dismiss"
+              onClick={(e) => { e.stopPropagation(); setOfflineManual(false); }}
+            >
+              Go online
+            </button>
+          )}
+        </div>
+      )}
 
       <div className={`side provider ${activeSide === 'provider' && isListening ? 'active' : ''}`}>
         <div className="side-label">
@@ -955,6 +1001,9 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       <div className="divider">
         <span className="app-name">Verba</span>
         {status && <span className="status">{status}</span>}
+        {sessionStartTime && !status && (
+          <span className="session-timer">{sessionElapsed}</span>
+        )}
         <div className="divider-actions">
           <button className="settings-btn" onClick={() => setShowSettings(true)}>⚙</button>
         </div>
