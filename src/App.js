@@ -354,7 +354,6 @@ export default function App() {
   const [twoDeviceJoinCode, setTwoDeviceJoinCode] = useState('');
   const [twoDeviceConnected, setTwoDeviceConnected] = useState(false);
   const [showTwoDeviceSetup, setShowTwoDeviceSetup] = useState(false);
-  const [twoDeviceStatus, setTwoDeviceStatus] = useState('');
   const ablyRef = useRef(null);
   const ablyChannelRef = useRef(null);
 
@@ -477,8 +476,8 @@ export default function App() {
       disconnectAbly();
     });
 
-  }, [selectedLang]);
-
+}, [selectedLang, disconnectAbly]);
+  
   const disconnectAbly = useCallback(() => {
     if (ablyChannelRef.current) {
       ablyChannelRef.current.unsubscribe();
@@ -541,8 +540,9 @@ export default function App() {
     utterance.onend = () => setIsSpeakingOnboarding(false);
     utterance.onerror = () => setIsSpeakingOnboarding(false);
     window.speechSynthesis.speak(utterance);
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedLang]);
-
+  
   useEffect(() => {
     if (showOnboarding) {
       setTimeout(() => speakOnboarding(), 400);
@@ -961,7 +961,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
   const onboarding = PATIENT_ONBOARDING[selectedLang.code];
 
   // In two-device mode, determine what this device shows
-  const twoDeviceSide = twoDeviceRole; // 'provider' or 'patient'
 
   const renderMessages = (viewSide, ref) => (
     <div className="messages" ref={ref}>
