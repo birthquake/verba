@@ -890,19 +890,33 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
     <div className="app">
 
       {!audioUnlocked && (
-        <div className="unlock-overlay" onClick={() => {
+  <div className="splash-overlay">
+    <div className="splash-content">
+      <div className="splash-logo">
+        <span className="splash-logo-icon">🌐</span>
+        <h1 className="splash-logo-name">Verba</h1>
+      </div>
+      <p className="splash-tagline">Real-time voice translation<br />for clinical care</p>
+      <div className="splash-langs">
+        <span>ES</span><span>中</span><span>PT</span><span>FR</span>
+        <span>AR</span><span>VI</span><span>HI</span><span>KO</span>
+        <span>RU</span><span>UK</span><span>粵</span>
+      </div>
+      <button
+        className="splash-btn"
+        onClick={() => {
           const utterance = new SpeechSynthesisUtterance(' ');
           utterance.volume = 0;
           window.speechSynthesis.speak(utterance);
           setAudioUnlocked(true);
-        }}>
-          <div className="unlock-box">
-            <span className="unlock-icon">🔊</span>
-            <p className="unlock-title">Tap to enable audio</p>
-            <p className="unlock-sub">Required for voice translation</p>
-          </div>
-        </div>
-      )}
+        }}
+      >
+        Begin Session
+      </button>
+      <p className="splash-privacy">Conversations are private and never stored</p>
+    </div>
+  </div>
+)}
 
       {offlineActive && (
         <div className="offline-banner">
