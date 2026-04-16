@@ -304,7 +304,6 @@ const PHRASE_CATEGORIES = [
   },
 ];
 
-// Generate a random session code like HAWK-4291
 const generateSessionCode = () => {
   const words = ['HAWK', 'BLUE', 'PINE', 'SALT', 'GOLD', 'IRON', 'LAKE', 'MOON', 'RAIN', 'WIND'];
   const word = words[Math.floor(Math.random() * words.length)];
@@ -347,16 +346,18 @@ export default function App() {
   const [sessionStartTime, setSessionStartTime] = useState(null);
   const [sessionElapsed, setSessionElapsed] = useState('0:00');
 
-  // Two-device mode state
-  const [twoDeviceMode, setTwoDeviceMode] = useState(false); // active or not
-  const [twoDeviceRole, setTwoDeviceRole] = useState(null); // 'provider' | 'patient'
+  // Two-device mode
+  const [twoDeviceMode, setTwoDeviceMode] = useState(false);
+  const [twoDeviceRole, setTwoDeviceRole] = useState(null);
   const [twoDeviceCode, setTwoDeviceCode] = useState('');
   const [twoDeviceJoinCode, setTwoDeviceJoinCode] = useState('');
   const [twoDeviceConnected, setTwoDeviceConnected] = useState(false);
   const [showTwoDeviceSetup, setShowTwoDeviceSetup] = useState(false);
+  // eslint-disable-next-line no-unused-vars
+  const [twoDeviceStatus, setTwoDeviceStatus] = useState('');
+
   const ablyRef = useRef(null);
   const ablyChannelRef = useRef(null);
-
   const medRecorderRef = useRef(null);
   const medChunksRef = useRef([]);
   const medStreamRef = useRef(null);
@@ -420,7 +421,28 @@ export default function App() {
     return () => clearInterval(interval);
   }, [sessionStartTime]);
 
-  // ── Ably two-device connection ──
+  useEffect(() => {
+    return () => {
+      if (ablyRef.current) ablyRef.current.close();
+    };
+  }, []);
+
+  const disconnectAbly = useCallback(() => {
+    if (ablyChannelRef.current) {
+      ablyChannelRef.current.unsubscribe();
+      ablyChannelRef.current = null;
+    }
+    if (ablyRef.current) {
+      ablyRef.current.close();
+      ablyRef.current = null;
+    }
+    setTwoDeviceConnected(false);
+    setTwoDeviceMode(false);
+    setTwoDeviceRole(null);
+    setTwoDeviceCode('');
+    setTwoDeviceStatus('');
+  }, []);
+
   const connectAbly = useCallback((code, role) => {
     if (ablyRef.current) {
       ablyRef.current.close();
@@ -449,20 +471,15 @@ export default function App() {
     const channel = client.channels.get(`verba-${code}`);
     ablyChannelRef.current = channel;
 
-    // Listen for messages from the other device
     channel.subscribe('translation', (msg) => {
       const { fromRole, original, translated, side, messageId } = msg.data;
-      // Only process messages from the other role
       if (fromRole === role) return;
 
-      // Add message to transcript
       setMessages((prev) => {
-        // Avoid duplicates
         if (prev.find(m => m.id === messageId)) return prev;
         return [...prev, { id: messageId, side, original, translated, backTranslations: {}, dismissed: false }];
       });
 
-      // Speak the translation on this device
       const speakText = role === 'provider' ? original : translated;
       const speakLang = role === 'provider' ? 'en-US' : selectedLang.voice;
       const utterance = new SpeechSynthesisUtterance(speakText);
@@ -472,34 +489,11 @@ export default function App() {
     });
 
     channel.subscribe('end-session', () => {
-      setTwoDeviceStatus('Session ended by other device');
       disconnectAbly();
     });
 
-}, [selectedLang, disconnectAbly]);
-  
-  const disconnectAbly = useCallback(() => {
-    if (ablyChannelRef.current) {
-      ablyChannelRef.current.unsubscribe();
-      ablyChannelRef.current = null;
-    }
-    if (ablyRef.current) {
-      ablyRef.current.close();
-      ablyRef.current = null;
-    }
-    setTwoDeviceConnected(false);
-    setTwoDeviceMode(false);
-    setTwoDeviceRole(null);
-    setTwoDeviceCode('');
-    setTwoDeviceStatus('');
-  }, []);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (ablyRef.current) ablyRef.current.close();
-    };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLang, disconnectAbly]);
 
   const handleStartTwoDeviceAsProvider = () => {
     const code = generateSessionCode();
@@ -540,9 +534,8 @@ export default function App() {
     utterance.onend = () => setIsSpeakingOnboarding(false);
     utterance.onerror = () => setIsSpeakingOnboarding(false);
     window.speechSynthesis.speak(utterance);
-// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedLang]);
-  
+
   useEffect(() => {
     if (showOnboarding) {
       setTimeout(() => speakOnboarding(), 400);
@@ -849,24 +842,18 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       if (!translatedText) { setStatus('Translation failed. Try again.'); return; }
       setMessages((prev) => prev.map((m) => m.id === messageId ? { ...m, translated: translatedText } : m));
 
-      // In two-device mode, publish to Ably channel
       if (twoDeviceMode && ablyChannelRef.current && twoDeviceConnected) {
         ablyChannelRef.current.publish('translation', {
-          fromRole: twoDeviceRole,
-          messageId,
-          side,
-          original: originalText,
-          translated: translatedText,
+          fromRole: twoDeviceRole, messageId, side,
+          original: originalText, translated: translatedText,
         });
       }
 
-      // In single-device mode, speak locally as normal
       if (!twoDeviceMode) {
         const utterance = new SpeechSynthesisUtterance(translatedText);
         utterance.lang = targetVoice; utterance.rate = 0.9;
         window.speechSynthesis.speak(utterance);
       } else {
-        // In two-device mode, speak own side's text
         const speakText = twoDeviceRole === 'provider' ? translatedText : originalText;
         const speakLang = twoDeviceRole === 'provider' ? selectedLang.voice : 'en-US';
         const utterance = new SpeechSynthesisUtterance(speakText);
@@ -897,14 +884,12 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       if (!translatedText) return;
       const messageId = Date.now();
       setMessages((prev) => [...prev, { id: messageId, side: 'provider', original: phrase.english, translated: translatedText, backTranslations: {}, dismissed: false }]);
-
       if (twoDeviceMode && ablyChannelRef.current && twoDeviceConnected) {
         ablyChannelRef.current.publish('translation', {
           fromRole: 'provider', messageId, side: 'provider',
           original: phrase.english, translated: translatedText,
         });
       }
-
       const utterance = new SpeechSynthesisUtterance(translatedText);
       utterance.lang = selectedLang.voice; utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
@@ -959,8 +944,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
   const patientLabel = PATIENT_LABELS[selectedLang.code];
   const patientBtn = PATIENT_BUTTONS[selectedLang.code];
   const onboarding = PATIENT_ONBOARDING[selectedLang.code];
-
-  // In two-device mode, determine what this device shows
 
   const renderMessages = (viewSide, ref) => (
     <div className="messages" ref={ref}>
@@ -1022,10 +1005,12 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
           <button className="two-device-end" onClick={handleEndTwoDeviceSession}>End</button>
         </div>
 
-        <div className={`side ${isProvider ? 'provider' : 'patient'} two-device-full ${activeSide && isListening ? 'active' : ''}`}
-          style={{ flex: 1, transform: 'none' }}>
+        <div
+          className={`side ${isProvider ? 'provider' : 'patient'} two-device-full ${activeSide && isListening ? 'active' : ''}`}
+          style={{ flex: 1, transform: 'none' }}
+        >
           <div className="side-label">
-            {isProvider ? `Healthcare Provider — English` : patientLabel}
+            {isProvider ? 'Healthcare Provider — English' : patientLabel}
             {isProvider && selectedSpecialty.code !== 'general' && <span className="specialty-badge">{selectedSpecialty.label}</span>}
           </div>
           {renderMessages(twoDeviceRole, isProvider ? providerRef : patientRef)}
@@ -1042,9 +1027,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
           </button>
         </div>
 
-        {status && (
-          <div className="two-device-status">{status}</div>
-        )}
+        {status && <div className="two-device-status">{status}</div>}
       </div>
     );
   }
@@ -1193,7 +1176,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         </div>
       )}
 
-      {/* Two-device setup panel */}
       {showTwoDeviceSetup && (
         <div className="phrases-overlay" onClick={() => setShowTwoDeviceSetup(false)}>
           <div className="phrases-panel settings-panel" onClick={(e) => e.stopPropagation()}>
