@@ -95,3 +95,101 @@
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }
+
+/* ── Vital Signs ── */
+.vitals-panel {
+  max-height: 80vh;
+  overflow-y: auto;
+  padding-bottom: calc(18px + env(safe-area-inset-bottom));
+}
+
+.vitals-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vitals-input-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #faf7f4;
+  border: 1px solid #ede8e0;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.vitals-input-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.vitals-label-en {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2a2018;
+}
+
+.vitals-unit {
+  font-size: 11px;
+  color: #b0a090;
+  font-weight: 500;
+}
+
+.vitals-input {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2a2018;
+  background: #ffffff;
+  border: 1px solid #ede8e0;
+  border-radius: 10px;
+  padding: 8px 12px;
+  width: 130px;
+  text-align: right;
+  outline: none;
+}
+
+.vitals-input:focus {
+  border-color: #e87840;
+}
+
+/* ── Vital Signs patient overlay ── */
+.vitals-patient-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px 18px;
+  border: 1px solid #c8d4e8;
+}
+
+.vitals-patient-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.vitals-patient-label-native {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a2a4a;
+}
+
+.vitals-patient-label-en {
+  font-size: 12px;
+  color: #8090b0;
+  font-weight: 500;
+}
+
+.vitals-patient-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: #4a78e8;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
