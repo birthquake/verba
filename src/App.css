@@ -1413,3 +1413,17 @@
 .panic-dismiss:active {
   background: #922b21;
 }
+
+/* ── Confidence warning ── */
+.confidence-warning {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #b7770d;
+  background: #fef9e7;
+  border: 1px solid #f9e4a0;
+  border-radius: 6px;
+  padding: 3px 7px;
+  margin-bottom: 5px;
+  letter-spacing: 0.02em;
+}
