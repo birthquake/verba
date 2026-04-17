@@ -1315,3 +1315,101 @@
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }
+
+/* ── Help / Panic Button ── */
+.help-btn {
+  width: 100%;
+  max-width: 320px;
+  padding: 13px;
+  border-radius: 16px;
+  border: 2px solid #c0392b;
+  background: #fdf0f0;
+  color: #c0392b;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  flex-shrink: 0;
+  letter-spacing: 0.01em;
+  margin-top: 6px;
+}
+
+.help-btn:active {
+  background: #c0392b;
+  color: #ffffff;
+  transform: scale(0.98);
+}
+
+/* ── Panic Alert Overlay ── */
+@keyframes panicFlash {
+  0%   { background: rgba(192, 57, 43, 0.95); }
+  50%  { background: rgba(192, 57, 43, 0.75); }
+  100% { background: rgba(192, 57, 43, 0.95); }
+}
+
+.panic-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 32px;
+  animation: panicFlash 0.8s ease-in-out infinite;
+}
+
+.panic-box {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+}
+
+.panic-icon {
+  font-size: 56px;
+  line-height: 1;
+}
+
+.panic-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #c0392b;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.panic-sub {
+  font-size: 18px;
+  color: #7a6858;
+  margin: 0;
+}
+
+.panic-dismiss {
+  margin-top: 8px;
+  width: 100%;
+  padding: 16px;
+  border-radius: 16px;
+  border: none;
+  background: #c0392b;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.panic-dismiss:active {
+  background: #922b21;
+}
