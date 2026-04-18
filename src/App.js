@@ -413,7 +413,6 @@ export default function App() {
   const [twoDeviceJoinCode, setTwoDeviceJoinCode] = useState('');
   const [twoDeviceConnected, setTwoDeviceConnected] = useState(false);
   const [showTwoDeviceSetup, setShowTwoDeviceSetup] = useState(false);
-  const [showQRCode, setShowQRCode] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [twoDeviceStatus, setTwoDeviceStatus] = useState('');
 
@@ -573,7 +572,6 @@ export default function App() {
     setTwoDeviceRole('provider');
     setTwoDeviceMode(true);
     connectAbly(code, 'provider');
-    setShowQRCode(true);
     setShowTwoDeviceSetup(false);
     setShowSettings(false);
   };
