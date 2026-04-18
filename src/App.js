@@ -393,6 +393,7 @@ export default function App() {
   const [sessionStartTime, setSessionStartTime] = useState(null);
   const [sessionElapsed, setSessionElapsed] = useState('0:00');
   const [showPainScale, setShowPainScale] = useState(false);
+  const [splashReady, setSplashReady] = useState(false);
   const [showVitalSigns, setShowVitalSigns] = useState(false);
   const [showVitalPatient, setShowVitalPatient] = useState(false);
   const [vitalValues, setVitalValues] = useState({ bp: '', hr: '', temp: '', o2: '' });
@@ -427,6 +428,11 @@ export default function App() {
   const audioChunksRef = useRef([]);
   const streamRef = useRef(null);
   const swipeStartX = useRef({});
+
+  useEffect(() => {
+    const t = setTimeout(() => setSplashReady(true), 100);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -910,8 +916,8 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
       if (segments.length > 0) {
         const avgNoSpeech = segments.reduce((sum, s) => sum + (s.no_speech_prob || 0), 0) / segments.length;
         const avgLogProb = segments.reduce((sum, s) => sum + (s.avg_logprob || 0), 0) / segments.length;
-        // avg_logprob of -0.5 or lower corresponds roughly to <70% confidence
-        lowConfidence = avgLogProb < -0.5 || avgNoSpeech > 0.3;
+        // avg_logprob below -1.0 indicates genuinely poor transcription confidence
+        lowConfidence = avgLogProb < -1.0 || avgNoSpeech > 0.5;
       }
 
       const messageId = Date.now();
@@ -1271,16 +1277,16 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
 
       {!audioUnlocked && (
         <div className="splash-overlay">
-          <div className="splash-content">
+          <div className={`splash-content ${splashReady ? 'splash-ready' : ''}`}>
             <div className="splash-logo">
               <span className="splash-logo-icon">🌐</span>
               <h1 className="splash-logo-name">Verba</h1>
             </div>
             <p className="splash-tagline">Real-time voice translation<br />for clinical care</p>
             <div className="splash-langs">
-              <span>ES</span><span>中</span><span>PT</span><span>FR</span>
-              <span>AR</span><span>VI</span><span>HI</span><span>KO</span>
-              <span>RU</span><span>UK</span><span>粵</span>
+              {['ES','中','PT','FR','AR','VI','HI','KO','RU','UK','粵'].map((lang, i) => (
+                <span key={lang} className="splash-lang-badge" style={{ animationDelay: `${i * 60}ms` }}>{lang}</span>
+              ))}
             </div>
             <button className="splash-btn" onClick={() => {
               const utterance = new SpeechSynthesisUtterance(' ');
@@ -1305,7 +1311,9 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
 
       <div className={`side provider ${activeSide === 'provider' && isListening ? 'active' : ''}`}>
         <div className="side-label">
-          Healthcare Provider — English
+          <span className="side-label-role">Provider</span>
+          <span className="side-label-sep">·</span>
+          <span className="side-label-lang">English</span>
           {selectedSpecialty.code !== 'general' && <span className="specialty-badge">{selectedSpecialty.label}</span>}
         </div>
         {renderMessages('provider', providerRef)}
@@ -1322,8 +1330,10 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
 
       <div className="divider">
         <span className="app-name">Verba</span>
-        {status && <span className="status">{status}</span>}
-        {sessionStartTime && !status && <span className="session-timer">{sessionElapsed}</span>}
+        <div className="divider-center">
+          {status && <span className="status">{status}</span>}
+          {sessionStartTime && !status && <span className="session-timer">{sessionElapsed}</span>}
+        </div>
         <div className="divider-actions">
           <button className="settings-btn" onClick={() => setShowSettings(true)}>⚙</button>
         </div>
@@ -1358,7 +1368,11 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
           {offlineActive ? 'Voice unavailable offline' : (activeSide === 'patient' && isListening ? patientBtn.listening : patientBtn.idle)}
         </button>
         {renderMessages('patient', patientRef)}
-        <div className="side-label">{patientLabel}</div>
+        <div className="side-label">
+          <span className="side-label-role">Patient</span>
+          <span className="side-label-sep">·</span>
+          <span className="side-label-lang">{selectedLang.label}</span>
+        </div>
         <button className="help-btn" onClick={handlePanicButton}>
           {HELP_BUTTON_LABELS[selectedLang.code] || 'I need help'}
         </button>
