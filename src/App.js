@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Ably from 'ably';
-import { QRCodeSVG } from 'qrcode.react';
 import './App.css';
 
 const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
@@ -1264,25 +1263,6 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         </div>
 
         {status && <div className="two-device-status">{status}</div>}
-
-        {showQRCode && (
-          <div className="qr-overlay" onClick={() => setShowQRCode(false)}>
-            <div className="qr-box" onClick={(e) => e.stopPropagation()}>
-              <p className="qr-title">Scan to Join</p>
-              <p className="qr-sub">Patient scans this with their camera</p>
-              <div className="qr-code">
-                <QRCodeSVG
-                  value={`${window.location.origin}${window.location.pathname}?join=${twoDeviceCode}`}
-                  size={200}
-                  level="M"
-                />
-              </div>
-              <p className="qr-code-text">{twoDeviceCode}</p>
-              <p className="qr-code-hint">Or patient can enter the code manually</p>
-              <button className="qr-dismiss" onClick={() => setShowQRCode(false)}>Start Session</button>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
