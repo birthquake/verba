@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Ably from 'ably';
+import { QRCodeSVG } from 'qrcode.react';
 import './App.css';
 
 const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
@@ -413,6 +414,7 @@ export default function App() {
   const [twoDeviceJoinCode, setTwoDeviceJoinCode] = useState('');
   const [twoDeviceConnected, setTwoDeviceConnected] = useState(false);
   const [showTwoDeviceSetup, setShowTwoDeviceSetup] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [twoDeviceStatus, setTwoDeviceStatus] = useState('');
 
@@ -427,6 +429,17 @@ export default function App() {
   const audioChunksRef = useRef([]);
   const streamRef = useRef(null);
   const swipeStartX = useRef({});
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const joinCode = params.get('join');
+    if (joinCode) {
+      setTwoDeviceJoinCode(joinCode.toUpperCase());
+      setShowTwoDeviceSetup(true);
+      // Clean URL without reload
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   useEffect(() => {
     const handleOffline = () => setIsOffline(true);
@@ -561,6 +574,7 @@ export default function App() {
     setTwoDeviceRole('provider');
     setTwoDeviceMode(true);
     connectAbly(code, 'provider');
+    setShowQRCode(true);
     setShowTwoDeviceSetup(false);
     setShowSettings(false);
   };
@@ -1153,19 +1167,26 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
 
   const renderMessages = (viewSide, ref) => (
     <div className="messages" ref={ref}>
+      {messages.length === 0 && (
+        <div className="messages-empty">
+          <span className="messages-empty-icon">🎙</span>
+          <span className="messages-empty-text">Hold the button to start</span>
+        </div>
+      )}
       {messages.map((m) => {
         const key = `${m.id}-${viewSide}`;
         const isSent =
           m.side === viewSide ||
           (viewSide === 'provider' && m.side === 'caregiver' && caregiverSpeaksEnglish) ||
           (viewSide === 'patient' && m.side === 'caregiver' && !caregiverSpeaksEnglish);
-        const shownText = isSent ? m.original : (m.translated ?? '...');
+        const shownText = isSent ? m.original : (m.translated ?? null);
         const backText = expandedMessages[key];
         const isExpanded = !!backText;
+        const isPending = !m.translated && !isSent;
         return (
           <div
             key={m.id}
-            className={`message ${isSent ? 'sent' : 'received'} ${isExpanded ? 'expanded' : ''} ${m.side === 'caregiver' ? 'caregiver-message' : ''} ${m.dismissed ? 'dismissed' : ''}`}
+            className={`message ${isSent ? 'sent' : 'received'} ${isExpanded ? 'expanded' : ''} ${m.side === 'caregiver' ? 'caregiver-message' : ''} ${m.dismissed ? 'dismissed' : ''} message-enter`}
             onClick={() => !m.dismissed && m.translated && handleBubbleTap(m, viewSide)}
             onTouchStart={(e) => handleSwipeStart(e, m.id)}
             onTouchEnd={(e) => handleSwipeEnd(e, m.id)}
@@ -1175,7 +1196,13 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
             {m.lowConfidence && isSent && !m.dismissed && (
               <span className="confidence-warning">⚠ Low confidence — verify</span>
             )}
-            <span className="original">{shownText}</span>
+            {isPending ? (
+              <span className="typing-indicator">
+                <span /><span /><span />
+              </span>
+            ) : (
+              <span className="original">{shownText}</span>
+            )}
             {isExpanded && !m.dismissed && <span className="back-translation">{backText === 'loading' ? 'Verifying...' : `↩ ${backText}`}</span>}
           </div>
         );
@@ -1237,6 +1264,25 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
         </div>
 
         {status && <div className="two-device-status">{status}</div>}
+
+        {showQRCode && (
+          <div className="qr-overlay" onClick={() => setShowQRCode(false)}>
+            <div className="qr-box" onClick={(e) => e.stopPropagation()}>
+              <p className="qr-title">Scan to Join</p>
+              <p className="qr-sub">Patient scans this with their camera</p>
+              <div className="qr-code">
+                <QRCodeSVG
+                  value={`${window.location.origin}${window.location.pathname}?join=${twoDeviceCode}`}
+                  size={200}
+                  level="M"
+                />
+              </div>
+              <p className="qr-code-text">{twoDeviceCode}</p>
+              <p className="qr-code-hint">Or patient can enter the code manually</p>
+              <button className="qr-dismiss" onClick={() => setShowQRCode(false)}>Start Session</button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -1383,12 +1429,15 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
               </button>
             </div>
             <div className="settings-divider" />
+            <p className="settings-section-label">Clinical Tools</p>
             <button className="settings-action-btn" onClick={() => { setShowSettings(false); setShowPhrases(true); }}>Quick Phrases</button>
             <button className="settings-action-btn" onClick={() => { setShowSettings(false); setShowPainScale(true); }}>Pain Scale</button>
             <button className="settings-action-btn" onClick={() => { setShowSettings(false); setShowVitalSigns(true); }}>Vital Signs</button>
             <button className="settings-action-btn" onClick={() => { setShowSettings(false); setShowOnboarding(true); }}>Patient Intro</button>
             <button className="settings-action-btn" onClick={() => { setShowSettings(false); setShowMedInstructions(true); }}>Medication Instructions</button>
             <button className="settings-action-btn" onClick={() => { setShowSettings(false); setShowDischarge(true); }}>Discharge Instructions</button>
+            <div className="settings-divider" />
+            <p className="settings-section-label">Connection</p>
             <button className="settings-action-btn" onClick={() => { setShowTwoDeviceSetup(true); setShowSettings(false); }}>Two-Device Mode</button>
             {messages.length > 0 && (
               <>
@@ -1497,14 +1546,18 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
               <button className="phrases-close" onClick={() => setShowPainScale(false)}>✕</button>
             </div>
             <p className="pain-scale-instruction">Ask the patient to tap their pain level.</p>
-            <div className="pain-scale-grid">
-              {PAIN_LEVELS.map(({ n, face, label, color }) => (
-                <button
-                  key={n}
-                  className="pain-btn"
-                  style={{ '--pain-color': color }}
-                  onClick={() => handlePainLevelTap(n)}
-                >
+            <div className="pain-scale-grid-top">
+              {PAIN_LEVELS.slice(0, 3).map(({ n, face, label, color }) => (
+                <button key={n} className="pain-btn" style={{ '--pain-color': color }} onClick={() => handlePainLevelTap(n)}>
+                  <span className="pain-face">{face}</span>
+                  <span className="pain-number" style={{ color }}>{n}</span>
+                  <span className="pain-label">{label}</span>
+                </button>
+              ))}
+            </div>
+            <div className="pain-scale-grid-bottom">
+              {PAIN_LEVELS.slice(3).map(({ n, face, label, color }) => (
+                <button key={n} className="pain-btn" style={{ '--pain-color': color }} onClick={() => handlePainLevelTap(n)}>
                   <span className="pain-face">{face}</span>
                   <span className="pain-number" style={{ color }}>{n}</span>
                   <span className="pain-label">{label}</span>
