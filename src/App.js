@@ -17,6 +17,8 @@ const LANGUAGES = [
   { label: 'Korean',     code: 'ko',  voice: 'ko-KR', whisper: 'ko' },
   { label: 'Russian',    code: 'ru',  voice: 'ru-RU', whisper: 'ru' },
   { label: 'Ukrainian',  code: 'uk',  voice: 'uk-UA', whisper: 'uk' },
+  { label: 'Persian',    code: 'fa',  voice: 'fa-IR', whisper: 'fa' },
+  { label: 'Turkish',    code: 'tr',  voice: 'tr-TR', whisper: 'tr' },
 ];
 
 const SPECIALTIES = [
@@ -65,6 +67,8 @@ const PATIENT_LABELS = {
   ko:  '환자 — 한국어',
   ru:  'Пациент — Русский',
   uk:  'Пацієнт — Українська',
+  fa:  'بیمار — فارسی',
+  tr:  'Hasta — Türkçe',
 };
 
 const PATIENT_BUTTONS = {
@@ -79,6 +83,8 @@ const PATIENT_BUTTONS = {
   ko:  { idle: '눌러서 말하기',              listening: '듣는 중...' },
   ru:  { idle: 'Держите для разговора',    listening: 'Слушаю...' },
   uk:  { idle: 'Утримуйте для розмови',    listening: 'Слухаю...' },
+  fa:  { idle: 'برای صحبت نگه دارید',      listening: 'در حال گوش دادن...' },
+  tr:  { idle: 'Konuşmak için basılı tut', listening: 'Dinleniyor...' },
 };
 
 const HELP_BUTTON_LABELS = {
@@ -93,6 +99,8 @@ const HELP_BUTTON_LABELS = {
   ko:  '도움이 필요해요',
   ru:  'Мне нужна помощь',
   uk:  'Мені потрібна допомога',
+  fa:  'به کمک نیاز دارم',
+  tr:  'Yardıma ihtiyacım var',
 };
 
 const PATIENT_ONBOARDING = {
@@ -184,6 +192,22 @@ const PATIENT_ONBOARDING = {
     dismiss: 'Зрозуміло',
     repeat: 'Повторити',
   },
+  fa: {
+    title: 'به Verba خوش آمدید',
+    body: 'این برنامه آنچه را که شما و پزشکتان می‌گویید به صورت زنده ترجمه می‌کند.',
+    instruction: 'برای صحبت، دکمه را نگه دارید. به طور طبیعی صحبت کنید.',
+    privacy: 'مکالمه شما خصوصی است و ذخیره نمی‌شود.',
+    dismiss: 'متوجه شدم',
+    repeat: 'تکرار',
+  },
+  tr: {
+    title: "Verba'ya Hoş Geldiniz",
+    body: 'Bu uygulama sizin ve doktorunuzun söylediklerini gerçek zamanlı olarak çevirir.',
+    instruction: 'Konuşmak için düğmeye basılı tutun. Doğal konuşun.',
+    privacy: 'Konuşmanız gizlidir ve saklanmaz.',
+    dismiss: 'Anladım',
+    repeat: 'Tekrarla',
+  },
 };
 
 const PHRASE_CATEGORIES = [
@@ -195,6 +219,7 @@ const PHRASE_CATEGORIES = [
         es: '¿Dónde le duele?', zh: '您哪里疼？', yue: '你喺邊度痛？', pt: 'Onde é a sua dor?',
         fr: 'Où avez-vous mal?', ar: 'أين يوجد ألمك؟', vi: 'Bạn đau ở đâu?',
         hi: 'आपको दर्द कहाँ है?', ko: '어디가 아프세요?', ru: 'Где у вас боль?', uk: 'Де у вас біль?',
+        fa: 'درد شما کجاست؟', tr: 'Ağrınız nerede?',
       },
       {
         english: 'Rate your pain 1 to 10.',
@@ -202,6 +227,7 @@ const PHRASE_CATEGORIES = [
         pt: 'Classifique sua dor de 1 a 10.', fr: 'Évaluez votre douleur de 1 à 10.', ar: 'قيّم ألمك من 1 إلى 10.',
         vi: 'Đánh giá cơn đau của bạn từ 1 đến 10.', hi: 'अपने दर्द को 1 से 10 के पैमाने पर बताएं।',
         ko: '통증을 1에서 10으로 평가해 주세요.', ru: 'Оцените боль по шкале от 1 до 10.', uk: 'Оцініть біль за шкалою від 1 до 10.',
+        fa: 'درد خود را از ۱ تا ۱۰ ارزیابی کنید.', tr: 'Ağrınızı 1 ile 10 arasında puanlayın.',
       },
       {
         english: 'Is the pain constant or does it come and go?',
@@ -210,6 +236,7 @@ const PHRASE_CATEGORIES = [
         ar: 'هل الألم مستمر أم يأتي ويذهب؟', vi: 'Cơn đau có liên tục hay đến rồi đi?',
         hi: 'क्या दर्द लगातार है या आता-जाता है?', ko: '통증이 지속적인가요, 아니면 왔다 갔다 하나요?',
         ru: 'Боль постоянная или приходит и уходит?', uk: 'Біль постійний чи приходить і відходить?',
+        fa: 'آیا درد مداوم است یا می‌آید و می‌رود؟', tr: 'Ağrı sürekli mi yoksa gelip geçiyor mu?',
       },
       {
         english: 'Does the pain radiate anywhere?',
@@ -218,6 +245,7 @@ const PHRASE_CATEGORIES = [
         ar: 'هل ينتشر الألم إلى مكان آخر؟', vi: 'Cơn đau có lan ra nơi nào không?',
         hi: 'क्या दर्द कहीं और फैलता है?', ko: '통증이 다른 곳으로 퍼지나요?',
         ru: 'Боль отдаёт куда-нибудь?', uk: 'Біль віддає кудись?',
+        fa: 'آیا درد به جای دیگری می‌کشد؟', tr: 'Ağrı bir yere yayılıyor mu?',
       },
     ],
   },
@@ -231,6 +259,7 @@ const PHRASE_CATEGORIES = [
         ar: 'هل تعاني من صعوبة في التنفس؟', vi: 'Bạn có khó thở không?',
         hi: 'क्या आपको सांस लेने में तकलीफ हो रही है?', ko: '숨쉬기가 힘드세요?',
         ru: 'У вас есть затруднение дыхания?', uk: 'У вас є труднощі з диханням?',
+        fa: 'آیا در تنفس مشکل دارید؟', tr: 'Nefes almakta güçlük çekiyor musunuz?',
       },
       {
         english: 'Do you feel dizzy or nauseous?',
@@ -239,12 +268,14 @@ const PHRASE_CATEGORIES = [
         ar: 'هل تشعر بالدوار أو الغثيان؟', vi: 'Bạn có cảm thấy chóng mặt hoặc buồn nôn không?',
         hi: 'क्या आपको चक्कर आ रहे हैं या मतली हो रही है?', ko: '어지럽거나 메스꺼움을 느끼시나요?',
         ru: 'Вы чувствуете головокружение или тошноту?', uk: 'Ви відчуваєте запаморочення або нудоту?',
+        fa: 'آیا احساس سرگیجه یا تهوع می‌کنید؟', tr: 'Baş dönmesi veya mide bulantısı hissediyor musunuz?',
       },
       {
         english: 'Do you have a fever?',
         es: '¿Tiene fiebre?', zh: '您发烧了吗？', yue: '你有冇發燒？', pt: 'Você tem febre?',
         fr: 'Avez-vous de la fièvre?', ar: 'هل لديك حمى؟', vi: 'Bạn có bị sốt không?',
         hi: 'क्या आपको बुखार है?', ko: '열이 있으세요?', ru: 'У вас есть температура?', uk: 'У вас є температура?',
+        fa: 'آیا تب دارید؟', tr: 'Ateşiniz var mı?',
       },
       {
         english: 'How long have you had this symptom?',
@@ -253,6 +284,7 @@ const PHRASE_CATEGORIES = [
         ar: 'منذ متى وأنت تعاني من هذا العَرَض؟', vi: 'Bạn có triệu chứng này bao lâu rồi?',
         hi: 'यह लक्षण आपको कितने समय से है?', ko: '이 증상이 얼마나 됐나요?',
         ru: 'Как давно у вас этот симптом?', uk: 'Як давно у вас цей симптом?',
+        fa: 'این علامت چه مدت است که دارید؟', tr: 'Bu belirti ne zamandan beri var?',
       },
     ],
   },
@@ -265,6 +297,7 @@ const PHRASE_CATEGORIES = [
         fr: 'Avez-vous des allergies?', ar: 'هل لديك أي حساسية؟', vi: 'Bạn có bị dị ứng gì không?',
         hi: 'क्या आपको कोई एलर्जी है?', ko: '알레르기가 있으세요?',
         ru: 'Есть ли у вас аллергия?', uk: 'Чи є у вас алергія?',
+        fa: 'آیا آلرژی دارید؟', tr: 'Alerjiniz var mı?',
       },
       {
         english: 'What medications are you currently taking?',
@@ -273,6 +306,7 @@ const PHRASE_CATEGORIES = [
         ar: 'ما الأدوية التي تتناولها حالياً؟', vi: 'Bạn đang dùng thuốc gì?',
         hi: 'आप अभी कौन सी दवाएं ले रहे हैं?', ko: '현재 복용 중인 약이 있으세요?',
         ru: 'Какие лекарства вы сейчас принимаете?', uk: 'Які ліки ви зараз приймаєте?',
+        fa: 'در حال حاضر چه داروهایی مصرف می‌کنید؟', tr: 'Şu anda hangi ilaçları kullanıyorsunuz?',
       },
       {
         english: 'Do you have any chronic conditions?',
@@ -281,6 +315,7 @@ const PHRASE_CATEGORIES = [
         ar: 'هل لديك أي أمراض مزمنة؟', vi: 'Bạn có bệnh mãn tính nào không?',
         hi: 'क्या आपको कोई पुरानी बीमारी है?', ko: '만성 질환이 있으세요?',
         ru: 'Есть ли у вас хронические заболевания?', uk: 'Чи є у вас хронічні захворювання?',
+        fa: 'آیا بیماری مزمنی دارید؟', tr: 'Kronik bir hastalığınız var mı?',
       },
     ],
   },
@@ -293,6 +328,7 @@ const PHRASE_CATEGORIES = [
         pt: 'Preciso examiná-lo/a.', fr: 'Je dois vous examiner.', ar: 'أحتاج إلى فحصك.',
         vi: 'Tôi cần khám cho bạn.', hi: 'मुझे आपकी जांच करनी है।', ko: '진찰을 해야 합니다.',
         ru: 'Мне нужно вас осмотреть.', uk: 'Мені потрібно вас оглянути.',
+        fa: 'باید شما را معاینه کنم.', tr: 'Sizi muayene etmem gerekiyor.',
       },
       {
         english: 'I am going to give you medication.',
@@ -300,12 +336,14 @@ const PHRASE_CATEGORIES = [
         pt: 'Vou lhe administrar medicamento.', fr: 'Je vais vous administrer un médicament.',
         ar: 'سأعطيك دواءً.', vi: 'Tôi sẽ cho bạn dùng thuốc.', hi: 'मैं आपको दवा दूंगा।',
         ko: '약을 드릴 것입니다.', ru: 'Я дам вам лекарство.', uk: 'Я дам вам ліки.',
+        fa: 'می‌خواهم به شما دارو بدهم.', tr: 'Size ilaç vereceğim.',
       },
       {
         english: 'Do you understand?',
         es: '¿Entiende?', zh: '您明白吗？', yue: '你明白嗎？', pt: 'Você entende?',
         fr: 'Comprenez-vous?', ar: 'هل تفهم؟', vi: 'Bạn có hiểu không?',
         hi: 'क्या आप समझे?', ko: '이해하셨나요?', ru: 'Вы понимаете?', uk: 'Ви розумієте?',
+        fa: 'آیا متوجه شدید؟', tr: 'Anlıyor musunuz?',
       },
       {
         english: 'Please sign here.',
@@ -313,6 +351,7 @@ const PHRASE_CATEGORIES = [
         pt: 'Por favor, assine aqui.', fr: 'Veuillez signer ici.', ar: 'من فضلك وقّع هنا.',
         vi: 'Vui lòng ký vào đây.', hi: 'कृपया यहाँ हस्ताक्षर करें।', ko: '여기에 서명해 주세요.',
         ru: 'Пожалуйста, подпишите здесь.', uk: 'Будь ласка, підпишіть тут.',
+        fa: 'لطفاً اینجا امضا کنید.', tr: 'Lütfen buraya imzalayın.',
       },
     ],
   },
@@ -334,13 +373,13 @@ const PAIN_LEVELS = [
 
 const VITAL_SIGNS = [
   { key: 'bp',   labelEn: 'Blood Pressure', unit: 'mmHg',  placeholder: 'e.g. 120/80',
-    labels: { es: 'Presión arterial', zh: '血压', yue: '血壓', pt: 'Pressão arterial', fr: 'Pression artérielle', ar: 'ضغط الدم', vi: 'Huyết áp', hi: 'रक्तचाप', ko: '혈압', ru: 'Артериальное давление', uk: 'Артеріальний тиск' } },
+    labels: { es: 'Presión arterial', zh: '血压', yue: '血壓', pt: 'Pressão arterial', fr: 'Pression artérielle', ar: 'ضغط الدم', vi: 'Huyết áp', hi: 'रक्तचाप', ko: '혈압', ru: 'Артериальное давление', uk: 'Артеріальний тиск', fa: 'فشار خون', tr: 'Tansiyon' } },
   { key: 'hr',   labelEn: 'Heart Rate',     unit: 'bpm',   placeholder: 'e.g. 72',
-    labels: { es: 'Frecuencia cardíaca', zh: '心率', yue: '心率', pt: 'Frequência cardíaca', fr: 'Fréquence cardiaque', ar: 'معدل ضربات القلب', vi: 'Nhịp tim', hi: 'हृदय गति', ko: '심박수', ru: 'Частота пульса', uk: 'Частота пульсу' } },
+    labels: { es: 'Frecuencia cardíaca', zh: '心率', yue: '心率', pt: 'Frequência cardíaca', fr: 'Fréquence cardiaque', ar: 'معدل ضربات القلب', vi: 'Nhịp tim', hi: 'हृदय गति', ko: '심박수', ru: 'Частота пульса', uk: 'Частота пульсу', fa: 'ضربان قلب', tr: 'Nabız' } },
   { key: 'temp', labelEn: 'Temperature',    unit: '',      placeholder: 'e.g. 98.6°F',
-    labels: { es: 'Temperatura', zh: '体温', yue: '體溫', pt: 'Temperatura', fr: 'Température', ar: 'درجة الحرارة', vi: 'Nhiệt độ', hi: 'तापमान', ko: '체온', ru: 'Температура', uk: 'Температура' } },
+    labels: { es: 'Temperatura', zh: '体温', yue: '體溫', pt: 'Temperatura', fr: 'Température', ar: 'درجة الحرارة', vi: 'Nhiệt độ', hi: 'तापमान', ko: '체온', ru: 'Температура', uk: 'Температура', fa: 'دما', tr: 'Ateş' } },
   { key: 'o2',   labelEn: 'Oxygen Level',   unit: '%',     placeholder: 'e.g. 98',
-    labels: { es: 'Nivel de oxígeno', zh: '血氧水平', yue: '血氧水平', pt: 'Nível de oxigênio', fr: "Niveau d'oxygène", ar: 'مستوى الأكسجين', vi: 'Nồng độ oxy', hi: 'ऑक्सीजन स्तर', ko: '산소 포화도', ru: 'Уровень кислорода', uk: 'Рівень кисню' } },
+    labels: { es: 'Nivel de oxígeno', zh: '血氧水平', yue: '血氧水平', pt: 'Nível de oxigênio', fr: "Niveau d'oxygène", ar: 'مستوى الأكسجين', vi: 'Nồng độ oxy', hi: 'ऑक्सीजन स्तर', ko: '산소 포화도', ru: 'Уровень кислорода', uk: 'Рівень кисню', fa: 'سطح اکسیژن', tr: 'Oksijen Seviyesi' } },
 ];
 
 const DISCHARGE_CATEGORIES = [
@@ -1284,7 +1323,7 @@ Write in clear, clinical language. Be brief — this is a quick reference, not a
             </div>
             <p className="splash-tagline">Real-time voice translation<br />for clinical care</p>
             <div className="splash-langs">
-              {['ES','中','PT','FR','AR','VI','HI','KO','RU','UK','粵'].map((lang, i) => (
+              {['ES','中','PT','FR','AR','VI','HI','KO','RU','UK','粵','FA','TR'].map((lang, i) => (
                 <span key={lang} className="splash-lang-badge" style={{ animationDelay: `${i * 60}ms` }}>{lang}</span>
               ))}
             </div>
