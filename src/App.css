@@ -967,6 +967,21 @@
   box-shadow: none;
 }
 
+.splash-skip-guide {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #b0a090;
+  cursor: pointer;
+  padding: 4px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.splash-skip-guide:active {
+  color: #7a6858;
+}
+
 .splash-privacy {
   font-size: 12px;
   color: #b0a090;
@@ -1752,4 +1767,191 @@
 
 .splash-ready .splash-lang-badge {
   animation: splashFadeUp 0.3s ease forwards;
+}
+
+/* ── Walkthrough ── */
+.walkthrough-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, #fdf6f0 0%, #fdeee2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 110;
+  padding: 32px 24px;
+}
+
+@keyframes walkthroughSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.walkthrough-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  gap: 0;
+  animation: walkthroughSlideIn 0.25s ease forwards;
+}
+
+.walkthrough-progress-bar {
+  width: 100%;
+  height: 3px;
+  background: #ede8e0;
+  border-radius: 2px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.walkthrough-progress-fill {
+  height: 100%;
+  background: #e87840;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.walkthrough-skip {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #b0a090;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-bottom: 20px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.walkthrough-skip:active {
+  color: #7a6858;
+}
+
+.walkthrough-icon {
+  font-size: 52px;
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.walkthrough-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #2a2018;
+  margin: 0 0 12px 0;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.walkthrough-body {
+  font-size: 16px;
+  color: #5a4a38;
+  line-height: 1.6;
+  margin: 0 0 12px 0;
+}
+
+.walkthrough-hint {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e87840;
+  background: #e8784012;
+  border: 1px solid #e8784030;
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin: 0 0 20px 0;
+  letter-spacing: 0.02em;
+}
+
+.walkthrough-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.walkthrough-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ede8e0;
+  transition: all 0.2s ease;
+}
+
+.walkthrough-dot.active {
+  background: #e87840;
+  transform: scale(1.2);
+}
+
+.walkthrough-dot.done {
+  background: #e8784060;
+}
+
+.walkthrough-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.walkthrough-back {
+  padding: 15px 20px;
+  border-radius: 16px;
+  border: 1px solid #ede8e0;
+  background: #ffffff;
+  color: #7a6858;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.walkthrough-back:active {
+  background: #f5f0ec;
+}
+
+.walkthrough-next {
+  flex: 1;
+  padding: 15px;
+  border-radius: 16px;
+  border: none;
+  background: #e87840;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  box-shadow: 0 3px 14px rgba(232, 120, 64, 0.3);
+  transition: all 0.15s ease;
+}
+
+.walkthrough-next:active {
+  background: #c45e28;
+  transform: scale(0.98);
+  box-shadow: none;
+}
+
+.walkthrough-begin {
+  flex: 1;
+  padding: 15px;
+  border-radius: 16px;
+  border: none;
+  background: #2a2018;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  box-shadow: 0 3px 14px rgba(42, 32, 24, 0.2);
+  transition: all 0.15s ease;
+}
+
+.walkthrough-begin:active {
+  background: #1a1208;
+  transform: scale(0.98);
+  box-shadow: none;
 }
