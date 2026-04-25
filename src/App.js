@@ -6,19 +6,66 @@ const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
 const ABLY_API_KEY = process.env.REACT_APP_ABLY_API_KEY;
 
 const LANGUAGES = [
-  { label: 'Spanish',    code: 'es',  voice: 'es-ES', whisper: 'es' },
-  { label: 'Mandarin',   code: 'zh',  voice: 'zh-CN', whisper: 'zh' },
-  { label: 'Cantonese',  code: 'yue', voice: 'zh-HK', whisper: 'yue' },
-  { label: 'Portuguese', code: 'pt',  voice: 'pt-BR', whisper: 'pt' },
-  { label: 'French',     code: 'fr',  voice: 'fr-FR', whisper: 'fr' },
   { label: 'Arabic',     code: 'ar',  voice: 'ar-SA', whisper: 'ar' },
-  { label: 'Vietnamese', code: 'vi',  voice: 'vi-VN', whisper: 'vi' },
+  { label: 'Bulgarian',  code: 'bg',  voice: 'bg-BG', whisper: 'bg' },
+  { label: 'Cantonese',  code: 'yue', voice: 'zh-HK', whisper: 'yue' },
+  { label: 'Croatian',   code: 'hr',  voice: 'hr-HR', whisper: 'hr' },
+  { label: 'Czech',      code: 'cs',  voice: 'cs-CZ', whisper: 'cs' },
+  { label: 'Danish',     code: 'da',  voice: 'da-DK', whisper: 'da' },
+  { label: 'Dutch',      code: 'nl',  voice: 'nl-NL', whisper: 'nl' },
+  { label: 'Finnish',    code: 'fi',  voice: 'fi-FI', whisper: 'fi' },
+  { label: 'French',     code: 'fr',  voice: 'fr-FR', whisper: 'fr' },
+  { label: 'German',     code: 'de',  voice: 'de-DE', whisper: 'de' },
+  { label: 'Greek',      code: 'el',  voice: 'el-GR', whisper: 'el' },
   { label: 'Hindi',      code: 'hi',  voice: 'hi-IN', whisper: 'hi' },
+  { label: 'Hungarian',  code: 'hu',  voice: 'hu-HU', whisper: 'hu' },
+  { label: 'Italian',    code: 'it',  voice: 'it-IT', whisper: 'it' },
   { label: 'Korean',     code: 'ko',  voice: 'ko-KR', whisper: 'ko' },
-  { label: 'Russian',    code: 'ru',  voice: 'ru-RU', whisper: 'ru' },
-  { label: 'Ukrainian',  code: 'uk',  voice: 'uk-UA', whisper: 'uk' },
+  { label: 'Mandarin',   code: 'zh',  voice: 'zh-CN', whisper: 'zh' },
+  { label: 'Norwegian',  code: 'no',  voice: 'nb-NO', whisper: 'no' },
   { label: 'Persian',    code: 'fa',  voice: 'fa-IR', whisper: 'fa' },
+  { label: 'Polish',     code: 'pl',  voice: 'pl-PL', whisper: 'pl' },
+  { label: 'Portuguese', code: 'pt',  voice: 'pt-BR', whisper: 'pt' },
+  { label: 'Romanian',   code: 'ro',  voice: 'ro-RO', whisper: 'ro' },
+  { label: 'Russian',    code: 'ru',  voice: 'ru-RU', whisper: 'ru' },
+  { label: 'Slovak',     code: 'sk',  voice: 'sk-SK', whisper: 'sk' },
+  { label: 'Spanish',    code: 'es',  voice: 'es-ES', whisper: 'es' },
+  { label: 'Swedish',    code: 'sv',  voice: 'sv-SE', whisper: 'sv' },
   { label: 'Turkish',    code: 'tr',  voice: 'tr-TR', whisper: 'tr' },
+  { label: 'Ukrainian',  code: 'uk',  voice: 'uk-UA', whisper: 'uk' },
+  { label: 'Vietnamese', code: 'vi',  voice: 'vi-VN', whisper: 'vi' },
+];
+
+const PROVIDER_LANGUAGES = [
+  { label: 'English',    code: 'en',  voice: 'en-US', whisper: 'en' },
+  { label: 'Arabic',     code: 'ar',  voice: 'ar-SA', whisper: 'ar' },
+  { label: 'Bulgarian',  code: 'bg',  voice: 'bg-BG', whisper: 'bg' },
+  { label: 'Cantonese',  code: 'yue', voice: 'zh-HK', whisper: 'yue' },
+  { label: 'Croatian',   code: 'hr',  voice: 'hr-HR', whisper: 'hr' },
+  { label: 'Czech',      code: 'cs',  voice: 'cs-CZ', whisper: 'cs' },
+  { label: 'Danish',     code: 'da',  voice: 'da-DK', whisper: 'da' },
+  { label: 'Dutch',      code: 'nl',  voice: 'nl-NL', whisper: 'nl' },
+  { label: 'Finnish',    code: 'fi',  voice: 'fi-FI', whisper: 'fi' },
+  { label: 'French',     code: 'fr',  voice: 'fr-FR', whisper: 'fr' },
+  { label: 'German',     code: 'de',  voice: 'de-DE', whisper: 'de' },
+  { label: 'Greek',      code: 'el',  voice: 'el-GR', whisper: 'el' },
+  { label: 'Hindi',      code: 'hi',  voice: 'hi-IN', whisper: 'hi' },
+  { label: 'Hungarian',  code: 'hu',  voice: 'hu-HU', whisper: 'hu' },
+  { label: 'Italian',    code: 'it',  voice: 'it-IT', whisper: 'it' },
+  { label: 'Korean',     code: 'ko',  voice: 'ko-KR', whisper: 'ko' },
+  { label: 'Mandarin',   code: 'zh',  voice: 'zh-CN', whisper: 'zh' },
+  { label: 'Norwegian',  code: 'no',  voice: 'nb-NO', whisper: 'no' },
+  { label: 'Persian',    code: 'fa',  voice: 'fa-IR', whisper: 'fa' },
+  { label: 'Polish',     code: 'pl',  voice: 'pl-PL', whisper: 'pl' },
+  { label: 'Portuguese', code: 'pt',  voice: 'pt-BR', whisper: 'pt' },
+  { label: 'Romanian',   code: 'ro',  voice: 'ro-RO', whisper: 'ro' },
+  { label: 'Russian',    code: 'ru',  voice: 'ru-RU', whisper: 'ru' },
+  { label: 'Slovak',     code: 'sk',  voice: 'sk-SK', whisper: 'sk' },
+  { label: 'Spanish',    code: 'es',  voice: 'es-ES', whisper: 'es' },
+  { label: 'Swedish',    code: 'sv',  voice: 'sv-SE', whisper: 'sv' },
+  { label: 'Turkish',    code: 'tr',  voice: 'tr-TR', whisper: 'tr' },
+  { label: 'Ukrainian',  code: 'uk',  voice: 'uk-UA', whisper: 'uk' },
+  { label: 'Vietnamese', code: 'vi',  voice: 'vi-VN', whisper: 'vi' },
 ];
 
 const SPECIALTIES = [
@@ -56,158 +103,127 @@ Be precise with procedure names and recovery expectations.`,
 ];
 
 const PATIENT_LABELS = {
-  es:  'Paciente — Español',
-  zh:  '患者 — 普通话',
-  yue: '病人 — 廣東話',
-  pt:  'Paciente — Português',
-  fr:  'Patient — Français',
   ar:  'مريض — العربية',
-  vi:  'Bệnh nhân — Tiếng Việt',
+  bg:  'Пациент — Български',
+  yue: '病人 — 廣東話',
+  hr:  'Pacijent — Hrvatski',
+  cs:  'Pacient — Cestina',
+  da:  'Patient — Dansk',
+  nl:  'Patient — Nederlands',
+  fi:  'Potilas — Suomi',
+  fr:  'Patient — Français',
+  de:  'Patient — Deutsch',
+  el:  'Ασθενής — Ελληνικά',
   hi:  'रोगी — हिन्दी',
+  hu:  'Beteg — Magyar',
+  it:  'Paziente — Italiano',
   ko:  '환자 — 한국어',
-  ru:  'Пациент — Русский',
-  uk:  'Пацієнт — Українська',
+  zh:  '患者 — 普通话',
+  no:  'Pasient — Norsk',
   fa:  'بیمار — فارسی',
-  tr:  'Hasta — Türkçe',
+  pl:  'Pacjent — Polski',
+  pt:  'Paciente — Português',
+  ro:  'Pacient — Romana',
+  ru:  'Пациент — Русский',
+  sk:  'Pacient — Slovencina',
+  es:  'Paciente — Español',
+  sv:  'Patient — Svenska',
+  tr:  'Hasta — Turkce',
+  uk:  'Пацієнт — Українська',
+  vi:  'Benh nhan — Tieng Viet',
 };
 
 const PATIENT_BUTTONS = {
-  es:  { idle: 'Mantén para hablar',       listening: 'Escuchando...' },
-  zh:  { idle: '按住说话',                  listening: '聆听中...' },
-  yue: { idle: '按住講嘢',                  listening: '聆聽中...' },
-  pt:  { idle: 'Segure para falar',        listening: 'Ouvindo...' },
-  fr:  { idle: 'Maintenir pour parler',    listening: 'Ecoute...' },
   ar:  { idle: 'اضغط للتحدث',              listening: 'جارٍ الاستماع...' },
-  vi:  { idle: 'Giu de noi',               listening: 'Dang nghe...' },
+  bg:  { idle: 'Drzhi za govorene',        listening: 'Slushane...' },
+  yue: { idle: '按住講嘢',                  listening: '聆聽中...' },
+  hr:  { idle: 'Drzi za govor',            listening: 'Slusa...' },
+  cs:  { idle: 'Podrzte pro mluveni',      listening: 'Poslouchani...' },
+  da:  { idle: 'Hold for at tale',         listening: 'Lytter...' },
+  nl:  { idle: 'Houd vast om te spreken',  listening: 'Luisteren...' },
+  fi:  { idle: 'Pida puhuaksesi',          listening: 'Kuunnellaan...' },
+  fr:  { idle: 'Maintenir pour parler',    listening: 'Ecoute...' },
+  de:  { idle: 'Halten zum Sprechen',      listening: 'Zuhoren...' },
+  el:  { idle: 'Kratiste gia na milete',   listening: 'Akouo...' },
   hi:  { idle: 'बोलने के लिए दबाएं',        listening: 'सुन रहा है...' },
+  hu:  { idle: 'Tartsa lenyomva beszedhez',listening: 'Hallgatas...' },
+  it:  { idle: 'Tieni premuto per parlare',listening: 'Ascolto...' },
   ko:  { idle: '눌러서 말하기',              listening: '듣는 중...' },
-  ru:  { idle: 'Держите для разговора',    listening: 'Слушаю...' },
-  uk:  { idle: 'Утримуйте для розмови',    listening: 'Слухаю...' },
+  zh:  { idle: '按住说话',                  listening: '聆听中...' },
+  no:  { idle: 'Hold for a snakke',        listening: 'Lytter...' },
   fa:  { idle: 'برای صحبت نگه دارید',      listening: 'در حال گوش دادن...' },
-  tr:  { idle: 'Konuşmak için basili tut', listening: 'Dinleniyor...' },
+  pl:  { idle: 'Przytrzymaj aby mowic',    listening: 'Sluchanie...' },
+  pt:  { idle: 'Segure para falar',        listening: 'Ouvindo...' },
+  ro:  { idle: 'Tineti apasat pentru vorbit', listening: 'Ascultare...' },
+  ru:  { idle: 'Держите для разговора',    listening: 'Слушаю...' },
+  sk:  { idle: 'Podrzte pre hovorenie',    listening: 'Pocuvanie...' },
+  es:  { idle: 'Manten para hablar',       listening: 'Escuchando...' },
+  sv:  { idle: 'Hall for att tala',        listening: 'Lyssnar...' },
+  tr:  { idle: 'Konusmak icin basili tut', listening: 'Dinleniyor...' },
+  uk:  { idle: 'Утримуйте для розмови',    listening: 'Слухаю...' },
+  vi:  { idle: 'Giu de noi',               listening: 'Dang nghe...' },
 };
 
 const HELP_BUTTON_LABELS = {
-  es:  'Necesito ayuda',
-  zh:  '我需要帮助',
-  yue: '我需要幫助',
-  pt:  'Preciso de ajuda',
-  fr:  "J'ai besoin d'aide",
   ar:  'احتاج مساعدة',
-  vi:  'Toi can giup do',
+  bg:  'Nuzhdaya se ot pomosht',
+  yue: '我需要幫助',
+  hr:  'Trebam pomoc',
+  cs:  'Potrebuji pomoc',
+  da:  'Jeg har brug for hjaelp',
+  nl:  'Ik heb hulp nodig',
+  fi:  'Tarvitsen apua',
+  fr:  "J'ai besoin d'aide",
+  de:  'Ich brauche Hilfe',
+  el:  'Xreiazomai voitheia',
   hi:  'मुझे मदद चाहिए',
+  hu:  'Segitsegre van szuksegem',
+  it:  'Ho bisogno di aiuto',
   ko:  '도움이 필요해요',
-  ru:  'Мне нужна помощь',
-  uk:  'Мені потрібна допомога',
+  zh:  '我需要帮助',
+  no:  'Jeg trenger hjelp',
   fa:  'به کمک نیاز دارم',
+  pl:  'Potrzebuje pomocy',
+  pt:  'Preciso de ajuda',
+  ro:  'Am nevoie de ajutor',
+  ru:  'Мне нужна помощь',
+  sk:  'Potrebujem pomoc',
+  es:  'Necesito ayuda',
+  sv:  'Jag behover hjalp',
   tr:  'Yardima ihtiyacim var',
+  uk:  'Мені потрібна допомога',
+  vi:  'Toi can giup do',
 };
 
 const PATIENT_ONBOARDING = {
-  es: {
-    title: 'Bienvenido a Verba',
-    body: 'Esta aplicación traduce lo que usted y su médico dicen en tiempo real.',
-    instruction: 'Mantenga presionado el botón para hablar. Hable con naturalidad.',
-    privacy: 'Su conversación es privada y no se almacena.',
-    dismiss: 'Entendido',
-    repeat: 'Repetir',
-  },
-  zh: {
-    title: '欢迎使用 Verba',
-    body: '此应用程序可实时翻译您和医生之间的对话。',
-    instruction: '按住按钮说话。请自然地说话。',
-    privacy: '您的对话是私密的，不会被存储。',
-    dismiss: '我明白了',
-    repeat: '重复',
-  },
-  yue: {
-    title: '歡迎使用 Verba',
-    body: '此應用程式可即時翻譯您和醫生之間的對話。',
-    instruction: '按住按鈕說話。請自然地說話。',
-    privacy: '您的對話是私密的，不會被儲存。',
-    dismiss: '我明白了',
-    repeat: '重複',
-  },
-  pt: {
-    title: 'Bem-vindo ao Verba',
-    body: 'Este aplicativo traduz em tempo real o que você e seu médico dizem.',
-    instruction: 'Mantenha o botão pressionado para falar. Fale naturalmente.',
-    privacy: 'Sua conversa é privada e não é armazenada.',
-    dismiss: 'Entendi',
-    repeat: 'Repetir',
-  },
-  fr: {
-    title: 'Bienvenue sur Verba',
-    body: 'Cette application traduit en temps réel ce que vous et votre médecin dites.',
-    instruction: 'Maintenez le bouton appuyé pour parler. Parlez naturellement.',
-    privacy: "Votre conversation est privée et n'est pas enregistrée.",
-    dismiss: "J'ai compris",
-    repeat: 'Répéter',
-  },
-  ar: {
-    title: 'مرحباً بك في Verba',
-    body: 'يترجم هذا التطبيق ما تقوله أنت وطبيبك في الوقت الفعلي.',
-    instruction: 'اضغط باستمرار على الزر للتحدث. تحدث بشكل طبيعي.',
-    privacy: 'محادثتك خاصة ولا يتم تخزينها.',
-    dismiss: 'فهمت',
-    repeat: 'كرر',
-  },
-  vi: {
-    title: 'Chao mung den voi Verba',
-    body: 'Ung dung nay dich theo thoi gian thuc nhung gi ban va bac si noi.',
-    instruction: 'Giu nut de noi. Hay noi tu nhien.',
-    privacy: 'Cuoc tro chuyen cua ban duoc bao mat va khong duoc luu tru.',
-    dismiss: 'Da hieu',
-    repeat: 'Lap lai',
-  },
-  hi: {
-    title: 'Verba में आपका स्वागत है',
-    body: 'यह ऐप आप और आपके डॉक्टर की बातों का रियल टाइम में अनुवाद करता है।',
-    instruction: 'बोलने के लिए बटन को दबाए रखें। स्वाभाविक रूप से बोलें।',
-    privacy: 'आपकी बातचीत निजी है और संग्रहीत नहीं की जाती।',
-    dismiss: 'समझ गया',
-    repeat: 'दोहराएं',
-  },
-  ko: {
-    title: 'Verba에 오신 것을 환영합니다',
-    body: '이 앱은 귀하와 의사의 대화를 실시간으로 번역합니다.',
-    instruction: '말하려면 버튼을 누르고 계세요. 자연스럽게 말씀하세요.',
-    privacy: '대화 내용은 비공개이며 저장되지 않습니다.',
-    dismiss: '확인했습니다',
-    repeat: '반복',
-  },
-  ru: {
-    title: 'Добро пожаловать в Verba',
-    body: 'Это приложение переводит в реальном времени то, что говорите вы и ваш врач.',
-    instruction: 'Удерживайте кнопку, чтобы говорить. Говорите естественно.',
-    privacy: 'Ваш разговор конфиденциален и не сохраняется.',
-    dismiss: 'Понятно',
-    repeat: 'Повторить',
-  },
-  uk: {
-    title: 'Ласкаво просимо до Verba',
-    body: 'Цей застосунок перекладає в реальному часі те, що говорите ви та ваш лікар.',
-    instruction: 'Утримуйте кнопку, щоб говорити. Говоріть природно.',
-    privacy: 'Ваша розмова є конфіденційною і не зберігається.',
-    dismiss: 'Зрозуміло',
-    repeat: 'Повторити',
-  },
-  fa: {
-    title: 'به Verba خوش آمدید',
-    body: 'این برنامه آنچه را که شما و پزشکتان می‌گویید به صورت زنده ترجمه می‌کند.',
-    instruction: 'برای صحبت، دکمه را نگه دارید. به طور طبیعی صحبت کنید.',
-    privacy: 'مکالمه شما خصوصی است و ذخیره نمی‌شود.',
-    dismiss: 'متوجه شدم',
-    repeat: 'تکرار',
-  },
-  tr: {
-    title: "Verba'ya Hos Geldiniz",
-    body: 'Bu uygulama sizin ve doktorunuzun soylediklerini gercek zamanli olarak cevirir.',
-    instruction: 'Konusmak icin dugmeye basili tutun. Dogal konusun.',
-    privacy: 'Konusmaniz gizlidir ve saklanmaz.',
-    dismiss: 'Anladim',
-    repeat: 'Tekrarla',
-  },
+  ar: { title: 'مرحباً بك في Verba', body: 'يترجم هذا التطبيق ما تقوله أنت وطبيبك في الوقت الفعلي.', instruction: 'اضغط باستمرار على الزر للتحدث. تحدث بشكل طبيعي.', privacy: 'محادثتك خاصة ولا يتم تخزينها.', dismiss: 'فهمت', repeat: 'كرر' },
+  bg: { title: 'Dobre doshli v Verba', body: 'Tazi aplikatsiya prevezda v realno vreme.', instruction: 'Natsnete i drzhi butona za da govorite.', privacy: 'Razgovorat vi e poveritelno.', dismiss: 'Razbrakh', repeat: 'Povtori' },
+  yue: { title: '歡迎使用 Verba', body: '此應用程式可即時翻譯您和醫生之間的對話。', instruction: '按住按鈕說話。請自然地說話。', privacy: '您的對話是私密的，不會被儲存。', dismiss: '我明白了', repeat: '重複' },
+  hr: { title: 'Dobrodosli u Verba', body: 'Ova aplikacija prevodi u stvarnom vremenu.', instruction: 'Pritisnite i drzite tipku za govor.', privacy: 'Vas razgovor je povjerljiv.', dismiss: 'Razumijem', repeat: 'Ponovi' },
+  cs: { title: 'Vitejte ve Verba', body: 'Tato aplikace prelozi v realnem case.', instruction: 'Podrzte tlacitko pro mluveni.', privacy: 'Vas rozhovor je duverny.', dismiss: 'Rozumim', repeat: 'Opakovat' },
+  da: { title: 'Velkommen til Verba', body: 'Denne app oversaetter i realtid.', instruction: 'Hold knappen nede for at tale.', privacy: 'Din samtale er privat.', dismiss: 'Forstaet', repeat: 'Gentag' },
+  nl: { title: 'Welkom bij Verba', body: 'Deze app vertaalt in realtime.', instruction: 'Houd de knop ingedrukt om te spreken.', privacy: 'Uw gesprek is prive.', dismiss: 'Begrepen', repeat: 'Herhaal' },
+  fi: { title: 'Tervetuloa Verbaan', body: 'Tama sovellus kaantaa reaaliajassa.', instruction: 'Pida painiketta alhaalla puhuaksesi.', privacy: 'Keskustelusi on yksityinen.', dismiss: 'Ymmarra', repeat: 'Toista' },
+  fr: { title: 'Bienvenue sur Verba', body: 'Cette application traduit en temps reel.', instruction: 'Maintenez le bouton pour parler.', privacy: "Votre conversation n'est pas enregistree.", dismiss: "J'ai compris", repeat: 'Repeter' },
+  de: { title: 'Willkommen bei Verba', body: 'Diese App ubersetzt in Echtzeit.', instruction: 'Halten Sie die Taste zum Sprechen gedruckt.', privacy: 'Ihr Gesprach wird nicht gespeichert.', dismiss: 'Verstanden', repeat: 'Wiederholen' },
+  el: { title: 'Kalosirthate sto Verba', body: 'Auti i efarmogi metafrazei se pragmatiko xrono.', instruction: 'Kratiste to koumpi gia na milete.', privacy: 'I synomilia sas einai empisteytiki.', dismiss: 'Katalava', repeat: 'Epanalipsi' },
+  hi: { title: 'Verba में आपका स्वागत है', body: 'यह ऐप रियल टाइम में अनुवाद करता है।', instruction: 'बोलने के लिए बटन को दबाए रखें।', privacy: 'आपकी बातचीत निजी है।', dismiss: 'समझ गया', repeat: 'दोहराएं' },
+  hu: { title: 'Udvozoljuk a Verbaban', body: 'Ez az alkalmazas valos idoben fordit.', instruction: 'Tartsa lenyomva a gombot a beszedhez.', privacy: 'A beszelgetese bizalmas.', dismiss: 'Ertettem', repeat: 'Ismetles' },
+  it: { title: 'Benvenuto su Verba', body: 'Questa app traduce in tempo reale.', instruction: 'Tieni premuto il pulsante per parlare.', privacy: 'La tua conversazione e privata.', dismiss: 'Capito', repeat: 'Ripeti' },
+  ko: { title: 'Verba에 오신 것을 환영합니다', body: '이 앱은 실시간으로 번역합니다.', instruction: '말하려면 버튼을 누르고 계세요.', privacy: '대화 내용은 저장되지 않습니다.', dismiss: '확인했습니다', repeat: '반복' },
+  zh: { title: '欢迎使用 Verba', body: '此应用程序可实时翻译。', instruction: '按住按钮说话。', privacy: '您的对话不会被存储。', dismiss: '我明白了', repeat: '重复' },
+  no: { title: 'Velkommen til Verba', body: 'Denne appen oversetter i sanntid.', instruction: 'Hold knappen nede for a snakke.', privacy: 'Samtalen din er privat.', dismiss: 'Forstaatt', repeat: 'Gjenta' },
+  fa: { title: 'به Verba خوش آمدید', body: 'این برنامه به صورت زنده ترجمه می‌کند.', instruction: 'برای صحبت، دکمه را نگه دارید.', privacy: 'مکالمه شما ذخیره نمی‌شود.', dismiss: 'متوجه شدم', repeat: 'تکرار' },
+  pl: { title: 'Witamy w Verba', body: 'Ta aplikacja tlumaczy w czasie rzeczywistym.', instruction: 'Przytrzymaj przycisk aby mowic.', privacy: 'Twoja rozmowa jest prywatna.', dismiss: 'Rozumiem', repeat: 'Powtorz' },
+  pt: { title: 'Bem-vindo ao Verba', body: 'Este aplicativo traduz em tempo real.', instruction: 'Mantenha o botao pressionado para falar.', privacy: 'Sua conversa e privada.', dismiss: 'Entendi', repeat: 'Repetir' },
+  ro: { title: 'Bun venit la Verba', body: 'Aceasta aplicatie traduce in timp real.', instruction: 'Tineti apasat butonul pentru a vorbi.', privacy: 'Conversatia dvs. este privata.', dismiss: 'Am inteles', repeat: 'Repeta' },
+  ru: { title: 'Добро пожаловать в Verba', body: 'Это приложение переводит в реальном времени.', instruction: 'Удерживайте кнопку, чтобы говорить.', privacy: 'Ваш разговор не сохраняется.', dismiss: 'Понятно', repeat: 'Повторить' },
+  sk: { title: 'Vitajte vo Verba', body: 'Tato aplikacia prelozi v realnom case.', instruction: 'Podrzte tlacidlo pre hovorenie.', privacy: 'Vas rozhovor je duverny.', dismiss: 'Rozumiem', repeat: 'Zopakovat' },
+  es: { title: 'Bienvenido a Verba', body: 'Esta aplicacion traduce en tiempo real.', instruction: 'Mantenga presionado el boton para hablar.', privacy: 'Su conversacion es privada.', dismiss: 'Entendido', repeat: 'Repetir' },
+  sv: { title: 'Valkommen till Verba', body: 'Den har appen oversatter i realtid.', instruction: 'Hall knappen intryckt for att tala.', privacy: 'Ditt samtal ar privat.', dismiss: 'Forstadd', repeat: 'Upprepa' },
+  tr: { title: "Verba'ya Hos Geldiniz", body: 'Bu uygulama gercek zamanli cevirir.', instruction: 'Konusmak icin dugmeye basili tutun.', privacy: 'Konusmaniz saklanmaz.', dismiss: 'Anladim', repeat: 'Tekrarla' },
+  uk: { title: 'Ласкаво просимо до Verba', body: 'Цей застосунок перекладає в реальному часі.', instruction: 'Утримуйте кнопку, щоб говорити.', privacy: 'Ваша розмова не зберігається.', dismiss: 'Зрозуміло', repeat: 'Повторити' },
+  vi: { title: 'Chao mung den voi Verba', body: 'Ung dung nay dich theo thoi gian thuc.', instruction: 'Giu nut de noi.', privacy: 'Cuoc tro chuyen cua ban duoc bao mat.', dismiss: 'Da hieu', repeat: 'Lap lai' },
 };
 
 const PHRASE_CATEGORIES = [
@@ -216,36 +232,43 @@ const PHRASE_CATEGORIES = [
     phrases: [
       {
         english: 'Where is your pain?',
-        es: '¿Dónde le duele?', zh: '您哪里疼？', yue: '你喺邊度痛？', pt: 'Onde é a sua dor?',
-        fr: 'Où avez-vous mal?', ar: 'أين يوجد ألمك؟', vi: 'Ban dau o dau?',
-        hi: 'आपको दर्द कहाँ है?', ko: '어디가 아프세요?', ru: 'Где у вас боль?', uk: 'Де у вас біль?',
-        fa: 'درد شما کجاست؟', tr: 'Agriniz nerede?',
+        ar: 'أين يوجد ألمك؟', bg: 'Kade e bolkata vi?', yue: '你喺邊度痛？', hr: 'Gdje vas boli?',
+        cs: 'Kde vas boli?', da: 'Hvor har du ondt?', nl: 'Waar heeft u pijn?', fi: 'Missa on kipusi?',
+        fr: 'Ou avez-vous mal?', de: 'Wo haben Sie Schmerzen?', el: 'Pou ponate?', hi: 'आपको दर्द कहाँ है?',
+        hu: 'Hol faj?', it: 'Dove ha dolore?', ko: '어디가 아프세요?', zh: '您哪里疼？',
+        no: 'Hvor har du vondt?', fa: 'درد شما کجاست؟', pl: 'Gdzie boli?', pt: 'Onde e a sua dor?',
+        ro: 'Unde va doare?', ru: 'Где у вас боль?', sk: 'Kde vas boli?', es: 'Donde le duele?',
+        sv: 'Var har du ont?', tr: 'Agriniz nerede?', uk: 'Де у вас біль?', vi: 'Ban dau o dau?',
       },
       {
         english: 'Rate your pain 1 to 10.',
-        es: 'Califique su dolor del 1 al 10.', zh: '请用1到10分来描述您的疼痛程度。', yue: '請用1至10分評估你嘅痛楚程度。',
-        pt: 'Classifique sua dor de 1 a 10.', fr: 'Évaluez votre douleur de 1 à 10.', ar: 'قيّم ألمك من 1 إلى 10.',
-        vi: 'Danh gia con dau cua ban tu 1 den 10.', hi: 'अपने दर्द को 1 से 10 के पैमाने पर बताएं।',
-        ko: '통증을 1에서 10으로 평가해 주세요.', ru: 'Оцените боль по шкале от 1 до 10.', uk: 'Оцініть біль за шкалою від 1 до 10.',
-        fa: 'درد خود را از ۱ تا ۱۰ ارزیابی کنید.', tr: 'Agrinizi 1 ile 10 arasinda puanlayin.',
+        ar: 'قيّم ألمك من 1 إلى 10.', bg: 'Ocenete bolkata ot 1 do 10.', yue: '請用1至10分評估你嘅痛楚程度。', hr: 'Ocijenite bol od 1 do 10.',
+        cs: 'Ohodnotte bolest od 1 do 10.', da: 'Vurder din smerte fra 1 til 10.', nl: 'Beoordeel uw pijn van 1 tot 10.', fi: 'Arvioi kipusi 1-10.',
+        fr: 'Evaluez votre douleur de 1 a 10.', de: 'Bewerten Sie Ihren Schmerz von 1 bis 10.', el: 'Vathmologiste ton pono apo 1 eos 10.', hi: 'अपने दर्द को 1 से 10 पर बताएं।',
+        hu: 'Ertekelje a fajdalmat 1-tol 10-ig.', it: 'Valuti il dolore da 1 a 10.', ko: '통증을 1에서 10으로 평가해 주세요.', zh: '请用1到10分描述您的疼痛。',
+        no: 'Vurder smerten fra 1 til 10.', fa: 'درد خود را از ۱ تا ۱۰ ارزیابی کنید.', pl: 'Ocen bol w skali 1-10.', pt: 'Classifique sua dor de 1 a 10.',
+        ro: 'Evaluati durerea de la 1 la 10.', ru: 'Оцените боль от 1 до 10.', sk: 'Ohodnotte bolest od 1 do 10.', es: 'Califique su dolor del 1 al 10.',
+        sv: 'Bedomm din smarta fran 1 till 10.', tr: 'Agrinizi 1 ile 10 arasinda puanlayin.', uk: 'Оцініть біль від 1 до 10.', vi: 'Danh gia con dau tu 1 den 10.',
       },
       {
         english: 'Is the pain constant or does it come and go?',
-        es: '¿El dolor es constante o va y viene?', zh: '疼痛是持续的还是时好时坏？', yue: '痛楚係持續定係時好時壞？',
-        pt: 'A dor é constante ou vai e vem?', fr: 'La douleur est-elle constante ou intermittente?',
-        ar: 'هل الألم مستمر أم يأتي ويذهب؟', vi: 'Con dau co lien tuc hay den roi di?',
-        hi: 'क्या दर्द लगातार है या आता-जाता है?', ko: '통증이 지속적인가요, 아니면 왔다 갔다 하나요?',
-        ru: 'Боль постоянная или приходит и уходит?', uk: 'Біль постійний чи приходить і відходить?',
-        fa: 'آیا درد مداوم است یا می‌آید و می‌رود؟', tr: 'Agri surekli mi yoksa gelip geciyor mu?',
+        ar: 'هل الألم مستمر أم يأتي ويذهب؟', bg: 'Bolkata postoyanna li e ili idva i si otiva?', yue: '痛楚係持續定係時好時壞？', hr: 'Je li bol stalna ili dolazi i odlazi?',
+        cs: 'Je bolest stala nebo prijde a odejde?', da: 'Er smerten konstant eller kommer og gar?', nl: 'Is de pijn constant of komt en gaat hij?', fi: 'Onko kipu jatkuvaa vai tuleeko ja menee?',
+        fr: 'La douleur est-elle constante ou intermittente?', de: 'Ist der Schmerz konstant oder kommt und geht er?', el: 'Einai o ponos diarkis i erchetai kai fevgei?', hi: 'क्या दर्द लगातार है या आता-जाता है?',
+        hu: 'A fajdalom allando vagy jon-megy?', it: 'Il dolore e costante o va e viene?', ko: '통증이 지속적인가요 아니면 왔다 갔다 하나요?', zh: '疼痛是持续的还是时好时坏？',
+        no: 'Er smerten konstant eller kommer og gar den?', fa: 'آیا درد مداوم است یا می‌آید و می‌رود؟', pl: 'Czy bol jest staly czy przychodzi i odchodzi?', pt: 'A dor e constante ou vai e vem?',
+        ro: 'Durerea este constanta sau vine si pleaca?', ru: 'Боль постоянная или приходит и уходит?', sk: 'Je bolest stala alebo prichádza a odchádza?', es: 'El dolor es constante o va y viene?',
+        sv: 'Ar smarten konstant eller kommer och gar den?', tr: 'Agri surekli mi yoksa gelip geciyor mu?', uk: 'Біль постійний чи приходить і відходить?', vi: 'Con dau co lien tuc hay den roi di?',
       },
       {
         english: 'Does the pain radiate anywhere?',
-        es: '¿El dolor se irradia a algún lugar?', zh: '疼痛是否向其他部位放射？', yue: '痛楚有冇擴散到其他地方？',
-        pt: 'A dor irradia para algum lugar?', fr: 'La douleur irradie-t-elle quelque part?',
-        ar: 'هل ينتشر الألم إلى مكان آخر؟', vi: 'Con dau co lan ra noi nao khong?',
-        hi: 'क्या दर्द कहीं और फैलता है?', ko: '통증이 다른 곳으로 퍼지나요?',
-        ru: 'Боль отдаёт куда-нибудь?', uk: 'Біль віддає кудись?',
-        fa: 'آیا درد به جای دیگری می‌کشد؟', tr: 'Agri bir yere yayiliyor mu?',
+        ar: 'هل ينتشر الألم إلى مكان آخر؟', bg: 'Razprostira li se bolkata njakade?', yue: '痛楚有冇擴散到其他地方？', hr: 'Siri li se bol negdje?',
+        cs: 'Vyrizuje se bolest nekam?', da: 'Straaler smerten ud noget sted?', nl: 'Straalt de pijn ergens naartoe?', fi: 'Saatuuko kipu johonkin?',
+        fr: 'La douleur irradie-t-elle quelque part?', de: 'Strahlt der Schmerz irgendwohin aus?', el: 'Aktinovolei o ponos kapoU?', hi: 'क्या दर्द कहीं और फैलता है?',
+        hu: 'Kisugarzik-e a fajdalom valahova?', it: 'Il dolore irradia da qualche parte?', ko: '통증이 다른 곳으로 퍼지나요?', zh: '疼痛是否向其他部位放射？',
+        no: 'Stralér smerten ut noe sted?', fa: 'آیا درد به جای دیگری می‌کشد؟', pl: 'Czy bol promieniuje gdzies?', pt: 'A dor irradia para algum lugar?',
+        ro: 'Durerea iradiaza undeva?', ru: 'Боль отдаёт куда-нибудь?', sk: 'Vyrizuje sa bolest niekam?', es: 'El dolor se irradia a algun lugar?',
+        sv: 'Straalar smarten ut nagon stans?', tr: 'Agri bir yere yayiliyor mu?', uk: 'Біль віддає кудись?', vi: 'Con dau co lan ra noi nao khong?',
       },
     ],
   },
@@ -254,37 +277,43 @@ const PHRASE_CATEGORIES = [
     phrases: [
       {
         english: 'Are you having trouble breathing?',
-        es: '¿Tiene dificultad para respirar?', zh: '您呼吸困难吗？', yue: '你有冇呼吸困難？',
-        pt: 'Você está tendo dificuldade para respirar?', fr: 'Avez-vous des difficultés à respirer?',
-        ar: 'هل تعاني من صعوبة في التنفس؟', vi: 'Ban co kho tho khong?',
-        hi: 'क्या आपको सांस लेने में तकलीफ हो रही है?', ko: '숨쉬기가 힘드세요?',
-        ru: 'У вас есть затруднение дыхания?', uk: 'У вас є труднощі з диханням?',
-        fa: 'آیا در تنفس مشکل دارید؟', tr: 'Nefes almakta guclu cekiryor musunuz?',
+        ar: 'هل تعاني من صعوبة في التنفس؟', bg: 'Trudno li vi e da diishate?', yue: '你有冇呼吸困難？', hr: 'Imate li poteskoca s disanjem?',
+        cs: 'Mate problemy s dychanim?', da: 'Har du svaert ved at trække vejret?', nl: 'Heeft u moeite met ademen?', fi: 'Onko sinulla vaikeuksia hengittaa?',
+        fr: 'Avez-vous des difficultes a respirer?', de: 'Haben Sie Schwierigkeiten beim Atmen?', el: 'Echete dyskolio na anapreete?', hi: 'क्या आपको सांस लेने में तकलीफ है?',
+        hu: 'Nehezsegei vannak a legzesben?', it: 'Ha difficolta a respirare?', ko: '숨쉬기가 힘드세요?', zh: '您呼吸困难吗？',
+        no: 'Har du vansker med a puste?', fa: 'آیا در تنفس مشکل دارید؟', pl: 'Czy ma pan/pani trudnosci z oddychaniem?', pt: 'Voce esta tendo dificuldade para respirar?',
+        ro: 'Aveti dificultati de respiratie?', ru: 'У вас затруднение дыхания?', sk: 'Mate problemy s dychanim?', es: 'Tiene dificultad para respirar?',
+        sv: 'Har du svarigheter att andas?', tr: 'Nefes almakta guclu cekiryor musunuz?', uk: 'У вас є труднощі з диханням?', vi: 'Ban co kho tho khong?',
       },
       {
         english: 'Do you feel dizzy or nauseous?',
-        es: '¿Se siente mareado o con náuseas?', zh: '您感到头晕或恶心吗？', yue: '你有冇頭暈或作嘔？',
-        pt: 'Você se sente tonto ou com náusea?', fr: 'Vous sentez-vous étourdi ou nauséeux?',
-        ar: 'هل تشعر بالدوار أو الغثيان؟', vi: 'Ban co cam thay chong mat hoac buon non khong?',
-        hi: 'क्या आपको चक्कर आ रहे हैं या मतली हो रही है?', ko: '어지럽거나 메스꺼움을 느끼시나요?',
-        ru: 'Вы чувствуете головокружение или тошноту?', uk: 'Ви відчуваєте запаморочення або нудоту?',
-        fa: 'آیا احساس سرگیجه یا تهوع می‌کنید؟', tr: 'Bas donmesi veya mide bulantisi hissediyor musunuz?',
+        ar: 'هل تشعر بالدوار أو الغثيان؟', bg: 'Chuvstvate li zamayane ili gadno?', yue: '你有冇頭暈或作嘔？', hr: 'Osjecate li vrtoglavicu ili mucninu?',
+        cs: 'Cítite se zavratelni nebo nevolno?', da: 'Har du svimmelhed eller kvalme?', nl: 'Voelt u zich duizelig of misselijk?', fi: 'Tunnetko huimausta tai pahoinvointia?',
+        fr: 'Vous sentez-vous etourdi ou nauseeux?', de: 'Fuhlen Sie sich schwindelig oder ubel?', el: 'Aisthanesteili zali i nausia?', hi: 'क्या आपको चक्कर या मतली हो रही है?',
+        hu: 'Szedulgeti magat vagy hanyingere van?', it: 'Si sente stordito o nauseato?', ko: '어지럽거나 메스꺼움을 느끼시나요?', zh: '您感到头晕或恶心吗？',
+        no: 'Foles du svimmel eller kvalm?', fa: 'آیا احساس سرگیجه یا تهوع می‌کنید؟', pl: 'Czy czuje sie pan/pani zawroty glowy lub nudnosci?', pt: 'Voce se sente tonto ou com nausea?',
+        ro: 'Va simtiti ametit sau greata?', ru: 'Вы чувствуете головокружение или тошноту?', sk: 'Cítite zavratie alebo nevolnost?', es: 'Se siente mareado o con nauseas?',
+        sv: 'Kanner du dig yr eller illamaende?', tr: 'Bas donmesi veya mide bulantisi hissediyor musunuz?', uk: 'Ви відчуваєте запаморочення або нудоту?', vi: 'Ban co cam thay chong mat hoac buon non khong?',
       },
       {
         english: 'Do you have a fever?',
-        es: '¿Tiene fiebre?', zh: '您发烧了吗？', yue: '你有冇發燒？', pt: 'Você tem febre?',
-        fr: 'Avez-vous de la fièvre?', ar: 'هل لديك حمى؟', vi: 'Ban co bi sot khong?',
-        hi: 'क्या आपको बुखार है?', ko: '열이 있으세요?', ru: 'У вас есть температура?', uk: 'У вас є температура?',
-        fa: 'آیا تب دارید؟', tr: 'Atesiniz var mi?',
+        ar: 'هل لديك حمى؟', bg: 'Imate li temperatura?', yue: '你有冇發燒？', hr: 'Imate li temperaturu?',
+        cs: 'Mate horku?', da: 'Har du feber?', nl: 'Heeft u koorts?', fi: 'Onko sinulla kuumetta?',
+        fr: 'Avez-vous de la fievre?', de: 'Haben Sie Fieber?', el: 'Echete pyreto?', hi: 'क्या आपको बुखार है?',
+        hu: 'Van laza?', it: 'Ha la febbre?', ko: '열이 있으세요?', zh: '您发烧了吗？',
+        no: 'Har du feber?', fa: 'آیا تب دارید؟', pl: 'Czy ma pan/pani goraczke?', pt: 'Voce tem febre?',
+        ro: 'Aveti febra?', ru: 'У вас есть температура?', sk: 'Mate horucku?', es: 'Tiene fiebre?',
+        sv: 'Har du feber?', tr: 'Atesiniz var mi?', uk: 'У вас є температура?', vi: 'Ban co bi sot khong?',
       },
       {
         english: 'How long have you had this symptom?',
-        es: '¿Cuánto tiempo lleva con este síntoma?', zh: '这个症状持续多久了？', yue: '呢個症狀持續幾耐了？',
-        pt: 'Há quanto tempo você tem esse sintoma?', fr: 'Depuis combien de temps avez-vous ce symptôme?',
-        ar: 'منذ متى وأنت تعاني من هذا العَرَض؟', vi: 'Ban co trieu chung nay bao lau roi?',
-        hi: 'यह लक्षण आपको कितने समय से है?', ko: '이 증상이 얼마나 됐나요?',
-        ru: 'Как давно у вас этот симптом?', uk: 'Як давно у вас цей симптом?',
-        fa: 'این علامت چه مدت است که دارید؟', tr: 'Bu belirti ne zamandan beri var?',
+        ar: 'منذ متى وأنت تعاني من هذا العَرَض؟', bg: 'Kolko vreme imate tozi simptom?', yue: '呢個症狀持續幾耐了？', hr: 'Koliko dugo imate ovaj simptom?',
+        cs: 'Jak dlouho mate tento priznak?', da: 'Hvor laenge har du haft dette symptom?', nl: 'Hoe lang heeft u dit symptoom al?', fi: 'Kuinka kauan sinulla on ollut tama oire?',
+        fr: 'Depuis combien de temps avez-vous ce symptome?', de: 'Wie lange haben Sie dieses Symptom schon?', el: 'Poso kairo echete auto to symptoma?', hi: 'यह लक्षण आपको कितने समय से है?',
+        hu: 'Mióta van ez a tunete?', it: 'Da quanto tempo ha questo sintomo?', ko: '이 증상이 얼마나 됐나요?', zh: '这个症状持续多久了？',
+        no: 'Hvor lenge har du hatt dette symptomet?', fa: 'این علامت چه مدت است که دارید؟', pl: 'Jak dlugo ma pan/pani ten objaw?', pt: 'Ha quanto tempo voce tem esse sintoma?',
+        ro: 'De cat timp aveti acest simptom?', ru: 'Как давно у вас этот симптом?', sk: 'Ako dlho mate tento priznak?', es: 'Cuanto tiempo lleva con este sintoma?',
+        sv: 'Hur lange har du haft det har symptomet?', tr: 'Bu belirti ne zamandan beri var?', uk: 'Як давно у вас цей симптом?', vi: 'Ban co trieu chung nay bao lau roi?',
       },
     ],
   },
@@ -293,29 +322,33 @@ const PHRASE_CATEGORIES = [
     phrases: [
       {
         english: 'Do you have any allergies?',
-        es: '¿Tiene alguna alergia?', zh: '您有过敏症吗？', yue: '你有冇過敏？', pt: 'Você tem alguma alergia?',
-        fr: 'Avez-vous des allergies?', ar: 'هل لديك أي حساسية؟', vi: 'Ban co bi di ung gi khong?',
-        hi: 'क्या आपको कोई एलर्जी है?', ko: '알레르기가 있으세요?',
-        ru: 'Есть ли у вас аллергия?', uk: 'Чи є у вас алергія?',
-        fa: 'آیا آلرژی دارید؟', tr: 'Alerjiniz var mi?',
+        ar: 'هل لديك أي حساسية؟', bg: 'Imate li niakakvi alergii?', yue: '你有冇過敏？', hr: 'Imate li alergije?',
+        cs: 'Mate nejake alergie?', da: 'Har du nogen allergier?', nl: 'Heeft u allergieën?', fi: 'Onko sinulla allergioita?',
+        fr: 'Avez-vous des allergies?', de: 'Haben Sie Allergien?', el: 'Echete allergies?', hi: 'क्या आपको कोई एलर्जी है?',
+        hu: 'Van barmilyen allergiaja?', it: 'Ha allergie?', ko: '알레르기가 있으세요?', zh: '您有过敏症吗？',
+        no: 'Har du noen allergier?', fa: 'آیا آلرژی دارید؟', pl: 'Czy ma pan/pani jakies alergie?', pt: 'Voce tem alguma alergia?',
+        ro: 'Aveti alergii?', ru: 'Есть ли у вас аллергия?', sk: 'Mate nejake alergie?', es: 'Tiene alguna alergia?',
+        sv: 'Har du nagra allergier?', tr: 'Alerjiniz var mi?', uk: 'Чи є у вас алергія?', vi: 'Ban co bi di ung gi khong?',
       },
       {
         english: 'What medications are you currently taking?',
-        es: '¿Qué medicamentos está tomando actualmente?', zh: '您目前在服用哪些药物？', yue: '你而家食緊咩藥？',
-        pt: 'Quais medicamentos você está tomando atualmente?', fr: 'Quels médicaments prenez-vous actuellement?',
-        ar: 'ما الأدوية التي تتناولها حالياً؟', vi: 'Ban dang dung thuoc gi?',
-        hi: 'आप अभी कौन सी दवाएं ले रहे हैं?', ko: '현재 복용 중인 약이 있으세요?',
-        ru: 'Какие лекарства вы сейчас принимаете?', uk: 'Які ліки ви зараз приймаєте?',
-        fa: 'در حال حاضر چه داروهایی مصرف می‌کنید؟', tr: 'Su anda hangi ilaclari kullaniyorsunuz?',
+        ar: 'ما الأدوية التي تتناولها حالياً؟', bg: 'Kakvi lekarstva vzemate v momenta?', yue: '你而家食緊咩藥？', hr: 'Koje lijekove trenutno uzimate?',
+        cs: 'Jake leky momentalne uzivate?', da: 'Hvilke mediciner tager du i ojeblikket?', nl: 'Welke medicijnen gebruikt u momenteel?', fi: 'Mita laakkeita kaytat talla hetkella?',
+        fr: 'Quels medicaments prenez-vous actuellement?', de: 'Welche Medikamente nehmen Sie derzeit?', el: 'Poia farmaka pairnete tora?', hi: 'आप अभी कौन सी दवाएं ले रहे हैं?',
+        hu: 'Milyen gyogyszereket szed jelenleg?', it: 'Quali farmaci sta attualmente prendendo?', ko: '현재 복용 중인 약이 있으세요?', zh: '您目前在服用哪些药物？',
+        no: 'Hvilke medisiner tar du for oyeblikket?', fa: 'در حال حاضر چه داروهایی مصرف می‌کنید؟', pl: 'Jakie leki pan/pani przyjmuje?', pt: 'Quais medicamentos voce esta tomando?',
+        ro: 'Ce medicamente luati in prezent?', ru: 'Какие лекарства вы принимаете?', sk: 'Ake lieky momentalne uzivate?', es: 'Que medicamentos esta tomando actualmente?',
+        sv: 'Vilka mediciner tar du for narvarande?', tr: 'Su anda hangi ilaclari kullaniyorsunuz?', uk: 'Які ліки ви зараз приймаєте?', vi: 'Ban dang dung thuoc gi?',
       },
       {
         english: 'Do you have any chronic conditions?',
-        es: '¿Tiene alguna enfermedad crónica?', zh: '您有慢性疾病吗？', yue: '你有冇慢性病？',
-        pt: 'Você tem alguma condição crônica?', fr: 'Avez-vous des maladies chroniques?',
-        ar: 'هل لديك أي أمراض مزمنة؟', vi: 'Ban co benh man tinh nao khong?',
-        hi: 'क्या आपको कोई पुरानी बीमारी है?', ko: '만성 질환이 있으세요?',
-        ru: 'Есть ли у вас хронические заболевания?', uk: 'Чи є у вас хронічні захворювання?',
-        fa: 'آیا بیماری مزمنی دارید؟', tr: 'Kronik bir hastaligiz var mi?',
+        ar: 'هل لديك أي أمراض مزمنة؟', bg: 'Imate li hronichni zabolyavaniya?', yue: '你有冇慢性病？', hr: 'Imate li kronicna stanja?',
+        cs: 'Mate nejake chronicke stavy?', da: 'Har du kroniske sygdomme?', nl: 'Heeft u chronische aandoeningen?', fi: 'Onko sinulla kroonisia sairauksia?',
+        fr: 'Avez-vous des maladies chroniques?', de: 'Haben Sie chronische Erkrankungen?', el: 'Echete chronies pathiseis?', hi: 'क्या आपको कोई पुरानी बीमारी है?',
+        hu: 'Van kronikaus allapota?', it: 'Ha condizioni croniche?', ko: '만성 질환이 있으세요?', zh: '您有慢性疾病吗？',
+        no: 'Har du kroniske tilstander?', fa: 'آیا بیماری مزمنی دارید؟', pl: 'Czy ma pan/pani choroby przewlekle?', pt: 'Voce tem alguma condicao cronica?',
+        ro: 'Aveti afectiuni cronice?', ru: 'Есть ли у вас хронические заболевания?', sk: 'Mate nejake chronicke stavy?', es: 'Tiene alguna enfermedad cronica?',
+        sv: 'Har du nagra kroniska tillstand?', tr: 'Kronik bir hastaligiz var mi?', uk: 'Чи є у вас хронічні захворювання?', vi: 'Ban co benh man tinh nao khong?',
       },
     ],
   },
@@ -324,34 +357,43 @@ const PHRASE_CATEGORIES = [
     phrases: [
       {
         english: 'I need to examine you.',
-        es: 'Necesito examinarlo/a.', zh: '我需要给您做检查。', yue: '我需要為你進行檢查。',
-        pt: 'Preciso examiná-lo/a.', fr: 'Je dois vous examiner.', ar: 'أحتاج إلى فحصك.',
-        vi: 'Toi can kham cho ban.', hi: 'मुझे आपकी जांच करनी है।', ko: '진찰을 해야 합니다.',
-        ru: 'Мне нужно вас осмотреть.', uk: 'Мені потрібно вас оглянути.',
-        fa: 'باید شما را معاینه کنم.', tr: 'Sizi muayene etmem gerekiyor.',
+        ar: 'أحتاج إلى فحصك.', bg: 'Tryabva da vi pregleda.', yue: '我需要為你進行檢查。', hr: 'Trebam vas pregledati.',
+        cs: 'Potrebuji vas vysetrit.', da: 'Jeg er nodt til at undersoge dig.', nl: 'Ik moet u onderzoeken.', fi: 'Minun taytyy tutkia sinut.',
+        fr: 'Je dois vous examiner.', de: 'Ich muss Sie untersuchen.', el: 'Prepei na sas exetaso.', hi: 'मुझे आपकी जांच करनी है।',
+        hu: 'Meg kell vizsgalnom ont.', it: 'Devo visitarla.', ko: '진찰을 해야 합니다.', zh: '我需要给您做检查。',
+        no: 'Jeg ma undersoke deg.', fa: 'باید شما را معاینه کنم.', pl: 'Musz pana/pania zbadac.', pt: 'Preciso examina-lo/a.',
+        ro: 'Trebuie sa va examinez.', ru: 'Мне нужно вас осмотреть.', sk: 'Musim vas vysetrit.', es: 'Necesito examinarlo/a.',
+        sv: 'Jag behover undersoka dig.', tr: 'Sizi muayene etmem gerekiyor.', uk: 'Мені потрібно вас оглянути.', vi: 'Toi can kham cho ban.',
       },
       {
         english: 'I am going to give you medication.',
-        es: 'Le voy a administrar medicamento.', zh: '我要给您用药。', yue: '我將會為你用藥。',
-        pt: 'Vou lhe administrar medicamento.', fr: 'Je vais vous administrer un médicament.',
-        ar: 'سأعطيك دواءً.', vi: 'Toi se cho ban dung thuoc.', hi: 'मैं आपको दवा दूंगा।',
-        ko: '약을 드릴 것입니다.', ru: 'Я дам вам лекарство.', uk: 'Я дам вам ліки.',
-        fa: 'می‌خواهم به شما دارو بدهم.', tr: 'Size ilac verecegim.',
+        ar: 'سأعطيك دواءً.', bg: 'Shte vi dam lekarstvo.', yue: '我將會為你用藥。', hr: 'Dat cu vam lijek.',
+        cs: 'Dam vam lek.', da: 'Jeg vil give dig medicin.', nl: 'Ik ga u medicatie geven.', fi: 'Annan sinulle laaketta.',
+        fr: 'Je vais vous administrer un medicament.', de: 'Ich werde Ihnen ein Medikament geben.', el: 'Tha sas doso farmako.', hi: 'मैं आपको दवा दूंगा।',
+        hu: 'Gyogyszert fogok adni onnek.', it: 'Le daro un farmaco.', ko: '약을 드릴 것입니다.', zh: '我要给您用药。',
+        no: 'Jeg skal gi deg medisin.', fa: 'می‌خواهم به شما دارو بدهم.', pl: 'Dam panu/pani lek.', pt: 'Vou lhe dar medicamento.',
+        ro: 'Va voi da medicatie.', ru: 'Я дам вам лекарство.', sk: 'Dam vam liek.', es: 'Le voy a dar medicamento.',
+        sv: 'Jag kommer ge dig medicin.', tr: 'Size ilac verecegim.', uk: 'Я дам вам ліки.', vi: 'Toi se cho ban dung thuoc.',
       },
       {
         english: 'Do you understand?',
-        es: '¿Entiende?', zh: '您明白吗？', yue: '你明白嗎？', pt: 'Você entende?',
-        fr: 'Comprenez-vous?', ar: 'هل تفهم؟', vi: 'Ban co hieu khong?',
-        hi: 'क्या आप समझे?', ko: '이해하셨나요?', ru: 'Вы понимаете?', uk: 'Ви розумієте?',
-        fa: 'آیا متوجه شدید؟', tr: 'Anliyor musunuz?',
+        ar: 'هل تفهم؟', bg: 'Razbirate li?', yue: '你明白嗎？', hr: 'Razumijete li?',
+        cs: 'Rozumite?', da: 'Forstar du?', nl: 'Begrijpt u het?', fi: 'Ymmarratkö?',
+        fr: 'Comprenez-vous?', de: 'Verstehen Sie?', el: 'Katalavainete?', hi: 'क्या आप समझे?',
+        hu: 'Erti?', it: 'Capisce?', ko: '이해하셨나요?', zh: '您明白吗？',
+        no: 'Forstar du?', fa: 'آیا متوجه شدید؟', pl: 'Czy rozumie pan/pani?', pt: 'Voce entende?',
+        ro: 'Intelegeti?', ru: 'Вы понимаете?', sk: 'Rozumiete?', es: 'Entiende?',
+        sv: 'Forstar du?', tr: 'Anliyor musunuz?', uk: 'Ви розумієте?', vi: 'Ban co hieu khong?',
       },
       {
         english: 'Please sign here.',
-        es: 'Por favor firme aquí.', zh: '请在这里签名。', yue: '請喺呢度簽名。',
-        pt: 'Por favor, assine aqui.', fr: 'Veuillez signer ici.', ar: 'من فضلك وقّع هنا.',
-        vi: 'Vui long ky vao day.', hi: 'कृपया यहाँ हस्ताक्षर करें।', ko: '여기에 서명해 주세요.',
-        ru: 'Пожалуйста, подпишите здесь.', uk: 'Будь ласка, підпишіть тут.',
-        fa: 'لطفاً اینجا امضا کنید.', tr: 'Lutfen buraya imzalayin.',
+        ar: 'من فضلك وقّع هنا.', bg: 'Molia podpishete tuk.', yue: '請喺呢度簽名。', hr: 'Molimo potpishite ovdje.',
+        cs: 'Prosim podepiste zde.', da: 'Venligst skriv under her.', nl: 'Gelieve hier te tekenen.', fi: 'Ole hyva ja allekirjoita tahan.',
+        fr: 'Veuillez signer ici.', de: 'Bitte hier unterschreiben.', el: 'Parakalo ypografste edo.', hi: 'कृपया यहाँ हस्ताक्षर करें।',
+        hu: 'Kerem irjon ala itt.', it: 'Firmi qui per favore.', ko: '여기에 서명해 주세요.', zh: '请在这里签名。',
+        no: 'Vennligst signer her.', fa: 'لطفاً اینجا امضا کنید.', pl: 'Prosze podpisac tutaj.', pt: 'Por favor assine aqui.',
+        ro: 'Va rugam sa semnati aici.', ru: 'Пожалуйста, подпишите здесь.', sk: 'Prosim podpiste tu.', es: 'Por favor firme aqui.',
+        sv: 'Var vanlig och skriv under har.', tr: 'Lutfen buraya imzalayin.', uk: 'Будь ласка, підпишіть тут.', vi: 'Vui long ky vao day.',
       },
     ],
   },
@@ -372,97 +414,37 @@ const PAIN_LEVELS = [
 ];
 
 const VITAL_SIGNS = [
-  { key: 'bp',   labelEn: 'Blood Pressure', unit: 'mmHg',  placeholder: 'e.g. 120/80',
-    labels: { es: 'Presión arterial', zh: '血压', yue: '血壓', pt: 'Pressão arterial', fr: 'Pression artérielle', ar: 'ضغط الدم', vi: 'Huyet ap', hi: 'रक्तचाप', ko: '혈압', ru: 'Артериальное давление', uk: 'Артеріальний тиск', fa: 'فشار خون', tr: 'Tansiyon' } },
-  { key: 'hr',   labelEn: 'Heart Rate',     unit: 'bpm',   placeholder: 'e.g. 72',
-    labels: { es: 'Frecuencia cardíaca', zh: '心率', yue: '心率', pt: 'Frequência cardíaca', fr: 'Fréquence cardiaque', ar: 'معدل ضربات القلب', vi: 'Nhip tim', hi: 'हृदय गति', ko: '심박수', ru: 'Частота пульса', uk: 'Частота пульсу', fa: 'ضربان قلب', tr: 'Nabiz' } },
-  { key: 'temp', labelEn: 'Temperature',    unit: '',      placeholder: 'e.g. 98.6F',
-    labels: { es: 'Temperatura', zh: '体温', yue: '體溫', pt: 'Temperatura', fr: 'Température', ar: 'درجة الحرارة', vi: 'Nhiet do', hi: 'तापमान', ko: '체온', ru: 'Температура', uk: 'Температура', fa: 'دما', tr: 'Ates' } },
-  { key: 'o2',   labelEn: 'Oxygen Level',   unit: '%',     placeholder: 'e.g. 98',
-    labels: { es: 'Nivel de oxígeno', zh: '血氧水平', yue: '血氧水平', pt: 'Nível de oxigênio', fr: "Niveau d'oxygene", ar: 'مستوى الأكسجين', vi: 'Nong do oxy', hi: 'ऑक्सीजन स्तर', ko: '산소 포화도', ru: 'Уровень кислорода', uk: 'Рівень кисню', fa: 'سطح اکسیژن', tr: 'Oksijen Seviyesi' } },
+  { key: 'bp',   labelEn: 'Blood Pressure', unit: 'mmHg', placeholder: 'e.g. 120/80',
+    labels: { ar: 'ضغط الدم', bg: 'Krvno nalyagane', yue: '血壓', hr: 'Krvni tlak', cs: 'Krevni tlak', da: 'Blodtryk', nl: 'Bloeddruk', fi: 'Verenpaine', fr: 'Pression arterielle', de: 'Blutdruck', el: 'Piesi', hi: 'रक्तचाप', hu: 'Vernyomas', it: 'Pressione sanguigna', ko: '혈압', zh: '血压', no: 'Blodtrykk', fa: 'فشار خون', pl: 'Cisnienie krwi', pt: 'Pressao arterial', ro: 'Tensiune arteriala', ru: 'Давление', sk: 'Krvny tlak', es: 'Presion arterial', sv: 'Blodtryck', tr: 'Tansiyon', uk: 'Тиск', vi: 'Huyet ap' } },
+  { key: 'hr',   labelEn: 'Heart Rate',     unit: 'bpm',  placeholder: 'e.g. 72',
+    labels: { ar: 'معدل ضربات القلب', bg: 'Sardechna chestota', yue: '心率', hr: 'Puls', cs: 'Tep', da: 'Puls', nl: 'Hartslag', fi: 'Syke', fr: 'Frequence cardiaque', de: 'Herzfrequenz', el: 'Kardiakos rythmis', hi: 'हृदय गति', hu: 'Szivritmus', it: 'Frequenza cardiaca', ko: '심박수', zh: '心率', no: 'Puls', fa: 'ضربان قلب', pl: 'Tetno', pt: 'Frequencia cardiaca', ro: 'Ritm cardiac', ru: 'Пульс', sk: 'Tep', es: 'Frecuencia cardiaca', sv: 'Hjartfrekvens', tr: 'Nabiz', uk: 'Пульс', vi: 'Nhip tim' } },
+  { key: 'temp', labelEn: 'Temperature',    unit: '',     placeholder: 'e.g. 98.6F',
+    labels: { ar: 'درجة الحرارة', bg: 'Temperatura', yue: '體溫', hr: 'Temperatura', cs: 'Teplota', da: 'Temperatur', nl: 'Temperatuur', fi: 'Lampotila', fr: 'Temperature', de: 'Temperatur', el: 'Thermokrasia', hi: 'तापमान', hu: 'Homerseklet', it: 'Temperatura', ko: '체온', zh: '体温', no: 'Temperatur', fa: 'دما', pl: 'Temperatura', pt: 'Temperatura', ro: 'Temperatura', ru: 'Температура', sk: 'Teplota', es: 'Temperatura', sv: 'Temperatur', tr: 'Ates', uk: 'Температура', vi: 'Nhiet do' } },
+  { key: 'o2',   labelEn: 'Oxygen Level',   unit: '%',    placeholder: 'e.g. 98',
+    labels: { ar: 'مستوى الأكسجين', bg: 'Nivo na kislorod', yue: '血氧水平', hr: 'Razina kisika', cs: 'Hladina kysliku', da: 'Iltmaetning', nl: 'Zuurstofgehalte', fi: 'Happisaturaatio', fr: "Niveau d'oxygene", de: 'Sauerstoffgehalt', el: 'Epipedo oxygonoy', hi: 'ऑक्सीजन स्तर', hu: 'Oxigenszint', it: 'Livello di ossigeno', ko: '산소 포화도', zh: '血氧水平', no: 'Oksygenniva', fa: 'سطح اکسیژن', pl: 'Poziom tlenu', pt: 'Nivel de oxigenio', ro: 'Nivel de oxigen', ru: 'Кислород', sk: 'Hladina kyslika', es: 'Nivel de oxigeno', sv: 'Syreniva', tr: 'Oksijen Seviyesi', uk: 'Кисень', vi: 'Nong do oxy' } },
 ];
 
 const DISCHARGE_CATEGORIES = [
-  { key: 'diet',        label: 'Diet',          icon: '🥗', placeholder: 'e.g. Soft foods only for 3 days' },
-  { key: 'medications', label: 'Medications',   icon: '💊', placeholder: 'e.g. Ibuprofen 400mg twice daily' },
-  { key: 'activity',   label: 'Activity',       icon: '🚶', placeholder: 'e.g. No heavy lifting for 2 weeks' },
-  { key: 'followup',   label: 'Follow-up',      icon: '📅', placeholder: 'e.g. Return in 7 days for wound check' },
-  { key: 'warnings',   label: 'Warning Signs',  icon: '⚠️', placeholder: 'e.g. Return if fever above 101F' },
+  { key: 'diet',        label: 'Diet',         icon: '🥗', placeholder: 'e.g. Soft foods only for 3 days' },
+  { key: 'medications', label: 'Medications',  icon: '💊', placeholder: 'e.g. Ibuprofen 400mg twice daily' },
+  { key: 'activity',    label: 'Activity',     icon: '🚶', placeholder: 'e.g. No heavy lifting for 2 weeks' },
+  { key: 'followup',    label: 'Follow-up',    icon: '📅', placeholder: 'e.g. Return in 7 days for wound check' },
+  { key: 'warnings',    label: 'Warning Signs',icon: '⚠️', placeholder: 'e.g. Return if fever above 101F' },
 ];
 
 const WALKTHROUGH_SLIDES = [
-  {
-    icon: '🌐',
-    title: 'Welcome to Verba',
-    body: 'Verba is a real-time voice translation app for clinical care. This guide will walk you through all of its features.',
-    hint: null,
-  },
-  {
-    icon: '📱',
-    title: 'Two-sided layout',
-    body: 'The screen is split in two. The top half faces you — the provider. The bottom half faces the patient (rotated 180°). Hold the phone between you, or each use your own device.',
-    hint: null,
-  },
-  {
-    icon: '🎙',
-    title: 'Hold to Speak',
-    body: 'Press and hold your button to record. Speak naturally — Verba transcribes, translates, and reads the response aloud in the other language automatically.',
-    hint: 'Release the button when you finish speaking.',
-  },
-  {
-    icon: '⚙',
-    title: 'Language & Specialty',
-    body: 'Tap the gear icon in the center divider to open Settings. Choose the patient\'s language and your clinical specialty. Specialty context (Emergency, Maternity, etc.) improves translation precision.',
-    hint: null,
-  },
-  {
-    icon: '💬',
-    title: 'Quick Phrases',
-    body: 'Access 16 pre-translated clinical phrases across Pain, Assessment, History, and Consent categories. These work fully offline — no internet needed.',
-    hint: 'Settings → Quick Phrases',
-  },
-  {
-    icon: '😣',
-    title: 'Pain Scale',
-    body: 'Show the patient an 11-point visual pain scale. They tap their level and it\'s spoken aloud to you in English.',
-    hint: 'Settings → Pain Scale',
-  },
-  {
-    icon: '📊',
-    title: 'Vital Signs',
-    body: 'Enter readings for blood pressure, heart rate, temperature, and oxygen level. Tap "Show Patient" to display them large and read them aloud in the patient\'s language.',
-    hint: 'Settings → Vital Signs',
-  },
-  {
-    icon: '👋',
-    title: 'Patient Intro',
-    body: 'Opens a full-screen welcome message in the patient\'s language, read aloud automatically. Use it at the start of a visit to orient the patient to the app.',
-    hint: 'Settings → Patient Intro',
-  },
-  {
-    icon: '💊',
-    title: 'Medication Instructions',
-    body: 'Type or dictate individual medication instructions. Each is translated and shown to the patient in large text, read aloud in sequence.',
-    hint: 'Settings → Medication Instructions',
-  },
-  {
-    icon: '📋',
-    title: 'Discharge Instructions',
-    body: 'Add discharge notes across five categories: Diet, Medications, Activity, Follow-up, and Warning Signs. All are shown to the patient organized by category.',
-    hint: 'Settings → Discharge Instructions',
-  },
-  {
-    icon: '👨‍👩‍👧',
-    title: 'Caregiver Mode',
-    body: 'Adds a third purple button for a family member or caregiver. You can set whether the caregiver speaks English or the patient\'s language.',
-    hint: 'Settings → Caregiver Mode (toggle)',
-  },
-  {
-    icon: '📡',
-    title: 'Two-Device Mode',
-    body: 'Each person holds their own phone. The provider generates a session code — the patient enters it to join. Both devices stay in sync in real time.',
-    hint: 'Settings → Two-Device Mode',
-  },
+  { icon: '🌐', title: 'Welcome to Verba', body: 'Verba is a real-time voice translation app for clinical care. This guide will walk you through all of its features.', hint: null },
+  { icon: '📱', title: 'Two-sided layout', body: 'The screen is split in two. The top half faces you — the provider. The bottom half faces the patient (rotated 180°). Hold the phone between you, or each use your own device.', hint: null },
+  { icon: '🎙', title: 'Hold to Speak', body: 'Press and hold your button to record. Speak naturally — Verba transcribes, translates, and reads the response aloud in the other language automatically.', hint: 'Release the button when you finish speaking.' },
+  { icon: '⚙', title: 'Language & Specialty', body: 'Tap the gear icon to open Settings. Choose the patient language, your provider language, and your clinical specialty. Both sides can now be any language.', hint: 'You can also change your provider language directly in the center divider.' },
+  { icon: '💬', title: 'Quick Phrases', body: 'Access 16 pre-translated clinical phrases across Pain, Assessment, History, and Consent categories. These work fully offline — no internet needed.', hint: 'Settings → Quick Phrases' },
+  { icon: '😣', title: 'Pain Scale', body: 'Show the patient an 11-point visual pain scale. They tap their level and it is spoken aloud to you in your language.', hint: 'Settings → Pain Scale' },
+  { icon: '📊', title: 'Vital Signs', body: 'Enter readings for blood pressure, heart rate, temperature, and oxygen level. Tap "Show Patient" to display them large and read them aloud in the patient language.', hint: 'Settings → Vital Signs' },
+  { icon: '👋', title: 'Patient Intro', body: 'Opens a full-screen welcome message in the patient language, read aloud automatically. Use it at the start of a visit to orient the patient to the app.', hint: 'Settings → Patient Intro' },
+  { icon: '💊', title: 'Medication Instructions', body: 'Type or dictate individual medication instructions. Each is translated and shown to the patient in large text, read aloud in sequence.', hint: 'Settings → Medication Instructions' },
+  { icon: '📋', title: 'Discharge Instructions', body: 'Add discharge notes across five categories: Diet, Medications, Activity, Follow-up, and Warning Signs. All are shown to the patient organized by category.', hint: 'Settings → Discharge Instructions' },
+  { icon: '👨‍👩‍👧', title: 'Caregiver Mode', body: 'Adds a third purple button for a family member or caregiver. You can set whether the caregiver speaks the provider language or the patient language.', hint: 'Settings → Caregiver Mode (toggle)' },
+  { icon: '📡', title: 'Two-Device Mode', body: 'Each person holds their own phone. The provider generates a session code — the patient enters it to join. Both devices stay in sync in real time.', hint: 'Settings → Two-Device Mode' },
 ];
 
 const generateSessionCode = () => {
@@ -471,14 +453,14 @@ const generateSessionCode = () => {
   const num = Math.floor(1000 + Math.random() * 9000);
   return `${word}-${num}`;
 };
-
 export default function App() {
   const [messages, setMessages] = useState([]);
   const [isListening, setIsListening] = useState(false);
   const [activeSide, setActiveSide] = useState(null);
   const [status, setStatus] = useState('');
   const [audioUnlocked, setAudioUnlocked] = useState(false);
-  const [selectedLang, setSelectedLang] = useState(LANGUAGES[0]);
+  const [selectedLang, setSelectedLang] = useState(LANGUAGES.find(l => l.code === 'es'));
+  const [selectedProviderLang, setSelectedProviderLang] = useState(PROVIDER_LANGUAGES[0]);
   const [selectedSpecialty, setSelectedSpecialty] = useState(SPECIALTIES[0]);
   const [showPhrases, setShowPhrases] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -494,7 +476,7 @@ export default function App() {
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [summaryCopyConfirmed, setSummaryCopyConfirmed] = useState(false);
   const [caregiverMode, setCaregiverMode] = useState(false);
-  const [caregiverSpeaksEnglish, setCaregiverSpeaksEnglish] = useState(true);
+  const [caregiverSpeaksProvider, setCaregiverSpeaksProvider] = useState(true);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [offlineManual, setOfflineManual] = useState(false);
   const [showMedInstructions, setShowMedInstructions] = useState(false);
@@ -521,6 +503,8 @@ export default function App() {
   const [dischargeInputLoading, setDischargeInputLoading] = useState(false);
   const [dischargeSpeaking, setDischargeSpeaking] = useState(false);
   const [walkthroughStep, setWalkthroughStep] = useState(null);
+  const [showProviderLangConfirm, setShowProviderLangConfirm] = useState(false);
+  const [pendingProviderLang, setPendingProviderLang] = useState(null);
 
   // Two-device mode
   const [twoDeviceMode, setTwoDeviceMode] = useState(false);
@@ -613,20 +597,12 @@ export default function App() {
   }, [sessionStartTime]);
 
   useEffect(() => {
-    return () => {
-      if (ablyRef.current) ablyRef.current.close();
-    };
+    return () => { if (ablyRef.current) ablyRef.current.close(); };
   }, []);
 
   const disconnectAbly = useCallback(() => {
-    if (ablyChannelRef.current) {
-      ablyChannelRef.current.unsubscribe();
-      ablyChannelRef.current = null;
-    }
-    if (ablyRef.current) {
-      ablyRef.current.close();
-      ablyRef.current = null;
-    }
+    if (ablyChannelRef.current) { ablyChannelRef.current.unsubscribe(); ablyChannelRef.current = null; }
+    if (ablyRef.current) { ablyRef.current.close(); ablyRef.current = null; }
     setTwoDeviceConnected(false);
     setTwoDeviceMode(false);
     setTwoDeviceRole(null);
@@ -635,56 +611,31 @@ export default function App() {
   }, []);
 
   const connectAbly = useCallback((code, role) => {
-    if (ablyRef.current) {
-      ablyRef.current.close();
-      ablyRef.current = null;
-      ablyChannelRef.current = null;
-    }
-
+    if (ablyRef.current) { ablyRef.current.close(); ablyRef.current = null; ablyChannelRef.current = null; }
     const client = new Ably.Realtime({ key: ABLY_API_KEY });
     ablyRef.current = client;
-
-    client.connection.on('connected', () => {
-      setTwoDeviceStatus('Connected');
-      setTwoDeviceConnected(true);
-    });
-
-    client.connection.on('disconnected', () => {
-      setTwoDeviceStatus('Disconnected');
-      setTwoDeviceConnected(false);
-    });
-
-    client.connection.on('failed', () => {
-      setTwoDeviceStatus('Connection failed');
-      setTwoDeviceConnected(false);
-    });
-
+    client.connection.on('connected', () => { setTwoDeviceStatus('Connected'); setTwoDeviceConnected(true); });
+    client.connection.on('disconnected', () => { setTwoDeviceStatus('Disconnected'); setTwoDeviceConnected(false); });
+    client.connection.on('failed', () => { setTwoDeviceStatus('Connection failed'); setTwoDeviceConnected(false); });
     const channel = client.channels.get(`verba-${code}`);
     ablyChannelRef.current = channel;
-
     channel.subscribe('translation', (msg) => {
       const { fromRole, original, translated, side, messageId } = msg.data;
       if (fromRole === role) return;
-
       setMessages((prev) => {
         if (prev.find(m => m.id === messageId)) return prev;
         return [...prev, { id: messageId, side, original, translated, backTranslations: {}, dismissed: false }];
       });
-
       const speakText = role === 'provider' ? original : translated;
-      const speakLang = role === 'provider' ? 'en-US' : selectedLang.voice;
+      const speakLang = role === 'provider' ? selectedProviderLang.voice : selectedLang.voice;
       const utterance = new SpeechSynthesisUtterance(speakText);
       utterance.lang = speakLang;
       utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
     });
-
-    channel.subscribe('end-session', () => {
-      disconnectAbly();
-    });
-
+    channel.subscribe('end-session', () => { disconnectAbly(); });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedLang, disconnectAbly]);
+  }, [selectedLang, selectedProviderLang, disconnectAbly]);
 
   const handleStartTwoDeviceAsProvider = () => {
     const code = generateSessionCode();
@@ -708,9 +659,7 @@ export default function App() {
   };
 
   const handleEndTwoDeviceSession = () => {
-    if (ablyChannelRef.current) {
-      ablyChannelRef.current.publish('end-session', {});
-    }
+    if (ablyChannelRef.current) ablyChannelRef.current.publish('end-session', {});
     disconnectAbly();
   };
 
@@ -728,12 +677,8 @@ export default function App() {
   }, [selectedLang]);
 
   useEffect(() => {
-    if (showOnboarding) {
-      setTimeout(() => speakOnboarding(), 400);
-    } else {
-      window.speechSynthesis.cancel();
-      setIsSpeakingOnboarding(false);
-    }
+    if (showOnboarding) { setTimeout(() => speakOnboarding(), 400); }
+    else { window.speechSynthesis.cancel(); setIsSpeakingOnboarding(false); }
   }, [showOnboarding, speakOnboarding]);
 
   const speakMedInstructions = useCallback((instructions) => {
@@ -756,19 +701,13 @@ export default function App() {
   }, [selectedLang]);
 
   useEffect(() => {
-    if (showMedPatient && medInstructions.length > 0) {
-      setTimeout(() => speakMedInstructions(medInstructions), 400);
-    } else if (!showMedPatient) {
-      window.speechSynthesis.cancel();
-      setMedIsSpeaking(false);
-    }
+    if (showMedPatient && medInstructions.length > 0) { setTimeout(() => speakMedInstructions(medInstructions), 400); }
+    else if (!showMedPatient) { window.speechSynthesis.cancel(); setMedIsSpeaking(false); }
   }, [showMedPatient, speakMedInstructions, medInstructions]);
 
   const getSupportedMimeType = () => {
     const types = ['audio/mp4', 'audio/aac', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'];
-    for (const type of types) {
-      if (MediaRecorder.isTypeSupported(type)) return type;
-    }
+    for (const type of types) { if (MediaRecorder.isTypeSupported(type)) return type; }
     return '';
   };
 
@@ -779,7 +718,7 @@ Your rules:
 - Translate from ${sourceLang} to ${targetLang}
 - Use formal clinical register appropriate for a hospital or clinic setting
 - Preserve all medical terminology, anatomical terms, medication names, and dosages exactly
-- Preserve numbers, measurements, and units exactly (e.g. "10mg", "120/80", "37.5C")
+- Preserve numbers, measurements, and units exactly
 - Do not add explanations, clarifications, or commentary
 - Do not soften or rephrase symptoms -- translate them as stated
 - If a term has no direct equivalent, use the closest clinical term in the target language
@@ -789,10 +728,21 @@ Your rules:
   };
 
   const getSideLanguages = (side) => {
-    if (side === 'provider' || (side === 'caregiver' && caregiverSpeaksEnglish)) {
-      return { sourceLang: 'English', targetLang: selectedLang.label, targetVoice: selectedLang.voice, whisperLang: 'en' };
+    const isProviderSide = side === 'provider' || (side === 'caregiver' && caregiverSpeaksProvider);
+    if (isProviderSide) {
+      return {
+        sourceLang: selectedProviderLang.label,
+        targetLang: selectedLang.label,
+        targetVoice: selectedLang.voice,
+        whisperLang: selectedProviderLang.whisper,
+      };
     }
-    return { sourceLang: selectedLang.label, targetLang: 'English', targetVoice: 'en-US', whisperLang: selectedLang.whisper };
+    return {
+      sourceLang: selectedLang.label,
+      targetLang: selectedProviderLang.label,
+      targetVoice: selectedProviderLang.voice,
+      whisperLang: selectedLang.whisper,
+    };
   };
 
   const translateMedInstruction = async (text) => {
@@ -802,10 +752,7 @@ Your rules:
       body: JSON.stringify({
         model: 'gpt-4o',
         messages: [
-          {
-            role: 'system',
-            content: `You are a certified medical interpreter. Translate the following discharge or medication instruction from English to ${selectedLang.label}. Use clear, plain language the patient can understand. Preserve medication names, dosages, and timing exactly. Return only the translated text, nothing else.`,
-          },
+          { role: 'system', content: `You are a certified medical interpreter. Translate the following medication instruction from ${selectedProviderLang.label} to ${selectedLang.label}. Use clear plain language. Preserve medication names, dosages, and timing exactly. Return only the translated text, nothing else.` },
           { role: 'user', content: text },
         ],
       }),
@@ -847,7 +794,7 @@ Your rules:
           const formData = new FormData();
           formData.append('file', blob, `audio.${ext}`);
           formData.append('model', 'whisper-1');
-          formData.append('language', 'en');
+          formData.append('language', selectedProviderLang.whisper);
           const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
             method: 'POST', headers: { Authorization: `Bearer ${OPENAI_API_KEY}` }, body: formData,
           });
@@ -884,19 +831,8 @@ Your rules:
         body: JSON.stringify({
           model: 'gpt-4o',
           messages: [
-            {
-              role: 'system',
-              content: `You are a clinical documentation assistant. Given a bilingual clinical conversation transcript, generate a concise session summary in English for the healthcare provider.
-
-The summary should be structured with these sections, and only include a section if relevant content exists in the transcript:
-- Chief Complaint
-- Key Symptoms
-- Instructions Given
-- Follow-up Needed
-
-Write in clear, clinical language. Be brief -- this is a quick reference, not a full note. Do not include patient names or identifying information. Return only the summary, no preamble.`,
-            },
-            { role: 'user', content: `Specialty: ${selectedSpecialty.label}\nLanguages: English -- ${selectedLang.label}\n\nTranscript:\n${transcriptLines}` },
+            { role: 'system', content: `You are a clinical documentation assistant. Given a bilingual clinical conversation transcript, generate a concise session summary in ${selectedProviderLang.label} for the healthcare provider.\n\nStructure with these sections if relevant:\n- Chief Complaint\n- Key Symptoms\n- Instructions Given\n- Follow-up Needed\n\nWrite in clear clinical language. Be brief. Return only the summary, no preamble.` },
+            { role: 'user', content: `Specialty: ${selectedSpecialty.label}\nLanguages: ${selectedProviderLang.label} / ${selectedLang.label}\n\nTranscript:\n${transcriptLines}` },
           ],
         }),
       });
@@ -918,13 +854,13 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
     if (isExpanded) { setExpandedMessages((prev) => ({ ...prev, [key]: null })); return; }
     const isSent =
       message.side === viewSide ||
-      (viewSide === 'provider' && message.side === 'caregiver' && caregiverSpeaksEnglish) ||
-      (viewSide === 'patient' && message.side === 'caregiver' && !caregiverSpeaksEnglish);
+      (viewSide === 'provider' && message.side === 'caregiver' && caregiverSpeaksProvider) ||
+      (viewSide === 'patient' && message.side === 'caregiver' && !caregiverSpeaksProvider);
     const shownText = isSent ? message.original : (message.translated ?? '...');
     if (!shownText || shownText === '...') return;
     const { sourceLang, targetLang } = getSideLanguages(message.side);
     const shownLang = isSent ? sourceLang : targetLang;
-    const backLang = shownLang === 'English' ? selectedLang.label : 'English';
+    const backLang = shownLang === selectedProviderLang.label ? selectedLang.label : selectedProviderLang.label;
     if (message.backTranslations?.[key]) { setExpandedMessages((prev) => ({ ...prev, [key]: message.backTranslations[key] })); return; }
     setExpandedMessages((prev) => ({ ...prev, [key]: 'loading' }));
     try {
@@ -986,7 +922,7 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
       mediaRecorder.start(250);
     } catch (err) {
       console.error('Mic error:', err);
-      setStatus('Microphone access denied. Please allow microphone in Safari settings.');
+      setStatus('Microphone access denied. Please allow microphone in settings.');
       setIsListening(false); setActiveSide(null);
     }
   };
@@ -1023,7 +959,6 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
       const whisperData = await whisperRes.json();
       const originalText = whisperData.text?.trim();
       if (!originalText) { setStatus('No speech detected. Hold longer and speak clearly.'); return; }
-
       const segments = whisperData.segments || [];
       let lowConfidence = false;
       if (segments.length > 0) {
@@ -1031,7 +966,6 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
         const avgLogProb = segments.reduce((sum, s) => sum + (s.avg_logprob || 0), 0) / segments.length;
         lowConfidence = avgLogProb < -1.0 || avgNoSpeech > 0.5;
       }
-
       const messageId = Date.now();
       setMessages((prev) => [...prev, { id: messageId, side, original: originalText, translated: null, backTranslations: {}, dismissed: false, lowConfidence }]);
       setStatus('');
@@ -1043,21 +977,16 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
       const translatedText = (await translateRes.json()).choices?.[0]?.message?.content?.trim();
       if (!translatedText) { setStatus('Translation failed. Try again.'); return; }
       setMessages((prev) => prev.map((m) => m.id === messageId ? { ...m, translated: translatedText } : m));
-
       if (twoDeviceMode && ablyChannelRef.current && twoDeviceConnected) {
-        ablyChannelRef.current.publish('translation', {
-          fromRole: twoDeviceRole, messageId, side,
-          original: originalText, translated: translatedText,
-        });
+        ablyChannelRef.current.publish('translation', { fromRole: twoDeviceRole, messageId, side, original: originalText, translated: translatedText });
       }
-
       if (!twoDeviceMode) {
         const utterance = new SpeechSynthesisUtterance(translatedText);
         utterance.lang = targetVoice; utterance.rate = 0.9;
         window.speechSynthesis.speak(utterance);
       } else {
         const speakText = twoDeviceRole === 'provider' ? translatedText : originalText;
-        const speakLang = twoDeviceRole === 'provider' ? selectedLang.voice : 'en-US';
+        const speakLang = twoDeviceRole === 'provider' ? selectedLang.voice : selectedProviderLang.voice;
         const utterance = new SpeechSynthesisUtterance(speakText);
         utterance.lang = speakLang; utterance.rate = 0.9;
         window.speechSynthesis.speak(utterance);
@@ -1080,17 +1009,14 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
     try {
       const translateRes = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST', headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: 'gpt-4o', messages: [{ role: 'system', content: buildSystemPrompt('English', selectedLang.label) }, { role: 'user', content: phrase.english }] }),
+        body: JSON.stringify({ model: 'gpt-4o', messages: [{ role: 'system', content: buildSystemPrompt(selectedProviderLang.label, selectedLang.label) }, { role: 'user', content: phrase.english }] }),
       });
       const translatedText = (await translateRes.json()).choices?.[0]?.message?.content?.trim();
       if (!translatedText) return;
       const messageId = Date.now();
       setMessages((prev) => [...prev, { id: messageId, side: 'provider', original: phrase.english, translated: translatedText, backTranslations: {}, dismissed: false }]);
       if (twoDeviceMode && ablyChannelRef.current && twoDeviceConnected) {
-        ablyChannelRef.current.publish('translation', {
-          fromRole: 'provider', messageId, side: 'provider',
-          original: phrase.english, translated: translatedText,
-        });
+        ablyChannelRef.current.publish('translation', { fromRole: 'provider', messageId, side: 'provider', original: phrase.english, translated: translatedText });
       }
       const utterance = new SpeechSynthesisUtterance(translatedText);
       utterance.lang = selectedLang.voice; utterance.rate = 0.9;
@@ -1107,14 +1033,11 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
       const playBeep = (startTime, freq) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.value = freq;
-        osc.type = 'sine';
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = freq; osc.type = 'sine';
         gain.gain.setValueAtTime(0.6, startTime);
         gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
-        osc.start(startTime);
-        osc.stop(startTime + 0.4);
+        osc.start(startTime); osc.stop(startTime + 0.4);
       };
       playBeep(ctx.currentTime, 880);
       playBeep(ctx.currentTime + 0.45, 880);
@@ -1123,10 +1046,7 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
     setPanicAlert(true);
   };
 
-  const handlePanicDismiss = () => {
-    setPanicAlert(false);
-    if (navigator.vibrate) navigator.vibrate(50);
-  };
+  const handlePanicDismiss = () => { setPanicAlert(false); if (navigator.vibrate) navigator.vibrate(50); };
 
   const handleDischargeAdd = async () => {
     const text = dischargeInputText.trim();
@@ -1140,37 +1060,23 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
         body: JSON.stringify({
           model: 'gpt-4o',
           messages: [
-            {
-              role: 'system',
-              content: `You are a certified medical interpreter. Translate the following discharge instruction from English to ${selectedLang.label}. Use clear, plain language the patient can understand. Preserve medication names, dosages, timing, and measurements exactly. Return only the translated text, nothing else.`,
-            },
+            { role: 'system', content: `You are a certified medical interpreter. Translate the following discharge instruction from ${selectedProviderLang.label} to ${selectedLang.label}. Use clear plain language. Preserve medication names, dosages, timing, and measurements exactly. Return only the translated text, nothing else.` },
             { role: 'user', content: text },
           ],
         }),
       });
       const data = await res.json();
       const translated = data.choices?.[0]?.message?.content?.trim();
-      if (translated) {
-        setDischargeItems(prev => ({
-          ...prev,
-          [catKey]: [...prev[catKey], { english: text, translated }],
-        }));
-        setDischargeInputText('');
-      }
+      if (translated) { setDischargeItems(prev => ({ ...prev, [catKey]: [...prev[catKey], { english: text, translated }] })); setDischargeInputText(''); }
     } catch (err) { console.error('Discharge translation error:', err); }
     finally { setDischargeInputLoading(false); }
   };
 
   const handleDischargeRemove = (catKey, index) => {
-    setDischargeItems(prev => ({
-      ...prev,
-      [catKey]: prev[catKey].filter((_, i) => i !== index),
-    }));
+    setDischargeItems(prev => ({ ...prev, [catKey]: prev[catKey].filter((_, i) => i !== index) }));
   };
 
-  const allDischargeItems = DISCHARGE_CATEGORIES.flatMap(cat =>
-    dischargeItems[cat.key].map(item => ({ ...item, cat }))
-  );
+  const allDischargeItems = DISCHARGE_CATEGORIES.flatMap(cat => dischargeItems[cat.key].map(item => ({ ...item, cat })));
 
   const speakDischarge = (items) => {
     window.speechSynthesis.cancel();
@@ -1180,8 +1086,7 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
     const speakNext = () => {
       if (index >= items.length) { setDischargeSpeaking(false); return; }
       const u = new SpeechSynthesisUtterance(items[index].translated);
-      u.lang = selectedLang.voice;
-      u.rate = 0.85;
+      u.lang = selectedLang.voice; u.rate = 0.85;
       u.onend = () => { index++; speakNext(); };
       u.onerror = () => setDischargeSpeaking(false);
       window.speechSynthesis.speak(u);
@@ -1192,7 +1097,7 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
   const handlePainLevelTap = (n) => {
     const spoken = `The patient reports a pain level of ${n} out of 10.`;
     const utterance = new SpeechSynthesisUtterance(spoken);
-    utterance.lang = 'en-US';
+    utterance.lang = selectedProviderLang.voice;
     utterance.rate = 0.9;
     window.speechSynthesis.speak(utterance);
     setShowPainScale(false);
@@ -1215,14 +1120,13 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
       const val = vitalValues[v.key].trim();
       const unit = v.unit ? ` ${v.unit}` : '';
       utterances.push({ text: `${patientLabel}: ${val}${unit}`, lang: selectedLang.voice });
-      utterances.push({ text: `${v.labelEn}: ${val}${unit}`, lang: 'en-US' });
+      utterances.push({ text: `${v.labelEn}: ${val}${unit}`, lang: selectedProviderLang.voice });
     });
     let index = 0;
     const speakNext = () => {
       if (index >= utterances.length) { setVitalSpeaking(false); return; }
       const u = new SpeechSynthesisUtterance(utterances[index].text);
-      u.lang = utterances[index].lang;
-      u.rate = 0.85;
+      u.lang = utterances[index].lang; u.rate = 0.85;
       u.onend = () => { index++; speakNext(); };
       u.onerror = () => setVitalSpeaking(false);
       window.speechSynthesis.speak(u);
@@ -1233,13 +1137,13 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
   const buildTranscript = () => {
     const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    const lines = ['Verba Session Transcript', `Date: ${date} at ${time}`, `Languages: English -- ${selectedLang.label}`, `Specialty: ${selectedSpecialty.label}`];
-    if (caregiverMode) lines.push(`Caregiver mode: on (caregiver speaks ${caregiverSpeaksEnglish ? 'English' : selectedLang.label})`);
+    const lines = ['Verba Session Transcript', `Date: ${date} at ${time}`, `Languages: ${selectedProviderLang.label} / ${selectedLang.label}`, `Specialty: ${selectedSpecialty.label}`];
+    if (caregiverMode) lines.push(`Caregiver mode: on`);
     if (twoDeviceMode) lines.push(`Two-device mode: on (session code: ${twoDeviceCode})`);
     if (sessionStartTime) lines.push(`Session duration: ${sessionElapsed}`);
     lines.push('', '---', '');
     const body = messages.filter((m) => m.translated).map((m) => {
-      const speakerLabel = m.side === 'provider' ? 'Provider' : m.side === 'caregiver' ? 'Caregiver' : selectedLang.label;
+      const speakerLabel = m.side === 'provider' ? 'Provider' : m.side === 'caregiver' ? 'Caregiver' : 'Patient';
       const { targetLang } = getSideLanguages(m.side);
       const dismissedTag = m.dismissed ? ' [DISMISSED]' : '';
       return `[${speakerLabel}]${dismissedTag} ${m.original}\n[${targetLang}]${dismissedTag} ${m.translated}`;
@@ -1273,6 +1177,26 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
     if (specialty) { setSelectedSpecialty(specialty); clearSession(); }
   };
 
+  const handleProviderLangChange = (code) => {
+    const lang = PROVIDER_LANGUAGES.find(l => l.code === code);
+    if (!lang || lang.code === selectedProviderLang.code) return;
+    if (messages.length > 0) {
+      setPendingProviderLang(lang);
+      setShowProviderLangConfirm(true);
+    } else {
+      setSelectedProviderLang(lang);
+    }
+  };
+
+  const confirmProviderLangChange = () => {
+    if (pendingProviderLang) {
+      setSelectedProviderLang(pendingProviderLang);
+      clearSession();
+      setPendingProviderLang(null);
+    }
+    setShowProviderLangConfirm(false);
+  };
+
   const handleBeginSession = () => {
     const utterance = new SpeechSynthesisUtterance(' ');
     utterance.volume = 0;
@@ -1296,8 +1220,8 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
         const key = `${m.id}-${viewSide}`;
         const isSent =
           m.side === viewSide ||
-          (viewSide === 'provider' && m.side === 'caregiver' && caregiverSpeaksEnglish) ||
-          (viewSide === 'patient' && m.side === 'caregiver' && !caregiverSpeaksEnglish);
+          (viewSide === 'provider' && m.side === 'caregiver' && caregiverSpeaksProvider) ||
+          (viewSide === 'patient' && m.side === 'caregiver' && !caregiverSpeaksProvider);
         const shownText = isSent ? m.original : (m.translated ?? null);
         const backText = expandedMessages[key];
         const isExpanded = !!backText;
@@ -1316,9 +1240,7 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
               <span className="confidence-warning">Low confidence -- verify</span>
             )}
             {isPending ? (
-              <span className="typing-indicator">
-                <span /><span /><span />
-              </span>
+              <span className="typing-indicator"><span /><span /><span /></span>
             ) : (
               <span className="original">{shownText}</span>
             )}
@@ -1329,12 +1251,10 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
     </div>
   );
 
-  // ── Walkthrough slide renderer ──
   const renderWalkthrough = () => {
     const isLastSlide = walkthroughStep === WALKTHROUGH_SLIDES.length - 1;
     const slide = WALKTHROUGH_SLIDES[walkthroughStep];
     const progress = ((walkthroughStep + 1) / WALKTHROUGH_SLIDES.length) * 100;
-
     return (
       <div className="walkthrough-overlay">
         <div className="walkthrough-card">
@@ -1366,7 +1286,6 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
     );
   };
 
-  // ── Two-device mode single-side layout ──
   if (twoDeviceMode && twoDeviceRole) {
     const isProvider = twoDeviceRole === 'provider';
     return (
@@ -1383,22 +1302,21 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
             </div>
           </div>
         )}
-
         <div className="two-device-bar">
-          <span className="two-device-code">
-            {twoDeviceConnected ? '🟢' : '🔴'} {twoDeviceCode}
-          </span>
-          <span className="two-device-role">{isProvider ? 'Provider' : selectedLang.label}</span>
+          <span className="two-device-code">{twoDeviceConnected ? '🟢' : '🔴'} {twoDeviceCode}</span>
+          <span className="two-device-role">{isProvider ? selectedProviderLang.label : selectedLang.label}</span>
           <button className="two-device-end" onClick={handleEndTwoDeviceSession}>End</button>
         </div>
-
-        <div
-          className={`side ${isProvider ? 'provider' : 'patient'} two-device-full ${activeSide && isListening ? 'active' : ''}`}
-          style={{ flex: 1, transform: 'none' }}
-        >
+        <div className={`side ${isProvider ? 'provider' : 'patient'} two-device-full ${activeSide && isListening ? 'active' : ''}`} style={{ flex: 1, transform: 'none' }}>
           <div className="side-label">
-            {isProvider ? 'Healthcare Provider -- English' : patientLabel}
-            {isProvider && selectedSpecialty.code !== 'general' && <span className="specialty-badge">{selectedSpecialty.label}</span>}
+            {isProvider ? (
+              <>
+                <span className="side-label-role">Provider</span>
+                <span className="side-label-sep">·</span>
+                <span className="side-label-lang">{selectedProviderLang.label}</span>
+                {selectedSpecialty.code !== 'general' && <span className="specialty-badge">{selectedSpecialty.label}</span>}
+              </>
+            ) : patientLabel}
           </div>
           {renderMessages(twoDeviceRole, isProvider ? providerRef : patientRef)}
           <button
@@ -1413,13 +1331,11 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
               : (isProvider ? 'Hold to Speak' : patientBtn.idle)}
           </button>
         </div>
-
         {status && <div className="two-device-status">{status}</div>}
       </div>
     );
   }
 
-  // ── Standard single-device layout ──
   return (
     <div className="app">
 
@@ -1432,8 +1348,8 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
             </div>
             <p className="splash-tagline">Real-time voice translation<br />for clinical care</p>
             <div className="splash-langs">
-              {['ES','中','PT','FR','AR','VI','HI','KO','RU','UK','粵','FA','TR'].map((lang, i) => (
-                <span key={lang} className="splash-lang-badge" style={{ animationDelay: `${i * 60}ms` }}>{lang}</span>
+              {['ES','DE','FR','IT','PT','PL','NL','RU','AR','ZH','HI','KO','VI','TR','FA','UK','粵','EL','SV','DA','NO','FI','RO','HR','CS','SK','BG','HU'].map((lang, i) => (
+                <span key={lang} className="splash-lang-badge" style={{ animationDelay: `${i * 50}ms` }}>{lang}</span>
               ))}
             </div>
             <button className="splash-btn" onClick={() => setWalkthroughStep(0)}>Get Started</button>
@@ -1444,6 +1360,20 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
       )}
 
       {!audioUnlocked && walkthroughStep !== null && renderWalkthrough()}
+
+      {showProviderLangConfirm && (
+        <div className="phrases-overlay" onClick={() => setShowProviderLangConfirm(false)}>
+          <div className="phrases-panel export-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="phrases-header">
+              <span className="phrases-title">Change Provider Language?</span>
+              <button className="phrases-close" onClick={() => { setShowProviderLangConfirm(false); setPendingProviderLang(null); }}>✕</button>
+            </div>
+            <p className="export-desc">Changing the provider language will clear the current session. This cannot be undone.</p>
+            <button className="export-action-btn" onClick={confirmProviderLangChange}>Continue and clear session</button>
+            <button className="export-action-btn share" onClick={() => { setShowProviderLangConfirm(false); setPendingProviderLang(null); }}>Cancel</button>
+          </div>
+        </div>
+      )}
 
       {offlineActive && (
         <div className="offline-banner" onClick={() => setShowPhrases(true)} style={{ cursor: 'pointer' }}>
@@ -1459,7 +1389,7 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
         <div className="side-label">
           <span className="side-label-role">Provider</span>
           <span className="side-label-sep">·</span>
-          <span className="side-label-lang">English</span>
+          <span className="side-label-lang">{selectedProviderLang.label}</span>
           {selectedSpecialty.code !== 'general' && <span className="specialty-badge">{selectedSpecialty.label}</span>}
         </div>
         {renderMessages('provider', providerRef)}
@@ -1481,6 +1411,14 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
           {sessionStartTime && !status && <span className="session-timer">{sessionElapsed}</span>}
         </div>
         <div className="divider-actions">
+          <select
+            className="divider-lang-select"
+            value={selectedProviderLang.code}
+            onChange={(e) => handleProviderLangChange(e.target.value)}
+            title="Provider language"
+          >
+            {PROVIDER_LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
+          </select>
           <button className="settings-btn" onClick={() => setShowSettings(true)}>⚙</button>
         </div>
       </div>
@@ -1499,8 +1437,8 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
             </button>
             <div className="caregiver-lang-toggle">
               <span className="caregiver-lang-label">Caregiver speaks</span>
-              <button className={`caregiver-lang-btn ${caregiverSpeaksEnglish ? 'active' : ''}`} onClick={() => setCaregiverSpeaksEnglish(true)}>English</button>
-              <button className={`caregiver-lang-btn ${!caregiverSpeaksEnglish ? 'active' : ''}`} onClick={() => setCaregiverSpeaksEnglish(false)}>{selectedLang.label}</button>
+              <button className={`caregiver-lang-btn ${caregiverSpeaksProvider ? 'active' : ''}`} onClick={() => setCaregiverSpeaksProvider(true)}>{selectedProviderLang.label}</button>
+              <button className={`caregiver-lang-btn ${!caregiverSpeaksProvider ? 'active' : ''}`} onClick={() => setCaregiverSpeaksProvider(false)}>{selectedLang.label}</button>
             </div>
           </div>
         )}
@@ -1541,6 +1479,12 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
             <div className="phrases-header">
               <span className="phrases-title">Session Settings</span>
               <button className="phrases-close" onClick={() => setShowSettings(false)}>✕</button>
+            </div>
+            <div className="settings-row">
+              <span className="settings-label">Provider language</span>
+              <select className="settings-select" value={selectedProviderLang.code} onChange={(e) => handleProviderLangChange(e.target.value)}>
+                {PROVIDER_LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
+              </select>
             </div>
             <div className="settings-row">
               <span className="settings-label">Patient language</span>
@@ -1599,27 +1543,12 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
             <p className="export-desc">Each person uses their own phone. The provider starts a session and shares the code with the patient.</p>
             <div className="settings-divider" />
             <p className="two-device-section-label">Provider -- Start a session</p>
-            <button className="export-action-btn" onClick={handleStartTwoDeviceAsProvider}>
-              Generate Session Code
-            </button>
+            <button className="export-action-btn" onClick={handleStartTwoDeviceAsProvider}>Generate Session Code</button>
             <div className="settings-divider" />
             <p className="two-device-section-label">Patient -- Join a session</p>
             <div className="med-input-row">
-              <input
-                className="med-input"
-                type="text"
-                placeholder="Enter code e.g. HAWK-4291"
-                value={twoDeviceJoinCode}
-                onChange={(e) => setTwoDeviceJoinCode(e.target.value.toUpperCase())}
-                maxLength={9}
-              />
-              <button
-                className="med-input-add"
-                onClick={handleJoinTwoDeviceAsPatient}
-                disabled={!twoDeviceJoinCode.trim()}
-              >
-                Join
-              </button>
+              <input className="med-input" type="text" placeholder="Enter code e.g. HAWK-4291" value={twoDeviceJoinCode} onChange={(e) => setTwoDeviceJoinCode(e.target.value.toUpperCase())} maxLength={9} />
+              <button className="med-input-add" onClick={handleJoinTwoDeviceAsPatient} disabled={!twoDeviceJoinCode.trim()}>Join</button>
             </div>
           </div>
         </div>
@@ -1653,19 +1582,12 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
             </div>
             <div className="phrases-tabs">
               {PHRASE_CATEGORIES.map((cat, i) => (
-                <button key={cat.category} className={`phrases-tab ${activeCategory === i ? 'active' : ''}`} onClick={() => setActiveCategory(i)}>
-                  {cat.category}
-                </button>
+                <button key={cat.category} className={`phrases-tab ${activeCategory === i ? 'active' : ''}`} onClick={() => setActiveCategory(i)}>{cat.category}</button>
               ))}
             </div>
             <div className="phrases-list">
               {PHRASE_CATEGORIES[activeCategory].phrases.map((phrase) => (
-                <button
-                  key={phrase.english}
-                  className={`phrase-item ${translatingPhrase === phrase.english ? 'loading' : ''}`}
-                  onClick={() => handlePhraseTap(phrase)}
-                  disabled={translatingPhrase !== null}
-                >
+                <button key={phrase.english} className={`phrase-item ${translatingPhrase === phrase.english ? 'loading' : ''}`} onClick={() => handlePhraseTap(phrase)} disabled={translatingPhrase !== null}>
                   <span className="phrase-english">{phrase.english}</span>
                   {offlineActive && <span className="phrase-pretranslated">{phrase[selectedLang.code]}</span>}
                   {translatingPhrase === phrase.english && <span className="phrase-pretranslated">Translating...</span>}
@@ -1721,23 +1643,11 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
                     <span className="vitals-label-en">{v.labelEn}</span>
                     {v.unit && <span className="vitals-unit">{v.unit}</span>}
                   </div>
-                  <input
-                    className="vitals-input"
-                    type="text"
-                    placeholder={v.placeholder}
-                    value={vitalValues[v.key]}
-                    onChange={(e) => setVitalValues(prev => ({ ...prev, [v.key]: e.target.value }))}
-                  />
+                  <input className="vitals-input" type="text" placeholder={v.placeholder} value={vitalValues[v.key]} onChange={(e) => setVitalValues(prev => ({ ...prev, [v.key]: e.target.value }))} />
                 </div>
               ))}
             </div>
-            <button
-              className="export-action-btn"
-              onClick={handleShowVitalPatient}
-              disabled={!VITAL_SIGNS.some(v => vitalValues[v.key].trim())}
-            >
-              Show Patient →
-            </button>
+            <button className="export-action-btn" onClick={handleShowVitalPatient} disabled={!VITAL_SIGNS.some(v => vitalValues[v.key].trim())}>Show Patient →</button>
           </div>
         </div>
       )}
@@ -1754,18 +1664,12 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
                   <span className="vitals-patient-label-native">{v.labels[selectedLang.code] || v.labelEn}</span>
                   <span className="vitals-patient-label-en">{v.labelEn}</span>
                 </div>
-                <span className="vitals-patient-value">
-                  {vitalValues[v.key].trim()}{v.unit ? ` ${v.unit}` : ''}
-                </span>
+                <span className="vitals-patient-value">{vitalValues[v.key].trim()}{v.unit ? ` ${v.unit}` : ''}</span>
               </div>
             ))}
           </div>
           <div className="med-patient-actions">
-            <button
-              className="med-patient-repeat"
-              onClick={() => speakVitals(VITAL_SIGNS.filter(v => vitalValues[v.key].trim()))}
-              disabled={vitalSpeaking}
-            >
+            <button className="med-patient-repeat" onClick={() => speakVitals(VITAL_SIGNS.filter(v => vitalValues[v.key].trim()))} disabled={vitalSpeaking}>
               {vitalSpeaking ? '🔊 Reading...' : '🔊 Repeat'}
             </button>
             <button className="med-patient-done" onClick={() => { setShowVitalPatient(false); setShowVitalSigns(true); window.speechSynthesis.cancel(); }}>Back</button>
@@ -1816,26 +1720,9 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
               <button className="phrases-close" onClick={() => setShowMedInstructions(false)}>✕</button>
             </div>
             <div className="med-input-row">
-              <input
-                className="med-input"
-                type="text"
-                placeholder="Type an instruction..."
-                value={medInputText}
-                onChange={(e) => setMedInputText(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleMedAddText(); }}
-                disabled={medInputLoading || medIsRecording}
-              />
-              <button className="med-input-add" onClick={handleMedAddText} disabled={medInputLoading || medIsRecording || !medInputText.trim()}>
-                {medInputLoading ? '...' : 'Add'}
-              </button>
-              <button
-                className={`med-mic-btn ${medIsRecording ? 'recording' : ''}`}
-                onMouseDown={handleMedStartRecording}
-                onMouseUp={handleMedStopRecording}
-                onTouchStart={(e) => { e.preventDefault(); handleMedStartRecording(); }}
-                onTouchEnd={(e) => { e.preventDefault(); handleMedStopRecording(); }}
-                disabled={medInputLoading}
-              >
+              <input className="med-input" type="text" placeholder="Type an instruction..." value={medInputText} onChange={(e) => setMedInputText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleMedAddText(); }} disabled={medInputLoading || medIsRecording} />
+              <button className="med-input-add" onClick={handleMedAddText} disabled={medInputLoading || medIsRecording || !medInputText.trim()}>{medInputLoading ? '...' : 'Add'}</button>
+              <button className={`med-mic-btn ${medIsRecording ? 'recording' : ''}`} onMouseDown={handleMedStartRecording} onMouseUp={handleMedStopRecording} onTouchStart={(e) => { e.preventDefault(); handleMedStartRecording(); }} onTouchEnd={(e) => { e.preventDefault(); handleMedStopRecording(); }} disabled={medInputLoading}>
                 {medIsRecording ? '🔴' : '🎙'}
               </button>
             </div>
@@ -1854,9 +1741,7 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
               </div>
             )}
             {medInstructions.length > 0 && (
-              <button className="export-action-btn" onClick={() => { setShowMedInstructions(false); setShowMedPatient(true); }}>
-                Show Patient →
-              </button>
+              <button className="export-action-btn" onClick={() => { setShowMedInstructions(false); setShowMedPatient(true); }}>Show Patient →</button>
             )}
           </div>
         </div>
@@ -1876,9 +1761,7 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
             ))}
           </div>
           <div className="med-patient-actions">
-            <button className="med-patient-repeat" onClick={() => speakMedInstructions(medInstructions)} disabled={medIsSpeaking}>
-              {medIsSpeaking ? '🔊 Reading...' : '🔊 Repeat'}
-            </button>
+            <button className="med-patient-repeat" onClick={() => speakMedInstructions(medInstructions)} disabled={medIsSpeaking}>{medIsSpeaking ? '🔊 Reading...' : '🔊 Repeat'}</button>
             <button className="med-patient-done" onClick={() => { setShowMedPatient(false); setShowMedInstructions(true); }}>Back</button>
             <button className="med-patient-close" onClick={() => { setShowMedPatient(false); window.speechSynthesis.cancel(); }}>Done</button>
           </div>
@@ -1894,35 +1777,15 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
             </div>
             <div className="phrases-tabs">
               {DISCHARGE_CATEGORIES.map((cat, i) => (
-                <button
-                  key={cat.key}
-                  className={`phrases-tab ${dischargeCategory === i ? 'active' : ''}`}
-                  onClick={() => { setDischargeCategory(i); setDischargeInputText(''); }}
-                >
+                <button key={cat.key} className={`phrases-tab ${dischargeCategory === i ? 'active' : ''}`} onClick={() => { setDischargeCategory(i); setDischargeInputText(''); }}>
                   {cat.icon} {cat.label}
-                  {dischargeItems[cat.key].length > 0 && (
-                    <span className="discharge-tab-count">{dischargeItems[cat.key].length}</span>
-                  )}
+                  {dischargeItems[cat.key].length > 0 && <span className="discharge-tab-count">{dischargeItems[cat.key].length}</span>}
                 </button>
               ))}
             </div>
             <div className="med-input-row">
-              <input
-                className="med-input"
-                type="text"
-                placeholder={DISCHARGE_CATEGORIES[dischargeCategory].placeholder}
-                value={dischargeInputText}
-                onChange={(e) => setDischargeInputText(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleDischargeAdd(); }}
-                disabled={dischargeInputLoading}
-              />
-              <button
-                className="med-input-add"
-                onClick={handleDischargeAdd}
-                disabled={dischargeInputLoading || !dischargeInputText.trim()}
-              >
-                {dischargeInputLoading ? '...' : 'Add'}
-              </button>
+              <input className="med-input" type="text" placeholder={DISCHARGE_CATEGORIES[dischargeCategory].placeholder} value={dischargeInputText} onChange={(e) => setDischargeInputText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleDischargeAdd(); }} disabled={dischargeInputLoading} />
+              <button className="med-input-add" onClick={handleDischargeAdd} disabled={dischargeInputLoading || !dischargeInputText.trim()}>{dischargeInputLoading ? '...' : 'Add'}</button>
             </div>
             {dischargeItems[DISCHARGE_CATEGORIES[dischargeCategory].key].length > 0 && (
               <div className="med-list">
@@ -1938,9 +1801,7 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
               </div>
             )}
             {allDischargeItems.length > 0 && (
-              <button className="export-action-btn" onClick={() => { setShowDischarge(false); setShowDischargePatient(true); setTimeout(() => speakDischarge(allDischargeItems), 400); }}>
-                Show Patient →
-              </button>
+              <button className="export-action-btn" onClick={() => { setShowDischarge(false); setShowDischargePatient(true); setTimeout(() => speakDischarge(allDischargeItems), 400); }}>Show Patient →</button>
             )}
           </div>
         </div>
@@ -1967,9 +1828,7 @@ Write in clear, clinical language. Be brief -- this is a quick reference, not a 
             ))}
           </div>
           <div className="med-patient-actions">
-            <button className="med-patient-repeat" onClick={() => speakDischarge(allDischargeItems)} disabled={dischargeSpeaking}>
-              {dischargeSpeaking ? '🔊 Reading...' : '🔊 Repeat'}
-            </button>
+            <button className="med-patient-repeat" onClick={() => speakDischarge(allDischargeItems)} disabled={dischargeSpeaking}>{dischargeSpeaking ? '🔊 Reading...' : '🔊 Repeat'}</button>
             <button className="med-patient-done" onClick={() => { setShowDischargePatient(false); setShowDischarge(true); window.speechSynthesis.cancel(); }}>Back</button>
             <button className="med-patient-close" onClick={() => { setShowDischargePatient(false); window.speechSynthesis.cancel(); setDischargeItems({ diet: [], medications: [], activity: [], followup: [], warnings: [] }); }}>Done</button>
           </div>
